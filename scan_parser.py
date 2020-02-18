@@ -189,7 +189,6 @@ class ScanParser:
         except Exception as e:
             print(filename)
             print(str(e))
-            print(traceback.format_exc())
             pass
 
         return sf
@@ -291,7 +290,6 @@ class ScanParser:
         except Exception as e:
             print(filename)
             print(str(e))
-            print(traceback.format_exc())
             pass
 
         return sf
@@ -394,7 +392,6 @@ class ScanParser:
         except Exception as e:
             print(filename)
             print(str(e))
-            print(traceback.format_exc())
             pass
 
         return sf
