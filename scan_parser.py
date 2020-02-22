@@ -309,12 +309,22 @@ class ScanParser:
         try:
             with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
-            if '?' in content[0]:
-                content = content[2:]
+            start = 0
+            if '?' in content[start]:
+                start += 1
+            if '!' in content[start]:
+                start += 1
+            
+            content = content[start:]
             content = ''.join(content)
             content = ''.join([i if ord(i) < 128 else ' ' for i in content])
 
             tree = etree.fromstring( str(content ) )
+
+
+            version = str(next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='version']/SID_DATA/text()")), ''))
+            if '.' in version:
+                version = version.split('.')[0]
 
             release = re.search('Release: ([0-9\*.]+) Benchmark', str( next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='releaseinfo']/SID_DATA/text()")), '')  ))
             release = release.group(1) if release is not None else '0'
@@ -329,7 +339,7 @@ class ScanParser:
 
                 'title'        : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='title']/SID_DATA/text()")), ''),
                 'uuid'         : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='uuid']/SID_DATA/text()")), ''),
-                'version'      : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='version']/SID_DATA/text()")), ''),
+                'version'      : version,
                 'release'      : release,
                 'stigid'       : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='stigid']/SID_DATA/text()")), ''),
                 'description'  : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='description']/SID_DATA/text()")), ''),
