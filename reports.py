@@ -303,7 +303,7 @@ class Reports:
                                 
                                 req_data = {
                                     'A': '',
-                                    'Control Vulnerability Description': f"Title: {req['reqTitle']}\nFamily: {req['grpId']}\nDescription:\n{req['description']}",
+                                    'Control Vulnerability Description': f"Title: {req['reqTitle']}\n\nFamily: {req['grpId']}\n\nDescription:\n{req['description']}",
                                     'Security Control Number (NC/NA controls only)': self.data_mapping['acas_control'][req['grpId']] if req['grpId'] in self.data_mapping['acas_control'] else '',
                                     'Office/Org': f"{self.contact_info['command']}\n{self.contact_info['name']}\n{self.contact_info['phone']}\n{self.contact_info['email']}\n".strip(),
                                     'Security Checks': f"{req['pluginId']}",

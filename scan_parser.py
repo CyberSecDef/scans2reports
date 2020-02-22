@@ -272,7 +272,7 @@ class ScanParser:
                     req = {
                         'cci'            : [],
                         'comments'       : next(iter(req.xpath("./plugin_output/text()")),''),
-                        'description'    : next(iter(req.xpath("./synopsis/text()")),''),
+                        'description'    : next(iter(req.xpath("./synopsis/text()")),'') + "\n\n" + next(iter(req.xpath("./description/text()")),''),
                         'findingDetails' : '',
                         'fixId'          : '',
                         'mitigation'     : '',
