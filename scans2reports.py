@@ -95,7 +95,7 @@ class Scans2Reports:
 
     def start_parse_thread(self, queue, result):
         """ Create / Start parsing thread """
-        scan_parser = ScanParser()
+        scan_parser = ScanParser(self.data_mapping)
 
         while not queue.empty():
             work = queue.get()

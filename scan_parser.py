@@ -4,6 +4,7 @@ import time
 import uuid
 import pprint
 import requests
+import dumper
 from lxml import etree
 from scan_file import ScanFile
 from scan_requirement import ScanRequirement
@@ -11,14 +12,9 @@ from utils import Utils
 from datetime import datetime
 
 class ScanParser:
-    json_rmf_cci = {}
-
-    def __init__(self):
-        r = requests.get('https://cyber.trackr.live/api/cci')
-        if r.status_code == 200:
-            self.json_rmf_cci = r.json()
-        else:
-            self.json_rmf_cci = None
+    data_mapping = {}
+    def __init__(self, data_mapping):
+        self.data_mapping = data_mapping
 
     def parseScap(self, filename):
         try:
@@ -143,13 +139,14 @@ class ScanParser:
                 rmf = ""
                 ap = ""
                 cci = str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:ident[contains(./text(),'CCI')]/text()", namespaces = ns)), ''))
-                if cci != '' and self.json_rmf_cci is not None:
-                    rmf_list = list(filter( lambda x: x['cci'] == cci, self.json_rmf_cci['data']))
-                    rmf_list = next(iter(rmf_list), None)
-                    if rmf_list is not None:
-                        ap = rmf_list['assessments']
-                        rmf = rmf_list['rmf']
-
+                if cci != '' and self.data_mapping is not None:
+                    for rmf_cci in self.data_mapping['rmf_cci']:
+                        if rmf_cci['cci'] == cci:
+                            rmf = rmf_cci['control']
+                    
+                    if cci in self.data_mapping['ap_mapping']:
+                        ap = self.data_mapping['ap_mapping'][cci]
+                            
                 sf.add_requirement(
                     ScanRequirement({
                         'vulnId'        : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/@id", namespaces = ns)), '').replace('xccdf_mil.disa.stig_group_',''),
@@ -368,13 +365,13 @@ class ScanParser:
                 rmf = ""
                 ap = ""
                 cci = str(next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='CCI_REF']/ATTRIBUTE_DATA/text()")), ''))
-                if cci != '' and self.json_rmf_cci is not None:
-                    rmf_list = list(filter( lambda x: x['cci'] == cci, self.json_rmf_cci['data']))
-                    rmf_list = next(iter(rmf_list), None)
-                    if rmf_list is not None:
-                        ap = rmf_list['assessments']
-                        rmf = rmf_list['rmf']
-
+                if cci != '' and self.data_mapping is not None:
+                    for rmf_cci in self.data_mapping['rmf_cci']:
+                        if rmf_cci['cci'] == cci:
+                            rmf = rmf_cci['control']
+                    
+                    if cci in self.data_mapping['ap_mapping']:
+                        ap = self.data_mapping['ap_mapping'][cci]
 
                 sf.add_requirement(
                     ScanRequirement({
@@ -412,7 +409,8 @@ class ScanParser:
 
         except Exception as e:
             print(filename)
-            print(str(e))
+            print(repr(e))
+            
             pass
 
         return sf
