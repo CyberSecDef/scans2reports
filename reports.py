@@ -1281,7 +1281,7 @@ Plugin ID: {pluginId}
         worksheet.set_column('X:X', 20)
         worksheet.set_column('Y:Y', 25)
         worksheet.set_column('Z:Z', 75)
-        worksheet.autofilter(0, 0, 0, 23)
+        worksheet.autofilter(0, 0, 0, 25)
 
         raw_results = []
         for scan_file in self.scan_results:
