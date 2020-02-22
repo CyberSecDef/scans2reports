@@ -243,7 +243,7 @@ class Reports:
         worksheet.set_column('G:G', 30)
         worksheet.set_column('H:H', 15)
         worksheet.set_column('I:I', 30)
-        worksheet.set_column('J:J', 40)
+        worksheet.set_column('J:J', 45)
 
         worksheet.set_column('K:K', 20)
         worksheet.set_column('L:L', 30)

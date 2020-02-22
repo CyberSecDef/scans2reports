@@ -26,7 +26,7 @@ class Utils(object):
             cross_walk_to = {
                 'ABBREV' : {0: 'O', 1: 'NR', 2: 'NA', 3: 'C', 4: 'E'},
                 'HUMAN' : {
-                    0: 'Open', 1: 'Not Reviewed', 2: 'Not Applicable', 3: 'Closed', 4: 'Error'
+                    0: 'Ongoing', 1: 'Not Reviewed', 2: 'Not Applicable', 3: 'Closed', 4: 'Error'
                 },
                 'RAW' : {
                     0: 'Open', 1: 'Not_Reviewed', 2: 'Not_Applicable', 3: 'Closed', 4: 'Error'

@@ -309,7 +309,8 @@ class ScanParser:
         try:
             with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
-            content = content[2:]
+            if '?' in content[0]:
+                content = content[2:]
             content = ''.join(content)
             content = ''.join([i if ord(i) < 128 else ' ' for i in content])
 
