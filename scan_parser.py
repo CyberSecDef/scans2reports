@@ -3,8 +3,6 @@ import re
 import time
 import uuid
 import pprint
-import requests
-import dumper
 from lxml import etree
 from scan_file import ScanFile
 from scan_requirement import ScanRequirement
@@ -15,6 +13,7 @@ class ScanParser:
     data_mapping = {}
     def __init__(self, data_mapping):
         self.data_mapping = data_mapping
+        pass
 
     def parseScap(self, filename):
         try:

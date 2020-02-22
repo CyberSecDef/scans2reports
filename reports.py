@@ -5,7 +5,7 @@ import pprint
 import os.path
 import string
 import datetime
-import requests
+
 from functools import reduce
 from dateutil import parser
 
@@ -414,7 +414,8 @@ class Reports:
 
         row = 0
         bold = self.workbook.add_format({'bold': True})
-        wrap_text = self.workbook.add_format({'font_size':8, 'text_wrap': True})
+        cell_format = self.workbook.add_format({'font_size':8, 'text_wrap': True, 'align': 'justify', 'valign':'bottom'})
+
         date_fmt = self.workbook.add_format({'num_format':'mm/dd/yyyy', 'font_size': 8})
 
         if report:
@@ -430,7 +431,7 @@ class Reports:
                     if col == 6:
                         worksheet.write(row, col, result[value], date_fmt)
                     else:
-                        worksheet.write(row, col, result[value], wrap_text)
+                        worksheet.write(row, col, result[value], cell_format)
                     col += 1
                 row += 1
 
@@ -632,8 +633,7 @@ Plugin ID: {pluginId}
 
         row = 0
         bold = self.workbook.add_format({'bold': True})
-        wrap_text = self.workbook.add_format({'font_size':8, 'text_wrap': True})
-
+        cell_format = self.workbook.add_format({'font_size':8, 'text_wrap': True, 'align' : 'justify', 'valign' : 'vcenter'})
         date_fmt = self.workbook.add_format({'num_format':'mm/dd/yyyy'})
 
         if report:
@@ -649,7 +649,7 @@ Plugin ID: {pluginId}
                     if col == 6:
                         worksheet.write(row, col, result[value], date_fmt)
                     else:
-                        worksheet.write(row, col, result[value], wrap_text)
+                        worksheet.write(row, col, result[value], cell_format)
                     col += 1
                 row += 1
 
