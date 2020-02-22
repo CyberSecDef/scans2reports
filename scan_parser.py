@@ -206,11 +206,21 @@ class ScanParser:
             )
             version =  version.group(1) if version is not None else ''
 
+            feed = re.search(
+                'Plugin feed version : ([0-9.]+)',
+                str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/ReportItem[@pluginID='19506']/plugin_output/text()")), ''))
+            )
+            feed =  feed.group(1) if feed is not None else ''
+            
             sf = ScanFile({
                 'type'         :'ACAS',
                 'fileName'     : str(filename),
                 'scanDate'     : str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), '')),
-                'title'        : "ACAS - {}".format( str(next(iter(tree.xpath("/NessusClientData_v2/Policy/policyName/text()")), '')) ),
+                'title'        : "Assured Compliance Assessment Solution (ACAS) Nessus Scanner\nVersion: {}\nFeed: {}\nPolicy:{}".format( 
+                    version,
+                    feed,
+                    str(next(iter(tree.xpath("/NessusClientData_v2/Policy/policyName/text()")), '')) 
+                ),
                 'uuid'         : str(uuid.uuid4()),
                 'version'      : version,
                 'hostname'     : '',
