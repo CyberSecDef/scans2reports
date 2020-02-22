@@ -435,7 +435,7 @@ class UiScansToReports(object):
         self.grp_file_drop.setTitle(_translate("ScansToReports", "Scan Drop"))
         self.lbl_file_drop.setText(_translate("ScansToReports", " Select multiple files with the file dialog or by dragging and dropping scan files into this region "))
         self.btn_select_scan_files.setText(_translate("ScansToReports", "Select Scan\n"
-"Fiiles"))
+"Files"))
         self.grp_data_points.setTitle(_translate("ScansToReports", "Report Data Points"))
         self.lbl_command.setText(_translate("ScansToReports", "Command"))
         self.lbl_poc.setText(_translate("ScansToReports", "Contact Name"))

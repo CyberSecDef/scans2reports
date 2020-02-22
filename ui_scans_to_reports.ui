@@ -726,7 +726,7 @@ font-size:20pt;</string>
               </property>
               <property name="text">
                <string>Select Scan
-Fiiles</string>
+Files</string>
               </property>
              </widget>
             </item>
