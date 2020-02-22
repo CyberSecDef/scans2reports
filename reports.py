@@ -291,7 +291,7 @@ class Reports:
                 for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
                     for host in scan_file['hosts']:
                         for req in filter(lambda x: x['pluginId'] == plugin, host['requirements']):
-                            if not list(filter(lambda x: str(x['Security Checks']).strip() == f"{req['pluginId']}" and str(x['Raw Severity Value']).strip() == Utils.risk_val(req['severity'], 'MIN'), report)):
+                            if not list(filter(lambda x: str(x['Security Checks']).strip() == f"{req['pluginId']}" and str(x['Raw Severity']).strip() == Utils.risk_val(req['severity'], 'MIN'), report)):
                                 # pylint: disable=C0330
                                 
                                 scd = ""
@@ -318,7 +318,7 @@ class Reports:
                                     'Source Identifying Control Vulnerability': f"{scan_file['title']}",
                                     'Status': f"{ Utils.status(req['status'], 'HUMAN') }",
                                     'Comments':  f"{', '.join(req['cci'])}\n\n{req['comments']}",
-                                    'Raw Severity Value': Utils.risk_val(req['severity'], 'MIN'),
+                                    'Raw Severity': Utils.risk_val(req['severity'], 'MIN'),
                                     'Devices Affected': ", ".join(list(set(acas_plugin_hosts[req['pluginId']]))),
                                     'Mitigations': '',
                                     'Predisposing Conditions': '',
@@ -396,7 +396,7 @@ class Reports:
                                 'Source Identifying Control Vulnerability': f"{prefix} - {scan_file['title']}",
                                 'Status': f"{Utils.status(req['status'], 'HUMAN')}",
                                 'Comments':  f"{req['cci']}\n\n{req['comments']}".strip(),
-                                'Raw Severity Value': Utils.risk_val(req['severity'], 'MIN'),
+                                'Raw Severity': Utils.risk_val(req['severity'], 'MIN'),
                                 'Devices Affected': ", ".join(list(set(disa_rule_hosts[req['ruleId'].replace('xccdf_mil.disa.stig_rule_', '')]))),
                                 'Mitigations': '',
                                 'Predisposing Conditions': req['findingDetails'],
