@@ -56,32 +56,12 @@ class Reports:
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'SCAP-CKL Inconsistencies' Tab")
 
-        worksheet.set_column('A:A', 50)
-        worksheet.set_column('B:B', 25)
-        worksheet.set_column('C:C', 25)
-        worksheet.set_column('D:D', 50)
-        worksheet.set_column('E:E', 15)
-
-        worksheet.set_column('F:F', 15)
-        worksheet.set_column('G:G', 15)
-        worksheet.set_column('H:H', 15)
-        worksheet.set_column('I:I', 50)
-        worksheet.set_column('J:J', 15)
-
-        worksheet.set_column('K:K', 15)
-        worksheet.set_column('L:L', 50)
-        worksheet.set_column('M:M', 15)
-        worksheet.set_column('N:N', 15)
-        worksheet.set_column('O:O', 15)
-
-        worksheet.set_column('P:P', 15)
-        worksheet.set_column('Q:Q', 50)
-
-        worksheet.set_column('R:R', 50)
-        worksheet.set_column('S:S', 50)
-        worksheet.set_column('T:T', 50)
-
-        worksheet.autofilter(0, 0, 0, 19)
+        widths = [50,25,25,50,15,15,15,15,50,15,15,50,15,15,15,15,50,50,50,50]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+        
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
         report = []
         #differences between scap status and ckl status
         for scap in filter(lambda x: x['type'] == 'SCAP', self.scan_results):
@@ -176,13 +156,13 @@ class Reports:
         worksheet = self.workbook.add_worksheet('Test Plan')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Test Plan' Tab")
+
+        widths = [75,10,50,50,35]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
             
-        worksheet.set_column('A:A', 75)
-        worksheet.set_column('B:B', 10)
-        worksheet.set_column('C:C', 50)
-        worksheet.set_column('D:D', 50)
-        worksheet.set_column('E:E', 35)
-        worksheet.autofilter(0, 0, 0, 4)
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         report = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS' and len(x['hosts']) > 0, self.scan_results):
@@ -240,37 +220,13 @@ class Reports:
         worksheet = self.workbook.add_worksheet('POAM')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'POAM' Tab")
-        worksheet.set_column('A:A', 1)
-        worksheet.set_column('B:B', 40)
-        worksheet.set_column('C:C', 15)
-        worksheet.set_column('D:D', 25)
-        worksheet.set_column('E:E', 25)
-
-        worksheet.set_column('F:F', 15)
-        worksheet.set_column('G:G', 30)
-        worksheet.set_column('H:H', 15)
-        worksheet.set_column('I:I', 30)
-        worksheet.set_column('J:J', 45)
-
-        worksheet.set_column('K:K', 20)
-        worksheet.set_column('L:L', 30)
-        worksheet.set_column('M:M', 25)
-        worksheet.set_column('N:N', 40)
-        worksheet.set_column('O:O', 40)
-
-        worksheet.set_column('P:P', 40)
-        worksheet.set_column('Q:Q', 25)
-        worksheet.set_column('R:R', 25)
-        worksheet.set_column('S:S', 40)
-        worksheet.set_column('T:T', 25)
-
-        worksheet.set_column('U:U', 25)
-        worksheet.set_column('V:V', 40)
-        worksheet.set_column('W:W', 25)
-        worksheet.set_column('X:X', 40)
-        worksheet.set_column('Y:Y', 50)
-
-        worksheet.autofilter(0, 0, 0, 24)
+        
+        widths = [1,40,15,25,25,15,30,15,30,45,20,30,25,40,40,40,25,25,40,25,25,40,25,40,50]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+        
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         report = []
         for status in ['Ongoing', 'Not Applicable', 'Not Reviewed', 'Error', 'Completed']:
@@ -454,34 +410,12 @@ class Reports:
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'RAR' Tab")
             
-        worksheet.set_column('A:A', 15)
-        worksheet.set_column('B:B', 15)
-        worksheet.set_column('C:C', 45)
-        worksheet.set_column('D:D', 30)
-        worksheet.set_column('E:E', 30)
-
-        worksheet.set_column('F:F', 45)
-        worksheet.set_column('G:G', 20)
-        worksheet.set_column('H:H', 15)
-        worksheet.set_column('I:I', 30)
-        worksheet.set_column('J:J', 30)
-
-        worksheet.set_column('K:K', 15)
-        worksheet.set_column('L:L', 15)
-        worksheet.set_column('M:M', 30)
-        worksheet.set_column('N:N', 30)
-        worksheet.set_column('O:O', 15)
-
-        worksheet.set_column('P:P', 15)
-        worksheet.set_column('Q:Q', 15)
-        worksheet.set_column('R:R', 15)
-        worksheet.set_column('S:S', 30)
-        worksheet.set_column('T:T', 30)
-
-        worksheet.set_column('U:U', 45)
-        worksheet.set_column('V:V', 30)
-
-        worksheet.autofilter(0, 0, 0, 20)
+        widths = [15,15,45,30,30,45,20,15,30,30,15,15,30,30,15,15,15,15,30,30,45,30]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+            
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         report = []
         for status in ['Ongoing', 'Not Applicable', 'Not Reviewed', 'Error', 'Completed']:
@@ -679,22 +613,13 @@ Plugin ID: {pluginId}
         worksheet = self.workbook.add_worksheet('Automated Scan Info')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Automated Scan Info' Tab")
-            
-        worksheet.set_column('A:A', 20)
-        worksheet.set_column('B:B', 100)
-        worksheet.set_column('C:C', 25)
-        worksheet.set_column('D:D', 25)
-        worksheet.set_column('E:E', 25)
-        worksheet.set_column('F:F', 50)
-        worksheet.set_column('G:G', 75)
         
-        worksheet.set_column('H:H', 25)
-        worksheet.set_column('I:I', 25)
-        worksheet.set_column('J:J', 50)
-        worksheet.set_column('K:K', 25)
-        worksheet.set_column('L:L', 25)
-        worksheet.set_column('M:M', 25)
-        worksheet.autofilter(0, 0, 0, 12)
+        widths = [20,100,25,25,25,50,75,25,25,50,25,25,25]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+        
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         report = []
 
@@ -783,12 +708,13 @@ Plugin ID: {pluginId}
         worksheet = self.workbook.add_worksheet('Software - Linux')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Software - Linux' Tab")
-        worksheet.set_column('A:A', 75)
-        worksheet.set_column('B:B', 25)
-        worksheet.set_column('C:C', 25)
-        worksheet.set_column('D:D', 25)
-        worksheet.set_column('E:E', 75)
-        worksheet.autofilter(0, 0, 0, 4)
+        
+        widths = [75, 25, 25, 25, 75]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+        
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         software = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
@@ -876,10 +802,13 @@ Plugin ID: {pluginId}
         worksheet = self.workbook.add_worksheet('Software - Windows')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Software - Windows' Tab")
-        worksheet.set_column('A:A', 75)
-        worksheet.set_column('B:B', 25)
-        worksheet.set_column('C:C', 75)
-        worksheet.autofilter(0, 0, 0, 2)
+            
+        widths = [75, 25, 75]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+        
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         software = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
@@ -955,12 +884,13 @@ Plugin ID: {pluginId}
         worksheet = self.workbook.add_worksheet('PPSM')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'PPSM' Tab")
-        worksheet.set_column('A:A', 25)
-        worksheet.set_column('B:B', 25)
-        worksheet.set_column('C:C', 25)
-        worksheet.set_column('D:D', 25)
-        worksheet.set_column('E:E', 25)
-        worksheet.autofilter(0, 0, 0, 4)
+        
+        widths = [25, 25, 25, 25, 25]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+            
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         ports = []
 
@@ -1000,16 +930,13 @@ Plugin ID: {pluginId}
         worksheet = self.workbook.add_worksheet('CCI Data')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'CCI Data' Tab")
-        worksheet.set_column('A:A', 25)
-        worksheet.set_column('B:B', 25)
-        worksheet.set_column('C:C', 25)
-        worksheet.set_column('D:D', 25)
-        worksheet.set_column('E:E', 25)
-        worksheet.set_column('E:E', 25)
-        worksheet.set_column('F:F', 25)
-        worksheet.set_column('G:G', 125)
-        worksheet.set_column('H:H', 125)
-        worksheet.autofilter(0, 0, 0, 7)
+            
+        widths = [25,25,25,25,25, 25,25,125,125]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+        
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         ccis = []
 
@@ -1050,12 +977,13 @@ Plugin ID: {pluginId}
         worksheet = self.workbook.add_worksheet('ACAS Unique Vuln')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'ACAS Unique Vuln' Tab")
-        worksheet.set_column('A:A', 25)
-        worksheet.set_column('B:B', 75)
-        worksheet.set_column('C:C', 50)
-        worksheet.set_column('D:D', 25)
-        worksheet.set_column('E:E', 25)
-        worksheet.autofilter(0, 0, 0, 4)
+        
+        widths = [25, 75, 50, 25, 25]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+        
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         plugins = []
         plugin_count = {}
@@ -1104,13 +1032,13 @@ Plugin ID: {pluginId}
         worksheet = self.workbook.add_worksheet('ACAS Unique IAVA')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'ACAS Unique IAVA' Tab")
-        worksheet.set_column('A:A', 25)
-        worksheet.set_column('B:B', 25)
-        worksheet.set_column('C:C', 50)
-        worksheet.set_column('D:D', 25)
-        worksheet.set_column('E:E', 25)
-        worksheet.set_column('F:F', 25)
-        worksheet.autofilter(0, 0, 0, 5)
+        
+        widths = [25, 25, 50, 25, 25, 25]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+        
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         plugins = []
         plugin_count = {}
@@ -1160,10 +1088,14 @@ Plugin ID: {pluginId}
         worksheet = self.workbook.add_worksheet('Missing Patches')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Missing Patches' Tab")
-        worksheet.set_column('A:A', 35)
-        worksheet.set_column('B:B', 50)
-        worksheet.set_column('C:C', 50)
-        worksheet.autofilter(0, 0, 0, 2)
+        
+        
+        widths = [35, 50, 50]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+            
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         patches = []
 
@@ -1207,19 +1139,13 @@ Plugin ID: {pluginId}
         worksheet = self.workbook.add_worksheet('Summary')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Summary' Tab")
-        worksheet.set_column('A:A', 10)
-        worksheet.set_column('B:B', 30)
-        worksheet.set_column('C:C', 20)
-        worksheet.set_column('D:D', 50)
-        worksheet.set_column('E:E', 50)
-        worksheet.set_column('F:F', 10)
-        worksheet.set_column('G:G', 10)
-        worksheet.set_column('H:H', 10)
-        worksheet.set_column('I:I', 10)
-        worksheet.set_column('J:J', 10)
-        worksheet.set_column('K:K', 10)
-        worksheet.set_column('L:L', 25)
-        worksheet.autofilter(0, 0, 0, 11)
+        
+        widths = [10,30,20,50,50,10,10,10,10,10,10,25]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+        
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         summary_results = []
 
@@ -1456,10 +1382,12 @@ Plugin ID: {pluginId}
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Operating Systems' Tab")
             
-        worksheet.set_column('A:A', 50)
-        worksheet.set_column('B:B', 25)
-        worksheet.set_column('C:C', 25)
-        worksheet.autofilter(0, 0, 0, 2)
+        widths = [50, 25, 25]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+      
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         os_list = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
@@ -1496,10 +1424,12 @@ Plugin ID: {pluginId}
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Local Users' Tab")
             
-        worksheet.set_column('A:A', 50)
-        worksheet.set_column('B:B', 50)
-        worksheet.set_column('C:C', 50)
-        worksheet.autofilter(0, 0, 0, 2)
+        widths = [50,50,50]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+            
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         users = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
