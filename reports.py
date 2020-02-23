@@ -484,7 +484,11 @@ class Reports:
                 for host in scan_file['hosts']:
                     for req in host['requirements']:
                         if Utils.status(req['status'], 'HUMAN') == Utils.status(status, 'HUMAN'):
-                            acas_plugins.append(req['pluginId'])
+                            if(
+                                datetime.datetime.strptime(req['publicationDate'],'%Y/%m/%d')  <
+                                datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] )
+                            ):
+                                acas_plugins.append(req['pluginId'])
             acas_plugins_by_status = sorted(list(set(acas_plugins)))
 
             #get all the hosts that for each plugin by status
