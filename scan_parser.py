@@ -3,6 +3,7 @@ import re
 import time
 import uuid
 import pprint
+import logging
 from lxml import etree
 from scan_file import ScanFile
 from scan_requirement import ScanRequirement
@@ -13,11 +14,12 @@ class ScanParser:
     data_mapping = {}
     def __init__(self, data_mapping):
         self.data_mapping = data_mapping
-        pass
+        FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
 
     def parseScap(self, filename):
+        logging.info('Parsing scap file %s', filename)
         try:
-
             with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
             content = content[2:]
@@ -190,6 +192,7 @@ class ScanParser:
         return sf
 
     def parseNessus(self, filename):
+        logging.info('Parsing ACAS File %s', filename)
         try:
             with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
@@ -307,6 +310,7 @@ class ScanParser:
 
 
     def parseCkl(self, filename):
+        logging.info('Parsing CKL file %s', filename)
         try:
             with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()

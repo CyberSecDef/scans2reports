@@ -5,7 +5,7 @@ import pprint
 import os.path
 import string
 import datetime
-
+import logging
 from functools import reduce
 from dateutil import parser
 
@@ -28,6 +28,9 @@ class Reports:
 
     def __init__(self, scan_results, data_mapping, contact_info, poam_conf, scans_to_reports=None):
         """ constructor """
+        FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
+        logging.info('Building Reports Object')
         self.scan_results = scan_results
 
         report_name = "{}/results/{}".format(
@@ -43,10 +46,12 @@ class Reports:
 
     def close(self):
         """ Close the excel file """
+        logging.info('Closing Workbook')
         self.workbook.close()
 
     def rpt_issues(self):
         """ SCAP - CKL Inconsistencies tab """
+        logging.info('Building SCAP-CKL Inconsistencies report')
         worksheet = self.workbook.add_worksheet('SCAP-CKL Inconsistencies')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'SCAP-CKL Inconsistencies' Tab")
@@ -167,6 +172,7 @@ class Reports:
 
     def rpt_test_plan(self):
         """ Generates Test Plan """
+        logging.info('Building Test Plan Report')
         worksheet = self.workbook.add_worksheet('Test Plan')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Test Plan' Tab")
@@ -230,6 +236,7 @@ class Reports:
 
     def rpt_poam56(self):
         """ Generates POAM """
+        logging.info('Building POAM')
         worksheet = self.workbook.add_worksheet('POAM')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'POAM' Tab")
@@ -442,6 +449,7 @@ class Reports:
 
     def rpt_rar(self):
         """ Generates RAR """
+        logging.info('Building RAR')
         worksheet = self.workbook.add_worksheet('RAR')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'RAR' Tab")
@@ -667,6 +675,7 @@ Plugin ID: {pluginId}
 
     def rpt_scan_info(self):
         """ Generates Scan Info Tab """
+        logging.info('Building Automated Scan Info Tab')
         worksheet = self.workbook.add_worksheet('Automated Scan Info')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Automated Scan Info' Tab")
@@ -769,6 +778,8 @@ Plugin ID: {pluginId}
 
     def rpt_soft_linux(self):
         """ Generates Linux Software Tab """
+        logging.info('Generating Linux Software Tab')
+        
         worksheet = self.workbook.add_worksheet('Software - Linux')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Software - Linux' Tab")
@@ -861,6 +872,7 @@ Plugin ID: {pluginId}
 
     def rpt_soft_windows(self):
         """ Generates Windows Software Tab """
+        logging.info('Building Windows Software Tab')
         worksheet = self.workbook.add_worksheet('Software - Windows')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Software - Windows' Tab")
@@ -939,7 +951,7 @@ Plugin ID: {pluginId}
 
     def rpt_ppsm(self):
         """ Generates PPSM Report """
-
+        logging.info('Building PPSM Tab')
         worksheet = self.workbook.add_worksheet('PPSM')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'PPSM' Tab")
@@ -984,7 +996,7 @@ Plugin ID: {pluginId}
                 
     def rpt_cci(self):
         """ Generates CCI Report """
-
+        logging.info('Building CCI Tab')
         worksheet = self.workbook.add_worksheet('CCI Data')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'CCI Data' Tab")
@@ -1034,7 +1046,7 @@ Plugin ID: {pluginId}
                 
     def rpt_acas_uniq_vuln(self):
         """ Generates ACAS Unique Vuln tab """
-
+        logging.info('Building ACAS Unique Vuln Tab')
         worksheet = self.workbook.add_worksheet('ACAS Unique Vuln')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'ACAS Unique Vuln' Tab")
@@ -1088,6 +1100,7 @@ Plugin ID: {pluginId}
 
     def rpt_acas_uniq_iava(self):
         """ Generates ACAS Unique IAVA Tab """
+        logging.info('Building ACAS Unique IAVA Tab')
         worksheet = self.workbook.add_worksheet('ACAS Unique IAVA')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'ACAS Unique IAVA' Tab")
@@ -1143,7 +1156,7 @@ Plugin ID: {pluginId}
 
     def rpt_missing_patches(self):
         """ Generates Missing Patches tab """
-
+        logging.info('Building Missing Patches tab')
         worksheet = self.workbook.add_worksheet('Missing Patches')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Missing Patches' Tab")
@@ -1190,6 +1203,7 @@ Plugin ID: {pluginId}
 
     def rpt_summary(self):
         """ Generates Scan Summary Tab """
+        logging.info('Building Summary Tab')
         worksheet = self.workbook.add_worksheet('Summary')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Summary' Tab")
@@ -1281,6 +1295,7 @@ Plugin ID: {pluginId}
 
     def rpt_raw_data(self):
         """ Generates RAW Data Tab """
+        logging.info('Building Raw Data Tab')
         worksheet = self.workbook.add_worksheet('Raw Data')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Raw Data' Tab")
@@ -1436,7 +1451,7 @@ Plugin ID: {pluginId}
 
     def rpt_operating_systems(self):
         """ Generates OS Tab """
-
+        logging.info('Building OS Tab')
         worksheet = self.workbook.add_worksheet('Operating Systems')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Operating Systems' Tab")
@@ -1476,7 +1491,7 @@ Plugin ID: {pluginId}
 
     def rpt_local_users(self):
         """ Generates Local Users tab """
-
+        logging.info('Building Local Users Tab')
         worksheet = self.workbook.add_worksheet('Local Users')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Local Users' Tab")

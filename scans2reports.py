@@ -12,7 +12,7 @@ import os
 import sys
 import time
 import json
-
+import logging
 from pathlib import Path
 from threading import Thread
 from queue import Queue
@@ -39,10 +39,14 @@ class Scans2Reports:
     
     def __init__(self, args):
         """ Constructor """
+        FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
+        logging.info('Started')
+        
         if args.gui or args.folder is None:
+            logging.info('Executing GUI mode')
             self.operating_mode = 'gui'
-         
-
+        
         if getattr(sys, 'frozen', False):
             # If the application is run as a bundle, the pyInstaller bootloader
             # extends the sys module by a flag frozen=True and sets the app 
@@ -50,8 +54,12 @@ class Scans2Reports:
             application_path = sys._MEIPASS
         else:
             application_path = os.path.dirname(os.path.abspath(__file__))
-            
+        logging.info('Application Path: %s', application_path)
+        
         self.num_theads = int(psutil.cpu_count()) - 2
+        
+        logging.info('Threads: %s', self.num_theads)
+        
         with open(os.path.join(application_path, "data/dataset.json"), "r") as read_file:
             self.data_mapping = json.load(read_file)
         
@@ -72,12 +80,16 @@ class Scans2Reports:
 
     def collect_scan_files(self):
         """ Collects all the files to be scanned """
+        logging.info('Collecting scan files')
+        
         root_directory = Path(self.source_folder)
         self.scan_files = list(root_directory.glob('**/*'))
         self.scan_results = [{} for x in self.scan_files]
 
     def parse_scan_files(self):
         """ Add scan file to parsing thread """
+        logging.info('Parsing scan files')
+        
         #add scan job to queue
         for i in range(len(self.scan_files)):
             self.q.put((i, self.scan_files[i]))
@@ -99,11 +111,14 @@ class Scans2Reports:
 
     def start_parse_thread(self, queue, result):
         """ Create / Start parsing thread """
+        logging.info('Starting Parse Thread')
+        
         scan_parser = ScanParser(self.data_mapping)
 
         while not queue.empty():
             work = queue.get()
             print(f"Max Threads: {self.num_theads:<3} | Starting thread {work[0]:<14}: {work[1]}")
+            logging.info(f"Max Threads: {self.num_theads:<3} | Starting thread {work[0]:<14}: {work[1]}")
             start_time = time.time()
             try:
                 file = None
@@ -135,6 +150,7 @@ class Scans2Reports:
 
     def generate_reports(self):
         """ After all scan files are parsed, begin generating Excel Tabs """
+        logging.info('Generating Reports')
         
         reports = Reports(
             self.scan_results,
@@ -146,6 +162,7 @@ class Scans2Reports:
 
         for report in filter(lambda x: x.startswith('rpt'), dir(reports)):
             print(report)
+            logging.info('Generating Report %s', report)
             getattr(reports, report)()
             QtWidgets.QApplication.processEvents()
 

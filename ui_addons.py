@@ -3,15 +3,19 @@ import os.path
 import time
 import pprint
 import dumper
+import logging
 from functools import partial
 
 class UiAddons():
     main_form = None
     def __init__(self,main_app, main_form):
+        FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
         self.main_form = main_form
         self.main_app = main_app
 
     def btn_select_scan_files_on_click(self):
+        logging.info('Select Scan Files Clicked')
         options = QtWidgets.QFileDialog.Options()
         files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"QFileDialog.getOpenFileNames()", "","All Files (*);;", options=options)
         if files:
@@ -27,6 +31,7 @@ class UiAddons():
                 
                 if filepath not in filepaths:
                     if extension in ['.ckl', '.xml', '.nessus']:
+                        logging.info('Adding file to queue: %s', filepath)
                         self.main_form.tbl_selected_scans.insertRow(0)
                         
                         item = QtWidgets.QTableWidgetItem( os.path.basename( filepath ))
@@ -41,6 +46,7 @@ class UiAddons():
                         self.main_form.tbl_selected_scans.horizontalHeader().setStretchLastSection(True)
                         
     def btn_parse_scan_files_on_click(self):
+        logging.info('Parse Scan Files Clicked')
         self.main_form.tbl_scan_summary.setRowCount(0)
         
         filepaths = []
@@ -54,6 +60,7 @@ class UiAddons():
         
         # print( self.main_app.scan_results )
         for scan_result in self.main_app.scan_results:
+            logging.info('Adding file to Processed List: %s', scan_result['fileName'])
             if scan_result['type'] == 'ACAS':
                 for host in scan_result['hosts']:
                     self.main_form.tbl_scan_summary.insertRow(0)
@@ -102,6 +109,7 @@ class UiAddons():
                 self.main_form.tbl_scan_summary.horizontalHeader().setStretchLastSection(True)
 
     def btn_execute_on_click(self):
+        logging.info('Execute Clicked')
         self.main_app.contact_info['command'] = self.main_form.txt_command.text()
         self.main_app.contact_info['name'] = self.main_form.txt_poc.text()
         self.main_app.contact_info['phone'] = self.main_form.txt_phone.text()
@@ -116,12 +124,14 @@ class UiAddons():
         self.main_app.generate_reports()
         
     def show_about(self):
+        logging.info('About Shown')
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle("About Scans To Reports")
         msg.setText("Scans To Reports - Python Edition\nVersion 1.0\nCopyright (C) 2020 - Robert Weber\nhttps://cyber.trackr.live")
         x = msg.exec_()
         
     def show_help(self):
+        logging.info('Help Shown')
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle("Scans To Reports - Help")
         msg.setText("""
@@ -140,6 +150,7 @@ To utilize the tool, follow the steps below:
         x = msg.exec_()        
 
     def connect_events(self):
+        logging.info('Connecting Events')
         self.main_form.btn_parse_scan_files.clicked.connect(self.btn_parse_scan_files_on_click)
         self.main_form.btn_execute.clicked.connect(self.btn_execute_on_click)
         self.main_form.btn_select_scan_files.clicked.connect(self.btn_select_scan_files_on_click)
@@ -153,6 +164,7 @@ To utilize the tool, follow the steps below:
         self.main_form.actionExit.triggered.connect( QtCore.QCoreApplication.quit)
         
     def update_summary_headers(self):
+        logging.info('Updating Summary Headers')
         self.main_form.tbl_scan_summary.setRowCount(1)
         self.main_form.tbl_scan_summary.setColumnCount(12)
         self.main_form.tbl_scan_summary.setHorizontalHeaderLabels(['Type', 'Hostname', 'IP','OS', 'Scan File Name', 'CAT I', 'CAT II', 'CAT III', 'CAT IV', 'Total', 'Score',' Credentialed'])
@@ -160,6 +172,7 @@ To utilize the tool, follow the steps below:
         self.main_form.tbl_scan_summary.horizontalHeader().setStretchLastSection(True)
         
     def update_scan_headers(self):
+        logging.info('Updating Scan Headers')
         self.main_form.tbl_selected_scans.setRowCount(1)
         self.main_form.tbl_selected_scans.setColumnCount(5)
         self.main_form.tbl_selected_scans.setHorizontalHeaderLabels(['Action', 'Name', 'Created', 'Size','File Type'])
