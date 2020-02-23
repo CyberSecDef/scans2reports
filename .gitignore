@@ -1,2 +1,4 @@
 /results/*
 /scans2reports.log
+/__pycache__/
+scans2reports.spec
