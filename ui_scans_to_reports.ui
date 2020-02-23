@@ -787,13 +787,13 @@ Files</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>300</width>
+             <width>235</width>
              <height>25</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>300</width>
+             <width>235</width>
              <height>25</height>
             </size>
            </property>
@@ -831,28 +831,6 @@ Files</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="txt_command">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>300</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>300</width>
-             <height>25</height>
-            </size>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="1">
           <widget class="QLineEdit" name="txt_poc">
            <property name="sizePolicy">
@@ -863,13 +841,13 @@ Files</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>300</width>
+             <width>235</width>
              <height>25</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>300</width>
+             <width>235</width>
              <height>25</height>
             </size>
            </property>
@@ -927,13 +905,13 @@ Files</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>300</width>
+             <width>235</width>
              <height>25</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>300</width>
+             <width>235</width>
              <height>25</height>
             </size>
            </property>
@@ -956,6 +934,28 @@ Files</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="txt_command">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>235</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>235</width>
+             <height>25</height>
+            </size>
            </property>
           </widget>
          </item>

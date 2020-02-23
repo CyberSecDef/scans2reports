@@ -676,12 +676,16 @@ Plugin ID: {pluginId}
         worksheet.set_column('C:C', 25)
         worksheet.set_column('D:D', 25)
         worksheet.set_column('E:E', 25)
-        worksheet.set_column('F:F', 75)
-        worksheet.set_column('G:G', 25)
-        worksheet.set_column('H:H', 50)
-        worksheet.set_column('I:I', 50)
-        worksheet.set_column('J:J', 25)
-        worksheet.autofilter(0, 0, 0, 9)
+        worksheet.set_column('F:F', 50)
+        worksheet.set_column('G:G', 75)
+        
+        worksheet.set_column('H:H', 25)
+        worksheet.set_column('I:I', 25)
+        worksheet.set_column('J:J', 50)
+        worksheet.set_column('K:K', 25)
+        worksheet.set_column('L:L', 25)
+        worksheet.set_column('M:M', 25)
+        worksheet.autofilter(0, 0, 0, 12)
 
         report = []
 
@@ -693,10 +697,13 @@ Plugin ID: {pluginId}
                 'Scanner edition used': scan_file['scannerEdition'],
                 'Scan Type': 'Normal',
                 'Scan policy used': scan_file['policy'],
+                'Port Range' : '',
+                'Hostname' : scan_file['hostname'] if scan_file['hostname'].strip() != '' else scan_file['ip'],
                 'Credentialed checks': Utils.parse_bool(str(scan_file['credentialed'])),
                 'Scan User': scan_file['scanUser'],
                 'Scan Start Date': scan_file['scanDate'],
-                'Scan duration': str(reduce(lambda x, y: x*60+y, [int(i) for i in (str(scan_file['duration'])).split(':')])) + ' sec'
+                'Scan duration': str(reduce(lambda x, y: x*60+y, [int(i) for i in (str(scan_file['duration'])).split(':')])) + ' sec',
+                'Scan To Feed Difference' : ''
             }
             report.append(info_details)
 
@@ -717,10 +724,16 @@ Plugin ID: {pluginId}
                             'Scanner edition used': scan_data['Nessus version'],
                             'Scan Type': scan_data['Scan type'],
                             'Scan policy used': scan_data['Scan policy used'],
+                            'Port Range' : scan_data['Port range'],
+                            'Hostname' : host['hostname'] if host['hostname'].strip() != '' else host['ip'],
                             'Credentialed checks': Utils.parse_bool(str(host['credentialed'])),
                             'Scan User': host['scanUser'],
                             'Scan Start Date': scan_data['Scan Start Date'],
                             'Scan duration': str(scan_data['Scan duration']),
+                            'Scan To Feed Difference' : (
+                                datetime.datetime.strptime(scan_file['scanDate'], '%a %b %d %H:%M:%S %Y') - 
+                                datetime.datetime.strptime(scan_data['Plugin feed version'], '%Y%m%d%H%M')
+                            ).days
                         }
                         report.append(info_details)
 
@@ -731,6 +744,7 @@ Plugin ID: {pluginId}
         row = 0
         bold = self.workbook.add_format({'bold': True})
         wrap_text = self.workbook.add_format({'font_size':8, 'text_wrap': True})
+        bad_feed = self.workbook.add_format({'font_size':8, 'text_wrap': True, 'bg_color': '#FFC7CE'})
 
         if report:
             col = 0
@@ -741,8 +755,15 @@ Plugin ID: {pluginId}
 
             for result in report:
                 col = 0
+                row_format = wrap_text
+                if( 
+                    'Scan To Feed Difference' in result and 
+                    str(result['Scan To Feed Difference']).strip() != '' and
+                    int(result['Scan To Feed Difference']) > 5
+                ):
+                    row_format = bad_feed
                 for value in result:
-                    worksheet.write(row, col, result[value], wrap_text)
+                    worksheet.write(row, col, result[value], row_format)
                     col += 1
                 row += 1
 

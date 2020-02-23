@@ -223,9 +223,12 @@ class ScanParser:
                 'os'           : '',
                 'ip'           : '',
                 'hosts'        : [],
+                'feed'         : feed
             })
 
-
+            
+            
+            
             for host in tree.xpath("/NessusClientData_v2/Report/ReportHost"):
                 scanUser = ""
                 scan_info = str( host.xpath("./ReportItem[@pluginID=19506]/plugin_output/text()") ).split("\\n")
