@@ -109,7 +109,8 @@ class UiAddons():
         
         self.main_app.poam_conf = { 
             'scd' : self.main_form.chk_prefill_scd.isChecked(), 
-            'lower_risk' : self.main_form.chk_lower_risk.isChecked()
+            'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
+            'exclude_plugins' : self.main_form.spnExcludeDays.value()
         }
         
         self.main_app.generate_reports()

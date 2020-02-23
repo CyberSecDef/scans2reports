@@ -3,7 +3,7 @@
 
 # NOTES:
 # Python Path: C:\Users\admin\AppData\Local\Programs\Python\Python37
-# Convert UI to PU: .\Scripts\pyuic5.exe -x D:\development\scans2poam\ui_scans_to_reports.ui -o D:\development\scans2poam\ui_scans_to_reports.py
+# Convert UI to PU: .\Scripts\pyuic5.exe -x S:\Misc\Development\scans2reports\src\ui_scans_to_reports.ui -o S:\Misc\Development\scans2reports\src\ui_scans_to_reports.py
 # Execute Applet: clear; .\python.exe D:\development\scans2poam\scans2report.py
 # from ui_addons import FileDrop
 
@@ -62,7 +62,11 @@ class Scans2Reports:
             'email' : (args.email if 'email' in args and args.email is not None and str(args.email).strip() != '' else '')
         }
         
-        self.poam_conf = { 'scd' : args.scd, 'lower_risk' : args.lower_risk}
+        self.poam_conf = { 
+            'scd' : args.scd, 
+            'lower_risk' : args.lower_risk, 
+            'exclude_plugins' : args.exclude_plugins 
+        }
         self.source_folder = args.folder
         
 
@@ -161,6 +165,7 @@ optional.add_argument('-n', '--name', help='Add POC Name to POAM')
 optional.add_argument('-p', '--phone', help='Add POC Phone Number to POAM')
 optional.add_argument('-e', '--email', help='Add POC Email Address to POAM')
 optional.add_argument('-s', '--scd', help='Prefill Estimated SCD to POAM', action='store_true')
+optional.add_argument('-x', '--exclude-plugins', help='Exclude plugins newer than this number of days', type=int, default=30)
 optional.add_argument('-l', '--lower-risk', help='Automatically Lower Risk on POAM', action='store_true')
 optional.add_argument('-folder', '--folder', required=False)
 optional.add_argument('-h', '--help', action='help', default=SUPPRESS, help='show this help message and exit')

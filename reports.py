@@ -274,7 +274,12 @@ class Reports:
                 for host in scan_file['hosts']:
                     for req in host['requirements']:
                         if Utils.status(req['status'], 'HUMAN') == Utils.status(status, 'HUMAN'):
-                            acas_plugins.append(req['pluginId'])
+                            if(
+                                datetime.datetime.strptime(req['publicationDate'],'%Y/%m/%d')  <
+                                datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] )
+                            ):
+                                acas_plugins.append(req['pluginId'])
+                                
             acas_plugins_by_status = sorted(list(set(acas_plugins)))
 
             #get all the hosts that for each plugin by status
@@ -1294,6 +1299,8 @@ Plugin ID: {pluginId}
                         'Scan Date': scan_file['scanDate'],
                         'Version': int(scan_file['version'].strip(string.ascii_letters)),
                         'Release': int(scan_file['release'].strip(string.ascii_letters)),
+                        'Publication Date' : '',
+                        'Modification Date' : '',
                         'Credentialed': scan_file['credentialed'],
                         'Hostname': scan_file['hostname'] if scan_file['hostname'].strip() != '' else scan_file['ip'],
                         'grpId': req['grpId'],
@@ -1324,6 +1331,8 @@ Plugin ID: {pluginId}
                         'Scan Date': scan_file['scanDate'],
                         'Version': int(scan_file['version'].strip(string.ascii_letters)),
                         'Release': int(scan_file['release'].strip(string.ascii_letters)),
+                        'Publication Date' : '',
+                        'Modification Date' : '',
                         'Credentialed': scan_file['credentialed'],
                         'Hostname': scan_file['hostname'] if scan_file['hostname'].strip() != '' else scan_file['ip'],
                         'grpId': req['grpId'],
@@ -1355,6 +1364,8 @@ Plugin ID: {pluginId}
                             'Scan Date': scan_file['scanDate'],
                             'Version': scan_file['version'],
                             'Release': '',
+                            'Publication Date' : req['publicationDate'],
+                            'Modification Date' : req['modificationDate'],
                             'Credentialed': host['credentialed'],
                             'Hostname': host['hostname'] if host['hostname'].strip() != '' else host['ip'],
                             'grpId': req['grpId'],
