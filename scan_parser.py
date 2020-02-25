@@ -385,9 +385,9 @@ class ScanParser:
                 'os'           : '',
                 'credentialed' : True,
 
-                'catI'         : len(tree.xpath("//VULN[./STATUS!='NotAFinding' and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='high']]") ),
-                'catII'        : len(tree.xpath("//VULN[./STATUS!='NotAFinding' and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='medium']]") ),
-                'catIII'       : len(tree.xpath("//VULN[./STATUS!='NotAFinding' and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='low']]") ),
+                'catI'         : len(tree.xpath("//VULN[(./STATUS!='NotAFinding' and ./STATUS!='Not_Applicable' ) and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='high']]") ),
+                'catII'        : len(tree.xpath("//VULN[(./STATUS!='NotAFinding' and ./STATUS!='Not_Applicable' ) and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='medium']]") ),
+                'catIII'       : len(tree.xpath("//VULN[(./STATUS!='NotAFinding' and ./STATUS!='Not_Applicable' ) and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='low']]") ),
                 'catIV'        : '',
                 'open'         : len(tree.xpath("//VULN[./STATUS='Open']") ),
                 'closed'       : len(tree.xpath("//VULN[./STATUS='NotAFinding']") ),
