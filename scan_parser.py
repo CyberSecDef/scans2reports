@@ -225,11 +225,7 @@ class ScanParser:
                 'type'         :'ACAS',
                 'fileName'     : str(filename),
                 'scanDate'     : str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), '')),
-                'title'        : "Assured Compliance Assessment Solution (ACAS) Nessus Scanner\nVersion: {}\nFeed: {}\nPolicy:{}".format( 
-                    version,
-                    feed,
-                    str(next(iter(tree.xpath("/NessusClientData_v2/Policy/policyName/text()")), '')) 
-                ),
+                'title'        : "Assured Compliance Assessment Solution (ACAS) Nessus Scanner\nVersion: {}\nFeed: {}".format(version, feed),
                 'uuid'         : str(uuid.uuid4()),
                 'version'      : version,
                 'hostname'     : '',
