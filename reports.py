@@ -170,7 +170,7 @@ class Reports:
                 'Title': scan_file['title'],
                 'Version': scan_file['version'],
                 'Hosts': ", ".join(
-                    list(set(map(lambda h: h['hostname'] if h['hostname'].strip() != '' else h['ip'], scan_file['hosts'])))
+                    sorted(list(set(map(lambda h: h['hostname'] if h['hostname'].strip() != '' else h['ip'], scan_file['hosts']))))
                 ),
                 'Scan File Name': os.path.basename(scan_file['fileName']),
                 'Dates': (parser.parse(scan_file['scanDate'])).strftime("%m/%d/%Y %H:%M:%S"),
@@ -287,7 +287,7 @@ class Reports:
                                     'Status': f"{ Utils.status(req['status'], 'HUMAN') }",
                                     'Comments':  f"{', '.join(req['cci'])}\n\n{req['comments']}",
                                     'Raw Severity': Utils.risk_val(req['severity'], 'MIN'),
-                                    'Devices Affected': ", ".join(list(set(acas_plugin_hosts[req['pluginId']]))),
+                                    'Devices Affected': ", ".join(sorted(list(set(acas_plugin_hosts[req['pluginId']])))),
                                     'Mitigations': '',
                                     'Predisposing Conditions': '',
                                     'Severity': Utils.risk_val(req['severity'], 'POAM'),
@@ -365,7 +365,7 @@ class Reports:
                                 'Status': f"{Utils.status(req['status'], 'HUMAN')}",
                                 'Comments':  f"{req['cci']}\n\n{req['comments']}".strip(),
                                 'Raw Severity': Utils.risk_val(req['severity'], 'MIN'),
-                                'Devices Affected': ", ".join(list(set(disa_rule_hosts[req['ruleId'].replace('xccdf_mil.disa.stig_rule_', '')]))),
+                                'Devices Affected': ", ".join(sorted(list(set(disa_rule_hosts[req['ruleId'].replace('xccdf_mil.disa.stig_rule_', '')])))),
                                 'Mitigations': '',
                                 'Predisposing Conditions': req['findingDetails'],
                                 'Severity': Utils.risk_val(req['severity'], 'POAM'),
@@ -471,7 +471,7 @@ class Reports:
 									'Source of Discovery(16a.2)': f"{scan_file['title']}",
 									'Vulnerability ID(16a.3)': f"{req['pluginId']}",
 									'Vulnerability Description (16.b)': req['reqTitle'],
-									'Devices Affected (16b.1)': ", ".join(list(set(acas_plugin_hosts[req['pluginId']]))),
+									'Devices Affected (16b.1)': ", ".join(sorted(list(set(acas_plugin_hosts[req['pluginId']])))),
 									'Security Objectives (C-I-A) (16c)': objectives,
 									'Raw Test Result (16d)': Utils.risk_val(req['severity'], 'CAT'),
 									'Predisposing Condition(s) (16d.1)': '',
@@ -549,7 +549,7 @@ class Reports:
                                 'Source of Discovery(16a.2)': f"{prefix} - {scan_file['title']}",
                                 'Vulnerability ID(16a.3)': f"{req['ruleId'].replace('xccdf_mil.disa.stig_rule_', '')}",
                                 'Vulnerability Description (16.b)': req['reqTitle'],
-                                'Devices Affected (16b.1)': ", ".join(list(set(disa_rule_hosts[req['ruleId'].replace('xccdf_mil.disa.stig_rule_', '')]))),
+                                'Devices Affected (16b.1)': ", ".join(sorted(list(set(disa_rule_hosts[req['ruleId'].replace('xccdf_mil.disa.stig_rule_', '')])))),
                                 'Security Objectives (C-I-A) (16c)': objectives,
                                 'Raw Test Result (16d)': Utils.risk_val(req['severity'], 'CAT'),
                                 'Predisposing Condition(s) (16d.1)': req['findingDetails'],
@@ -658,7 +658,7 @@ Plugin ID: {pluginId}
                             'Scanner edition used': scan_data['Nessus version'],
                             'Scan Type': scan_data['Scan type'],
                             'Scan policy used': scan_data['Scan policy used'],
-                            'Port Range' : scan_data['Port range'],
+                            'Port Range' : scan_data['Port range'] if 'Port range' in scan_data else '',
                             'Hostname' : host['hostname'] if host['hostname'].strip() != '' else host['ip'],
                             'Credentialed checks': Utils.parse_bool(str(host['credentialed'])),
                             'Scan User': host['scanUser'],
@@ -773,7 +773,7 @@ Plugin ID: {pluginId}
                 'Version': str(software['version']).strip(),
                 'Release': str(software['release']).strip(),
                 'Architecture': str(software['arch']).strip(),
-                'Hosts': ",".join(list(set(hosts)))
+                'Hosts': ", ".join(sorted(list(set(hosts))))
             })
 
         report = sorted(report, key=lambda s: (str(s['Name']).lower().strip(), str(s['Version']).lower().strip()))
@@ -856,7 +856,7 @@ Plugin ID: {pluginId}
             report.append({
                 'Name': str(soft['name']).strip(),
                 'Version': str(soft['version']).strip(),
-                'Hosts': ",".join(list(set(hosts)))
+                'Hosts': ", ".join(sorted(list(set(hosts))))
             })
 
         report = sorted(report, key=lambda s: (s['Name'].lower().strip(), s['Version']))
@@ -1254,7 +1254,7 @@ Plugin ID: {pluginId}
         worksheet.set_column('Y:Y', 25)
         worksheet.set_column('Z:Z', 20)
         worksheet.set_column('AA:AA', 25)
-        worksheet.set_column('BB:BB', 75)
+        worksheet.set_column('AB:AB', 75)
         worksheet.autofilter(0, 0, 0, 27)
 
         raw_results = []

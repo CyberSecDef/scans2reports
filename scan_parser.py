@@ -44,6 +44,16 @@ class ScanParser:
                 release = re.search('Release: [0-9]+\.([0-9]+) Benchmark', release)
                 release = release.group(1) if release is not None else '0'
 
+            fqdn_val = ""
+            if next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:fqdn']/text()", namespaces = ns)), ''):
+                fqdn_val = str( next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:fqdn']/text()", namespaces = ns)), '') ).lower()
+            elif next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target/text()", namespaces = ns)), ''):
+                fqdn_val =  str(next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target/text()", namespaces = ns)), '')).lower()
+            elif next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-address/text()", namespaces = ns)), ''):
+                fqdn_val = str(next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-address/text()", namespaces = ns)), '')).lower()
+            else:
+                fqdn_val = 'UNKNOWN'
+            
             sf = ScanFile({
                 'type'         :'SCAP',
                 'fileName'     : str(filename),
@@ -67,7 +77,7 @@ class ScanParser:
                 'release'      : release,
                 'stigid'       : next(iter(tree.xpath("/cdf:Benchmark/@id", namespaces = ns)), '').split(',')[0],
                 'description'  : next(iter(tree.xpath("/cdf:Benchmark/cdf:description/text()", namespaces = ns)), '').split(',')[0],
-                'hostname'     : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target/text()", namespaces = ns)), ''),
+                'hostname'     : fqdn_val,
                 'ip'           : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-address/text()", namespaces = ns)), ''),
                 'mac'          : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:mac']/text()", namespaces = ns)), ''),
                 'os'           : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:os_name']/text()", namespaces = ns)), ''),
@@ -246,10 +256,19 @@ class ScanParser:
                             else:
                                 scanUser = str(v)
                         except:
-                            
-                            scanUser = 'Unknown'
+                            scanUser = 'UNKNOWN'
+                fqdn_val = ""
+                if next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
+                    fqdn_val = str( next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
+                elif next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),''):
+                    fqdn_val =  str(next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),'')).lower()
+                elif next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''):
+                    fqdn_val = str(next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),'')).lower()
+                else:
+                    fqdn_val = 'UNKNOWN'
+                
                 host_data = {
-                    'hostname'      : next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''),
+                    'hostname'      : fqdn_val,
                     'ip'            : next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''),
                     'mac'           : next(iter(host.xpath("./HostProperties/tag[@name='mac-address']/text()")),''),
                     'os'            : next(iter(host.xpath("./HostProperties/tag[@name='operating-system']/text()")),''),
@@ -336,6 +355,17 @@ class ScanParser:
             if '.' in release:
                 release = release.split('.')[1]
 
+            fqdn_val = ""
+            if next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_FQDN/text()")), ''):
+                fqdn_val = str( next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_FQDN/text()")), '') ).lower()
+            elif next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_NAME/text()")), ''):
+                fqdn_val =  str(next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_NAME/text()")), '')).lower()
+            elif next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_IP/text()")), ''):
+                fqdn_val = str(next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_IP/text()")), '')).lower()
+            else:
+                fqdn_val = 'UNKNOWN'
+                
+                    
             sf = ScanFile({
                 'type'         :'CKL',
 
@@ -349,8 +379,7 @@ class ScanParser:
                 'stigid'       : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='stigid']/SID_DATA/text()")), ''),
                 'description'  : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='description']/SID_DATA/text()")), ''),
 
-
-                'hostname'     : next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_NAME/text()")), ''),
+                'hostname'     : fqdn_val,
                 'ip'           : next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_IP/text()")), ''),
                 'mac'          : next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_MAC/text()")), ''),
                 'os'           : '',
