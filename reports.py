@@ -878,6 +878,129 @@ Plugin ID: {pluginId}
                     col += 1
                 row += 1
 
+    def rpt_hardware(self):
+        """Generates the hardware list"""
+        logging.info('Building Hardware Tab')
+        
+        worksheet = self.workbook.add_worksheet('Hardware')
+        if self.scans_to_reports:
+            self.scans_to_reports.statusBar().showMessage("Generating 'Hardware' Tab")
+        
+        widths = [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+            
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
+        
+        hardware = []
+        hosts = []
+        for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
+            for host in scan_file['hosts']:
+                if Utils.is_ip(str(host['hostname'])):
+                    fqdn_val = (str(host['hostname']))
+                elif '.' in str(host['hostname']):
+                    fqdn_val = (str(host['hostname']).split('.')[0])
+                else:
+                    fqdn_val = (str(host['hostname']))
+                    
+                if fqdn_val not in hosts:
+                    hosts.append(fqdn_val)
+                    hardware.append({
+                        '#'                                  : '',
+                        'Component Type'                     : host['device_type'],
+                        'Machine Name (Required)'            : fqdn_val,
+                        'IP Address'                         : host['ip'],
+                        'Virtual Asset?'                     : '',
+                        
+                        'Manufacturer'                       : host['manufacturer'],
+                        'Model Number'                       : host['model'],
+                        'Serial Number'                      : host['serial'],
+                        'OS/iOS/FW Version'                  : host['os'],
+                        'Location (P/C/S & Building)'        : '',
+                        'Approval Status'                    : '',
+                        'Critical Information System Asset?' : ''
+                    })
+                
+        for scan_file in filter(lambda x: x['type'] == 'SCAP', self.scan_results):
+            if Utils.is_ip(str(scan_file['hostname'])):
+                fqdn_val = (str(scan_file['hostname']))
+            elif '.' in str(scan_file['hostname']):
+                fqdn_val = (str(scan_file['hostname']).split('.')[0])
+            else:
+                fqdn_val = (str(scan_file['hostname']))
+                
+            if fqdn_val not in hosts:
+                hosts.append(fqdn_val)
+                hardware.append({
+                    '#'                                  : '',
+                    'Component Type'                     : scan_file['device_type'],
+                    'Machine Name (Required)'            : fqdn_val,
+                    'IP Address'                         : scan_file['ip'],
+                    'Virtual Asset?'                     : '',
+                    
+                    'Manufacturer'                       : scan_file['manufacturer'],
+                    'Model Number'                       : scan_file['model'],
+                    'Serial Number'                      : scan_file['serial'],
+                    'OS/iOS/FW Version'                  : scan_file['os'],
+                    'Location (P/C/S & Building)'        : '',
+                    'Approval Status'                    : '',
+                    'Critical Information System Asset?' : ''
+                })
+                    
+        
+        for scan_file in filter(lambda x: x['type'] == 'CKL', self.scan_results):
+            if Utils.is_ip(str(scan_file['hostname'])):
+                fqdn_val = (str(scan_file['hostname']))
+            elif '.' in str(scan_file['hostname']):
+                fqdn_val = (str(scan_file['hostname']).split('.')[0])
+            else:
+                fqdn_val = (str(scan_file['hostname']))
+                
+            if fqdn_val not in hosts:
+                hosts.append(fqdn_val)
+                hardware.append({
+                    '#'                                  : '',
+                    'Component Type'                     : scan_file['device_type'] if 'device_type' in scan_file and scan_file['device_type'].strip() != '' else 'Unknown',
+                    'Machine Name (Required)'            : fqdn_val,
+                    'IP Address'                         : scan_file['ip'],
+                    'Virtual Asset?'                     : '',
+                    
+                    'Manufacturer'                       : scan_file['manufacturer'],
+                    'Model Number'                       : scan_file['model'],
+                    'Serial Number'                      : scan_file['serial'],
+                    'OS/iOS/FW Version'                  : scan_file['os'],
+                    'Location (P/C/S & Building)'        : '',
+                    'Approval Status'                    : '',
+                    'Critical Information System Asset?' : ''
+                })
+
+        hardware = sorted(hardware, key=lambda hardware: hardware['Machine Name (Required)'])
+        hardware_count = 0
+        for asset in hardware:
+            hardware_count += 1
+            asset['#'] = hardware_count
+        
+        row = 0
+        bold = self.workbook.add_format({'bold': True})
+        wrap_text = self.workbook.add_format({'font_size':8, 'text_wrap': True})
+
+        if hardware:
+            col = 0
+            for column_header in hardware[0]:
+                worksheet.write(row, col, column_header, bold)
+                col += 1
+            row += 1
+
+            for result in hardware:
+                col = 0
+                for value in result:
+                    worksheet.write(row, col, result[value], wrap_text)
+                    col += 1
+                row += 1
+                
+                
+    
     def rpt_ppsm(self):
         """ Generates PPSM Report """
         logging.info('Building PPSM Tab')

@@ -1,7 +1,22 @@
+import re
+
 """ Utilities module of static methods """
 class Utils(object):
     """Utilities class """
 
+    @staticmethod
+    def is_ip(val):
+        """ determines if value is an IP address or not"""
+        regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+            25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+            25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+            25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)'''
+        
+        if(re.search(regex, val)):  
+            return True
+        else:  
+            return False
+    
     @staticmethod
     def clamp(number, minn, maxn):
         """ ensures integer stays within range """

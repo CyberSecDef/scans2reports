@@ -80,7 +80,11 @@ class ScanParser:
                 'hostname'     : fqdn_val,
                 'ip'           : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-address/text()", namespaces = ns)), ''),
                 'mac'          : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:mac']/text()", namespaces = ns)), ''),
-                'os'           : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:os_name']/text()", namespaces = ns)), ''),
+                'device_type'  : '',
+                'manufacturer' : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:manufacturer']/text()", namespaces = ns)), ''),
+                'model'        : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:model']/text()", namespaces = ns)), ''),
+                'serial'       : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:ein']/text()", namespaces = ns)), ''),  
+                'os'           : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:os_version']/text()", namespaces = ns)), ''),
                 'credentialed' : bool( next(iter(tree.xpath(" /cdf:Benchmark/cdf:TestResult/cdf:identity/@privileged", namespaces = ns)), '') ),
                 'scanUser'     : next(iter(tree.xpath(" /cdf:Benchmark/cdf:TestResult/cdf:identity/text()", namespaces = ns)), ''),
                 'catI'         : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@severity='high' and ./cdf:result != 'pass']", namespaces = ns) ),
@@ -253,6 +257,30 @@ class ScanParser:
                                 scanUser = str(v)
                         except:
                             scanUser = 'UNKNOWN'
+                
+                wmi_info = str( host.xpath("./ReportItem[@pluginID=24270]/plugin_output/text()") ).split("\\n")
+                device_type = ""
+                manufacturer = ""
+                model = ""
+                serial = ""
+                for line in wmi_info:
+                    if ':' in line:
+                        k,v = line.split(':', 1)
+                        try:
+                            if str(k).strip() == 'Computer Manufacturer':
+                                manufacturer = str(v).strip()
+                            elif str(k).strip() == 'Computer Model':
+                                model = str(v).strip()
+                            elif str(k).strip() == 'Computer SerialNumber':
+                                serial = str(v).strip()
+                            elif str(k).strip() == 'Computer Type':
+                                device_type = str(v).strip()
+                        except:
+                            device_type = ""
+                            manufacturer = ""
+                            model = ""
+                            serial = ""
+                            
                 fqdn_val = ""
                 if next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
                     fqdn_val = str( next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
@@ -268,6 +296,12 @@ class ScanParser:
                     'ip'            : next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''),
                     'mac'           : next(iter(host.xpath("./HostProperties/tag[@name='mac-address']/text()")),''),
                     'os'            : next(iter(host.xpath("./HostProperties/tag[@name='operating-system']/text()")),''),
+                    
+                    'device_type'   : device_type,
+                    'manufacturer'  : manufacturer,
+                    'model'         : model,
+                    'serial'        : serial,
+                    
                     'credentialed'  : bool(str( host.xpath("./HostProperties/tag[@name='Credentialed_Scan']/text()"))),
                     'scanUser'      : scanUser,
                     'catI'          : len(host.xpath("./ReportItem[@severity>=3]") ),
@@ -379,6 +413,11 @@ class ScanParser:
                 'ip'           : next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_IP/text()")), ''),
                 'mac'          : next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_MAC/text()")), ''),
                 'os'           : '',
+                'device_type'  : '',
+                'manufacturer' : '',
+                'model'        : '',
+                'serial'       : '',
+                
                 'credentialed' : True,
 
                 'catI'         : len(tree.xpath("//VULN[(./STATUS!='NotAFinding' and ./STATUS!='Not_Applicable' ) and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='high']]") ),
