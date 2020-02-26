@@ -85,7 +85,7 @@ class ScanParser:
                 'model'        : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:model']/text()", namespaces = ns)), ''),
                 'serial'       : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:ein']/text()", namespaces = ns)), ''),  
                 'os'           : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:os_version']/text()", namespaces = ns)), ''),
-                'credentialed' : bool( next(iter(tree.xpath(" /cdf:Benchmark/cdf:TestResult/cdf:identity/@privileged", namespaces = ns)), '') ),
+                'credentialed' : Utils.parse_bool(str( next(iter(tree.xpath(" /cdf:Benchmark/cdf:TestResult/cdf:identity/@privileged", namespaces = ns)), '') )),
                 'scanUser'     : next(iter(tree.xpath(" /cdf:Benchmark/cdf:TestResult/cdf:identity/text()", namespaces = ns)), ''),
                 'catI'         : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@severity='high' and ./cdf:result != 'pass']", namespaces = ns) ),
                 'catII'        : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@severity='medium' and ./cdf:result != 'pass']", namespaces = ns) ),
@@ -97,6 +97,7 @@ class ScanParser:
                 'notReviewed'  : 0,
                 'notApplicable': 0,
             })
+            
             sf['total'] = sf['catI'] + sf['catII'] + sf['catIII']
             sf['score'] = 10*sf['catI'] + 3*sf['catII'] + sf['catIII']
 
@@ -302,7 +303,7 @@ class ScanParser:
                     'model'         : model,
                     'serial'        : serial,
                     
-                    'credentialed'  : bool(str( host.xpath("./HostProperties/tag[@name='Credentialed_Scan']/text()"))),
+                    'credentialed'  : Utils.parse_bool(str(next(iter( host.xpath("./HostProperties/tag[@name='Credentialed_Scan']/text()"))))),
                     'scanUser'      : scanUser,
                     'catI'          : len(host.xpath("./ReportItem[@severity>=3]") ),
                     'catII'         : len(host.xpath("./ReportItem[@severity=2]") ),
@@ -318,7 +319,7 @@ class ScanParser:
 
                 host_data['total'] = host_data['catI'] + host_data['catII'] + host_data['catIII']
                 host_data['score'] = 10*host_data['catI'] + 3*host_data['catII'] + host_data['catIII']
-
+                
                 for req in host.xpath("./ReportItem"):
                     req = {
                         'cci'              : [],
