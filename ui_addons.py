@@ -1,18 +1,47 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import os.path
+import re
 import time
 import pprint
 import dumper
 import logging
 from functools import partial
-
+            
+class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
+    def __init__ (self, value):
+        super(QNumericTableWidgetItem, self).__init__(value)
+        
+    def __lt__ (self, other):
+        if (isinstance(other, QNumericTableWidgetItem)):
+            selfDataValue  = float(re.sub(r'[^0-9\-\.]', '', str(self.text())))
+            otherDataValue = float(re.sub(r'[^0-9\-\.]', '', str(other.text())))
+            return selfDataValue < otherDataValue
+        else:
+            return QtWidgets.QTableWidgetItem.__lt__(self, other)
+            
+    def __rt__ (self, other):
+        if (isinstance(other, QNumericTableWidgetItem)):
+            selfDataValue  = float(re.sub(r'[ $]', '', str(self.text())))
+            otherDataValue = float(re.sub(r'[ $]', '', str(other.text())))
+            print(selfDataValue, otherDataValue)
+            return selfDataValue > otherDataValue
+        else:
+            return QtWidgets.QTableWidgetItem.__lt__(self, other)
+            
 class UiAddons():
     main_form = None
+    tbl_selected_scans_sort_col = 0
+    tbl_selected_scans_sort_order = 0
+    tbl_scan_summary_sort_col = 0
+    tbl_scan_summary_sort_order = 0
+    
     def __init__(self,main_app, main_form):
         FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
         logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
         self.main_form = main_form
         self.main_app = main_app
+        self.main_form.tbl_selected_scans.horizontalHeader().setSortIndicatorShown(True)
+        self.main_form.tbl_scan_summary.horizontalHeader().setSortIndicatorShown(True)
 
     def btn_select_scan_files_on_click(self):
         logging.info('Select Scan Files Clicked')
@@ -39,7 +68,7 @@ class UiAddons():
                         self.main_form.tbl_selected_scans.setItem(0, 1, item)
                         
                         self.main_form.tbl_selected_scans.setItem(0, 2, QtWidgets.QTableWidgetItem( time.strftime( '%Y-%m-%d %H:%M:%S', time.gmtime( os.path.getmtime( filepath ))) ) )
-                        self.main_form.tbl_selected_scans.setItem(0, 3, QtWidgets.QTableWidgetItem( str( os.path.getsize( filepath ))) )
+                        self.main_form.tbl_selected_scans.setItem(0, 3, QNumericTableWidgetItem( QtWidgets.QTableWidgetItem( str( os.path.getsize( filepath ))) ) )
                         self.main_form.tbl_selected_scans.setItem(0, 4, QtWidgets.QTableWidgetItem( extension ))
                         
                         self.main_form.tbl_selected_scans.resizeColumnsToContents()
@@ -72,13 +101,13 @@ class UiAddons():
                     
                     self.main_form.tbl_scan_summary.setItem(0, 4, QtWidgets.QTableWidgetItem( os.path.basename( scan_result['fileName'] )))
                     
-                    self.main_form.tbl_scan_summary.setItem(0, 5, QtWidgets.QTableWidgetItem( str( int( str(host['catI']).strip() or 0 ) )) )
-                    self.main_form.tbl_scan_summary.setItem(0, 6, QtWidgets.QTableWidgetItem( str( int( str(host['catII']).strip() or 0 ) )) )
-                    self.main_form.tbl_scan_summary.setItem(0, 7, QtWidgets.QTableWidgetItem( str( int( str(host['catIII']).strip() or 0 ) )) )
-                    self.main_form.tbl_scan_summary.setItem(0, 8, QtWidgets.QTableWidgetItem( str( int( str(host['catIV']).strip() or 0 ) )) )
+                    self.main_form.tbl_scan_summary.setItem(0, 5, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catI']).strip() or 0 ) )) ) )
+                    self.main_form.tbl_scan_summary.setItem(0, 6, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catII']).strip() or 0 ) )) ) )
+                    self.main_form.tbl_scan_summary.setItem(0, 7, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catIII']).strip() or 0 ) )) ) )
+                    self.main_form.tbl_scan_summary.setItem(0, 8, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catIV']).strip() or 0 ) )) ) )
                     
-                    self.main_form.tbl_scan_summary.setItem(0, 9, QtWidgets.QTableWidgetItem( str(host['total'] )))
-                    self.main_form.tbl_scan_summary.setItem(0, 10, QtWidgets.QTableWidgetItem( str(host['score'] )))
+                    self.main_form.tbl_scan_summary.setItem(0, 9, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(host['total'] ))) )
+                    self.main_form.tbl_scan_summary.setItem(0, 10, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(host['score'] ))) )
                     self.main_form.tbl_scan_summary.setItem(0, 11, QtWidgets.QTableWidgetItem( str(host['credentialed'] )))
                 
                 
@@ -95,10 +124,10 @@ class UiAddons():
                 
                 self.main_form.tbl_scan_summary.setItem(0, 4, QtWidgets.QTableWidgetItem( os.path.basename( scan_result['fileName'] )))
                 
-                self.main_form.tbl_scan_summary.setItem(0, 5, QtWidgets.QTableWidgetItem( str( int( str(scan_result['catI']).strip() or 0 ) )) )
-                self.main_form.tbl_scan_summary.setItem(0, 6, QtWidgets.QTableWidgetItem( str( int( str(scan_result['catII']).strip() or 0 ) )) )
-                self.main_form.tbl_scan_summary.setItem(0, 7, QtWidgets.QTableWidgetItem( str( int( str(scan_result['catIII']).strip() or 0 ) )) )
-                self.main_form.tbl_scan_summary.setItem(0, 8, QtWidgets.QTableWidgetItem( str( int( str(scan_result['catIV']).strip() or 0 ) )) )
+                self.main_form.tbl_scan_summary.setItem(0, 5, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catI']).strip() or 0 ) )) ) )
+                self.main_form.tbl_scan_summary.setItem(0, 6, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catII']).strip() or 0 ) )) ) )
+                self.main_form.tbl_scan_summary.setItem(0, 7, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catIII']).strip() or 0 ) )) ) )
+                self.main_form.tbl_scan_summary.setItem(0, 8, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catIV']).strip() or 0 ) )) ) )
                 
                 self.main_form.tbl_scan_summary.setItem(0, 9, QtWidgets.QTableWidgetItem( str(scan_result['total'] )))
                 self.main_form.tbl_scan_summary.setItem(0, 10, QtWidgets.QTableWidgetItem( str(scan_result['score'] )))
@@ -107,7 +136,7 @@ class UiAddons():
                 
                 self.main_form.tbl_scan_summary.resizeColumnsToContents()
                 self.main_form.tbl_scan_summary.horizontalHeader().setStretchLastSection(True)
-
+    
     def btn_execute_on_click(self):
         logging.info('Execute Clicked')
         self.main_app.contact_info['command'] = self.main_form.txt_command.text()
@@ -149,11 +178,39 @@ To utilize the tool, follow the steps below:
 """)
         x = msg.exec_()        
 
+
+    def sort_tbl_selected_scans(self, val):
+        if self.tbl_selected_scans_sort_col == val:
+            if self.tbl_selected_scans_sort_order == 0:
+                self.tbl_selected_scans_sort_order = 1
+            else:
+                self.tbl_selected_scans_sort_order = 0
+        else:
+            self.tbl_selected_scans_sort_col = val
+            self.tbl_selected_scans_sort_order = 1
+        self.main_form.tbl_selected_scans.sortByColumn(self.tbl_selected_scans_sort_col, self.tbl_selected_scans_sort_order)
+        
+    def sort_tbl_scan_summary(self, val):
+        if self.tbl_scan_summary_sort_col == val:
+            if self.tbl_scan_summary_sort_order == 0:
+                self.tbl_scan_summary_sort_order = 1
+            else:
+                self.tbl_scan_summary_sort_order = 0
+        else:
+            self.tbl_scan_summary_sort_col = val
+            self.tbl_scan_summary_sort_order = 1
+        
+        self.main_form.tbl_scan_summary.sortByColumn(self.tbl_scan_summary_sort_col, self.tbl_scan_summary_sort_order)
+        
+        
     def connect_events(self):
         logging.info('Connecting Events')
         self.main_form.btn_parse_scan_files.clicked.connect(self.btn_parse_scan_files_on_click)
         self.main_form.btn_execute.clicked.connect(self.btn_execute_on_click)
         self.main_form.btn_select_scan_files.clicked.connect(self.btn_select_scan_files_on_click)
+
+        self.main_form.tbl_selected_scans.horizontalHeader().sectionClicked.connect(self.sort_tbl_selected_scans)
+        self.main_form.tbl_scan_summary.horizontalHeader().sectionClicked.connect(self.sort_tbl_scan_summary)
 
         self.main_form.actionAbout.triggered.connect( self.show_about )
         self.main_form.actionHelp.triggered.connect( self.show_help )
@@ -170,6 +227,7 @@ To utilize the tool, follow the steps below:
         self.main_form.tbl_scan_summary.setHorizontalHeaderLabels(['Type', 'Hostname', 'IP','OS', 'Scan File Name', 'CAT I', 'CAT II', 'CAT III', 'CAT IV', 'Total', 'Score',' Credentialed'])
         self.main_form.tbl_scan_summary.resizeColumnsToContents()
         self.main_form.tbl_scan_summary.horizontalHeader().setStretchLastSection(True)
+        
         
     def update_scan_headers(self):
         logging.info('Updating Scan Headers')
@@ -256,7 +314,7 @@ class FileDrop(QtWidgets.QLabel):
                         self.main_form.tbl_selected_scans.setItem(0, 1, item)
                         
                         self.main_form.tbl_selected_scans.setItem(0, 2, QtWidgets.QTableWidgetItem( time.strftime( '%Y-%m-%d %H:%M:%S', time.gmtime( os.path.getmtime( filepath ))) ) )
-                        self.main_form.tbl_selected_scans.setItem(0, 3, QtWidgets.QTableWidgetItem( str( os.path.getsize( filepath ))) )
+                        self.main_form.tbl_selected_scans.setItem(0, 3, QNumericTableWidgetItem( QtWidgets.QTableWidgetItem( str( os.path.getsize( filepath ))) ) )
                         self.main_form.tbl_selected_scans.setItem(0, 4, QtWidgets.QTableWidgetItem( extension ))
                         
                         self.main_form.tbl_selected_scans.resizeColumnsToContents()

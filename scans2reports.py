@@ -107,6 +107,7 @@ class Scans2Reports:
         print('All scans parsed.')
         print('')
         if S2R.scans_to_reports:
+
             S2R.scans_to_reports.statusBar().showMessage("All scans parsed")
 
     def start_parse_thread(self, queue, result):
@@ -203,8 +204,9 @@ if __name__ == "__main__":
         ui_addons.connect_events()
         ui_addons.update_scan_headers()
         ui_addons.update_summary_headers()
-        
+
         S2R.scans_to_reports.show()
+        
         sys.exit(app.exec_())
 
         pass
