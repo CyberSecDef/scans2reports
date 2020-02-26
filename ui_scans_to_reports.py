@@ -27,6 +27,7 @@ class UiScansToReports(object):
         self.grid_selected_scans = QtWidgets.QGridLayout()
         self.grid_selected_scans.setObjectName("grid_selected_scans")
         self.tbl_selected_scans = QtWidgets.QTableWidget(self.grp_selected_scans)
+        self.tbl_selected_scans.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.tbl_selected_scans.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.tbl_selected_scans.setStyleSheet("QHeaderView::section{\n"
 "            border-top:0px solid #D8D8D8;\n"
@@ -70,6 +71,7 @@ class UiScansToReports(object):
         self.grid_scan_summary = QtWidgets.QGridLayout()
         self.grid_scan_summary.setObjectName("grid_scan_summary")
         self.tbl_scan_summary = QtWidgets.QTableWidget(self.grp_scan_summary)
+        self.tbl_scan_summary.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.tbl_scan_summary.setStyleSheet("QHeaderView::section{\n"
 "            border-top:0px solid #D8D8D8;\n"
 "            border-left:0px solid #D8D8D8;\n"
@@ -275,7 +277,7 @@ class UiScansToReports(object):
         self.frm_file_drop.setObjectName("frm_file_drop")
         self.gridLayout = QtWidgets.QGridLayout(self.frm_file_drop)
         self.gridLayout.setObjectName("gridLayout")
-        self.lbl_file_drop = FileDrop( QtWidgets.QLabel(self.frm_file_drop), self )
+        self.lbl_file_drop = FileDrop( QtWidgets.QLabel(self.frm_file_drop), self)
         self.lbl_file_drop.setMinimumSize(QtCore.QSize(200, 150))
         self.lbl_file_drop.setAcceptDrops(True)
         self.lbl_file_drop.setStyleSheet("QLabel#lbl_file_drop{\n"
@@ -386,6 +388,7 @@ class UiScansToReports(object):
         self.txt_command.setSizePolicy(sizePolicy)
         self.txt_command.setMinimumSize(QtCore.QSize(235, 25))
         self.txt_command.setMaximumSize(QtCore.QSize(235, 25))
+        self.txt_command.setPlaceholderText("")
         self.txt_command.setObjectName("txt_command")
         self.gridLayout_3.addWidget(self.txt_command, 0, 1, 1, 1)
         self.grid_data_points.addWidget(self.grp_data_points, 0, 1, 1, 1)
@@ -431,6 +434,17 @@ class UiScansToReports(object):
 
         self.retranslateUi(ScansToReports)
         QtCore.QMetaObject.connectSlotsByName(ScansToReports)
+        ScansToReports.setTabOrder(self.txt_command, self.txt_poc)
+        ScansToReports.setTabOrder(self.txt_poc, self.txt_phone)
+        ScansToReports.setTabOrder(self.txt_phone, self.txt_email)
+        ScansToReports.setTabOrder(self.txt_email, self.chk_prefill_scd)
+        ScansToReports.setTabOrder(self.chk_prefill_scd, self.chk_lower_risk)
+        ScansToReports.setTabOrder(self.chk_lower_risk, self.spnExcludeDays)
+        ScansToReports.setTabOrder(self.spnExcludeDays, self.btn_select_scan_files)
+        ScansToReports.setTabOrder(self.btn_select_scan_files, self.btn_parse_scan_files)
+        ScansToReports.setTabOrder(self.btn_parse_scan_files, self.btn_execute)
+        ScansToReports.setTabOrder(self.btn_execute, self.tbl_selected_scans)
+        ScansToReports.setTabOrder(self.tbl_selected_scans, self.tbl_scan_summary)
 
     def retranslateUi(self, ScansToReports):
         _translate = QtCore.QCoreApplication.translate
