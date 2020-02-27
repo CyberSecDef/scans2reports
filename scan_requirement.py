@@ -27,7 +27,9 @@ class ScanRequirement(dict):
     status = ""
     resources = ""
     credentialed = False
-
+    port_range = ""
+    
+    
     def __init__(self, data):
         """ Constructor """
         dict.__init__(self)

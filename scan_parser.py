@@ -35,6 +35,9 @@ class ScanParser:
             )
             version =  version.group(1) if version is not None else str(next(iter(tree.xpath("/cdf:Benchmark/cdf:version/text()", namespaces = ns)), '').split(',')[0])
 
+            if version.isdigit():
+                version = str(int(version))
+                
             release = re.search(
                 '[0-9]+\.([0-9]+)',
                 str(next(iter(tree.xpath("/cdf:Benchmark/cdf:version/text()", namespaces = ns)), '').split(',')[0])
@@ -43,6 +46,10 @@ class ScanParser:
             if ':' in release:
                 release = re.search('Release: [0-9]+\.([0-9]+) Benchmark', release)
                 release = release.group(1) if release is not None else '0'
+
+            if release.isdigit():
+                release = str(int(release))
+            
 
             fqdn_val = ""
             if next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:fqdn']/text()", namespaces = ns)), ''):
@@ -233,15 +240,13 @@ class ScanParser:
                 'title'        : "Assured Compliance Assessment Solution (ACAS) Nessus Scanner\nVersion: {}\nFeed: {}".format(version, feed),
                 'uuid'         : str(uuid.uuid4()),
                 'version'      : version,
+                'policy'       : str(next(iter(tree.xpath("/NessusClientData_v2/Policy/policyName/text()")), '')),
                 'hostname'     : '',
                 'os'           : '',
                 'ip'           : '',
                 'hosts'        : [],
                 'feed'         : feed
             })
-
-            
-            
             
             for host in tree.xpath("/NessusClientData_v2/Report/ReportHost"):
                 scanUser = ""
@@ -258,7 +263,12 @@ class ScanParser:
                                 scanUser = str(v)
                         except:
                             scanUser = 'UNKNOWN'
-                
+                            
+                    port_range = ""
+                    if 'Port range' in line:
+                        k,v = line.split(':', 1)
+                        port_range = str(v).strip()
+                        
                 wmi_info = str( host.xpath("./ReportItem[@pluginID=24270]/plugin_output/text()") ).split("\\n")
                 device_type = ""
                 manufacturer = ""
@@ -305,6 +315,8 @@ class ScanParser:
                     
                     'credentialed'  : Utils.parse_bool(str(next(iter( host.xpath("./HostProperties/tag[@name='Credentialed_Scan']/text()"))))),
                     'scanUser'      : scanUser,
+                    'port_range'     : port_range,
+                    
                     'catI'          : len(host.xpath("./ReportItem[@severity>=3]") ),
                     'catII'         : len(host.xpath("./ReportItem[@severity=2]") ),
                     'catIII'        : len(host.xpath("./ReportItem[@severity=1]") ),
@@ -380,12 +392,18 @@ class ScanParser:
             version = str(next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='version']/SID_DATA/text()")), ''))
             if '.' in version:
                 version = version.split('.')[0]
+                
+            if version.isdigit():
+                version = str(int(version))
 
             release = re.search('Release: ([0-9\*.]+) Benchmark', str( next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='releaseinfo']/SID_DATA/text()")), '')  ))
             release = release.group(1) if release is not None else '0'
             if '.' in release:
                 release = release.split('.')[1]
-
+            
+            if release.isdigit():
+                release = str(int(release))
+                
             fqdn_val = ""
             if next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_FQDN/text()")), ''):
                 fqdn_val = str( next(iter(tree.xpath("/CHECKLIST/ASSET/HOST_FQDN/text()")), '') ).lower()

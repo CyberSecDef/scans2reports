@@ -32,6 +32,8 @@ class ScanFile(dict):
     credentialed = False
     requirements = []
     hosts = []
+    feed = ''
+    port_range = ""
 
     def __init__(self, data):
         """ Constructor """

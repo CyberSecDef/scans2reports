@@ -878,6 +878,170 @@ Plugin ID: {pluginId}
                     col += 1
                 row += 1
 
+    def rpt_asset_traceability(self):
+        """Generates the Asset Traceability list"""
+        logging.info('Building Asset Traceability Tab')
+        
+        worksheet = self.workbook.add_worksheet('Asset Traceability')
+        if self.scans_to_reports:
+            self.scans_to_reports.statusBar().showMessage("Generating 'Asset Traceability' Tab")
+        
+        widths = [
+            25, 25, 25, 25, 25, 
+            25, 25, 25, 25, 25, 
+            25, 25, 25, 25, 25, 
+            25, 25, 25, 25, 25,
+            25, 25, 25, 25
+            ]
+        ascii = string.ascii_uppercase
+        for index, w in enumerate(widths):
+            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
+            
+        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
+        
+        hardware = []
+        for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
+            
+            for host in scan_file['hosts']:
+                if Utils.is_ip(str(host['hostname'])):
+                    fqdn_val = (str(host['hostname']))
+                elif '.' in str(host['hostname']):
+                    fqdn_val = (str(host['hostname']).split('.')[0])
+                else:
+                    fqdn_val = (str(host['hostname']))
+                
+                hardware.append({
+                    'Machine Name (Required)'                : fqdn_val,
+                    'IP'                                     : host['ip'],
+                    'OS'                                     : host['os'],
+                    
+                    'ACAS Scan Files'                        : os.path.basename(scan_file['fileName']),
+                    'ACAS Scanner Versions'                  : scan_file['version'],
+                    'ACAS Scanner Types'                     : '',
+                    'ACAS Scan Policy'                       : scan_file['policy'],
+                    'ACAS Port Range 0-65535'                : 'True' if host['port_range'] == '0-65535' or host['port_range'] == 'all ports' else 'False',
+                    'ACAS Scan Users'                        : host['scanUser'],
+                    'ACAS Credentialed Checks'               : host['credentialed'],
+                    'ACAS Feed Version'                      : scan_file['feed'],
+                    'ACAS Scan Start Date'                   : scan_file['scanDate'],
+                    'ACAS Days Between Plugin Feed And Scan' : (
+                        datetime.datetime.strptime(scan_file['scanDate'], '%a %b %d %H:%M:%S %Y') - 
+                        datetime.datetime.strptime(scan_file['feed'], '%Y%m%d%H%M')
+                    ).days,
+                    
+                    'STIG CKL File'                      : '',
+                    'STIG CKL Version/Release'               : '',
+                    'STIG CKL Credentialed Checks'           : '',
+                    'STIG CKL Total Not Reviewed'            : '',
+                    
+                    'SCAP Benchmark File'                    : '',
+                    'SCAP Scanner Versions'                  : '',
+                    'SCAP Benchmark Version/Release'         : '',
+                    'SCAP Benchmark Policy'                  : '',
+                    'SCAP Scan Users'                        : '',
+                    'SCAP Credentialed Checks'               : '',
+                    'SCAP Benchmark Errors'                  : '',
+                })
+                
+        for scan_file in filter(lambda x: x['type'] == 'SCAP', self.scan_results):
+            if Utils.is_ip(str(scan_file['hostname'])):
+                fqdn_val = (str(scan_file['hostname']))
+            elif '.' in str(scan_file['hostname']):
+                fqdn_val = (str(scan_file['hostname']).split('.')[0])
+            else:
+                fqdn_val = (str(scan_file['hostname']))
+                
+            hardware.append({
+                'Machine Name (Required)'                : fqdn_val,
+                'IP'                                     : scan_file['ip'],
+                'OS'                                     : scan_file['os'],
+                
+                'ACAS Scan Files'                        : '',
+                'ACAS Scanner Versions'                  : '',
+                'ACAS Scanner Types'                     : '',
+                'ACAS Scan Policy'                       : '',
+                'ACAS Port Range 0-65535'                : '',
+                'ACAS Scan Users'                        : '',
+                'ACAS Credentialed Checks'               : '',
+                'ACAS Feed Version'                      : '',
+                'ACAS Scan Start Date'                   : '',
+                'ACAS Days Between Plugin Feed And Scan' : '',
+                
+                'STIG CKL File'                          : '',
+                'STIG CKL Version/Release'               : '',
+                'STIG CKL Credentialed Checks'           : '',
+                'STIG CKL Total Not Reviewed'            : '',
+                
+                'SCAP Benchmark File'                    : os.path.basename(scan_file['fileName']),
+                'SCAP Scanner Versions'                  : scan_file['scannerEdition'],
+                'SCAP Benchmark Version/Release'         : f"V{scan_file['version']}R{scan_file['release']}",
+                'SCAP Benchmark Policy'                  : scan_file['policy'],
+                'SCAP Scan Users'                        : scan_file['scanUser'],
+                'SCAP Credentialed Checks'               : scan_file['credentialed'],
+                'SCAP Benchmark Errors'                  : scan_file['error'],
+            })
+            
+        
+        for scan_file in filter(lambda x: x['type'] == 'CKL', self.scan_results):
+            if Utils.is_ip(str(scan_file['hostname'])):
+                fqdn_val = (str(scan_file['hostname']))
+            elif '.' in str(scan_file['hostname']):
+                fqdn_val = (str(scan_file['hostname']).split('.')[0])
+            else:
+                fqdn_val = (str(scan_file['hostname']))
+                
+            hardware.append({
+                'Machine Name (Required)'                : fqdn_val,
+                'IP'                                     : scan_file['ip'],
+                'OS'                                     : scan_file['os'],
+                
+                'ACAS Scan Files'                        : '',
+                'ACAS Scanner Versions'                  : '',
+                'ACAS Scanner Types'                     : '',
+                'ACAS Scan Policy'                       : '',
+                'ACAS Port Range 0-65535'                : '',
+                'ACAS Scan Users'                        : '',
+                'ACAS Credentialed Checks'               : '',
+                'ACAS Feed Version'                      : '',
+                'ACAS Scan Start Date'                   : '',
+                'ACAS Days Between Plugin Feed And Scan' : '',
+                
+                'STIG CKL File'                          : os.path.basename(scan_file['fileName']),
+                'STIG CKL Version/Release'               : f"V{scan_file['version']}R{scan_file['release']}",
+                'STIG CKL Credentialed Checks'           : 'True',
+                'STIG CKL Total Not Reviewed'            : scan_file['notReviewed'],
+                
+                'SCAP Benchmark File'                    : '',
+                'SCAP Scanner Versions'                  : '',
+                'SCAP Benchmark Version/Release'         : '',
+                'SCAP Benchmark Policy'                  : '',
+                'SCAP Scan Users'                        : '',
+                'SCAP Credentialed Checks'               : '',
+                'SCAP Benchmark Errors'                  : '',
+            })
+
+        hardware = sorted(hardware, key=lambda hardware: hardware['Machine Name (Required)'])
+        hardware_count = 0
+        
+        row = 0
+        bold = self.workbook.add_format({'bold': True})
+        wrap_text = self.workbook.add_format({'font_size':8, 'text_wrap': True})
+
+        if hardware:
+            col = 0
+            for column_header in hardware[0]:
+                worksheet.write(row, col, column_header, bold)
+                col += 1
+            row += 1
+
+            for result in hardware:
+                col = 0
+                for value in result:
+                    worksheet.write(row, col, result[value], wrap_text)
+                    col += 1
+                row += 1
+                
+                
     def rpt_hardware(self):
         """Generates the hardware list"""
         logging.info('Building Hardware Tab')
