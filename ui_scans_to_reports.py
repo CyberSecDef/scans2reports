@@ -277,7 +277,7 @@ class UiScansToReports(object):
         self.frm_file_drop.setObjectName("frm_file_drop")
         self.gridLayout = QtWidgets.QGridLayout(self.frm_file_drop)
         self.gridLayout.setObjectName("gridLayout")
-        self.lbl_file_drop = FileDrop( QtWidgets.QLabel(self.frm_file_drop), self)
+        self.lbl_file_drop = FileDrop( QtWidgets.QLabel(self.frm_file_drop), self )
         self.lbl_file_drop.setMinimumSize(QtCore.QSize(200, 150))
         self.lbl_file_drop.setAcceptDrops(True)
         self.lbl_file_drop.setStyleSheet("QLabel#lbl_file_drop{\n"
@@ -401,6 +401,8 @@ class UiScansToReports(object):
         self.mnu_file.setObjectName("mnu_file")
         self.mnu_help = QtWidgets.QMenu(self.mnu_main)
         self.mnu_help.setObjectName("mnu_help")
+        self.menuScans = QtWidgets.QMenu(self.mnu_main)
+        self.menuScans.setObjectName("menuScans")
         ScansToReports.setMenuBar(self.mnu_main)
         self.statusbar = QtWidgets.QStatusBar(ScansToReports)
         self.statusbar.setObjectName("statusbar")
@@ -421,6 +423,10 @@ class UiScansToReports(object):
         self.actionHelp.setObjectName("actionHelp")
         self.actionAbout = QtWidgets.QAction(ScansToReports)
         self.actionAbout.setObjectName("actionAbout")
+        self.actionMerge_Nessus = QtWidgets.QAction(ScansToReports)
+        self.actionMerge_Nessus.setObjectName("actionMerge_Nessus")
+        self.actionSplit_Nessus = QtWidgets.QAction(ScansToReports)
+        self.actionSplit_Nessus.setObjectName("actionSplit_Nessus")
         self.mnu_file.addAction(self.actionSelect)
         self.mnu_file.addAction(self.actionParse_Scans)
         self.mnu_file.addAction(self.actionExecute)
@@ -429,7 +435,10 @@ class UiScansToReports(object):
         self.mnu_help.addAction(self.actionHelp)
         self.mnu_help.addSeparator()
         self.mnu_help.addAction(self.actionAbout)
+        self.menuScans.addAction(self.actionMerge_Nessus)
+        self.menuScans.addAction(self.actionSplit_Nessus)
         self.mnu_main.addAction(self.mnu_file.menuAction())
+        self.mnu_main.addAction(self.menuScans.menuAction())
         self.mnu_main.addAction(self.mnu_help.menuAction())
 
         self.retranslateUi(ScansToReports)
@@ -469,6 +478,7 @@ class UiScansToReports(object):
         self.label.setText(_translate("ScansToReports", "Exclude ACAS Plugins Less Than:"))
         self.mnu_file.setTitle(_translate("ScansToReports", "File"))
         self.mnu_help.setTitle(_translate("ScansToReports", "Help"))
+        self.menuScans.setTitle(_translate("ScansToReports", "Scans"))
         self.actionSelect.setText(_translate("ScansToReports", "Select Scans"))
         self.actionParse_Scans.setText(_translate("ScansToReports", "Parse Scans"))
         self.actionExecute.setText(_translate("ScansToReports", "Execute"))
@@ -477,6 +487,8 @@ class UiScansToReports(object):
         self.actionClear_Scans.setText(_translate("ScansToReports", "Clear Scans"))
         self.actionHelp.setText(_translate("ScansToReports", "Help"))
         self.actionAbout.setText(_translate("ScansToReports", "About"))
+        self.actionMerge_Nessus.setText(_translate("ScansToReports", "Merge Nessus"))
+        self.actionSplit_Nessus.setText(_translate("ScansToReports", "Split Nessus"))
 
 
 if __name__ == "__main__":

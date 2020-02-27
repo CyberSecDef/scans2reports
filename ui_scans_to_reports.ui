@@ -1002,7 +1002,15 @@ Files</string>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuScans">
+    <property name="title">
+     <string>Scans</string>
+    </property>
+    <addaction name="actionMerge_Nessus"/>
+    <addaction name="actionSplit_Nessus"/>
+   </widget>
    <addaction name="mnu_file"/>
+   <addaction name="menuScans"/>
    <addaction name="mnu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -1044,6 +1052,16 @@ Files</string>
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionMerge_Nessus">
+   <property name="text">
+    <string>Merge Nessus</string>
+   </property>
+  </action>
+  <action name="actionSplit_Nessus">
+   <property name="text">
+    <string>Split Nessus</string>
    </property>
   </action>
  </widget>

@@ -13,12 +13,16 @@ import sys
 import time
 import json
 import logging
+import copy 
+import secrets
+from lxml import etree
 from pathlib import Path
 from threading import Thread
 from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
 from reports import Reports
 from scan_parser import ScanParser
+import datetime
 import psutil
 from ui_scans_to_reports import UiScansToReports
 from ui_addons import UiAddons
@@ -76,7 +80,67 @@ class Scans2Reports:
             'exclude_plugins' : args.exclude_plugins 
         }
         self.source_folder = args.folder
+
+    def split_nessus_file(self, file):
+        with open(file, 'r', errors='replace', encoding='utf-8') as content_file:
+            content = content_file.readlines()
+        content = ''.join(content)
+        tree = etree.fromstring( str(content ) )
         
+        for host in tree.xpath("/NessusClientData_v2/Report/ReportHost"):
+            if next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
+                fqdn_val = str( next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
+            elif next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),''):
+                fqdn_val =  str(next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),'')).lower()
+            elif next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''):
+                fqdn_val = str(next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),'')).lower()
+            else:
+                fqdn_val = 'UNKNOWN'
+            
+            
+            scanDate = datetime.datetime.strptime(
+                str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), ''))
+                , '%a %b %d %H:%M:%S %Y'
+            ).strftime("%Y%m%d_%H%M%S")
+            
+            print(f"{fqdn_val}_{scanDate}.nessus")
+            
+            report_name = "{}/results/{}_{}.nessus".format(
+                os.path.dirname(os.path.realpath(__file__)),
+                fqdn_val,
+                scanDate
+            )
+        
+            host_nessus = copy.deepcopy(tree)
+            for host in host_nessus.xpath("/NessusClientData_v2/Report/ReportHost"):
+                if next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
+                    host_fqdn_val = str( next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
+                elif next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),''):
+                    host_fqdn_val =  str(next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),'')).lower()
+                elif next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''):
+                    host_fqdn_val = str(next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),'')).lower()
+                else:
+                    host_fqdn_val = 'UNKNOWN'
+            
+                if host_fqdn_val != fqdn_val:
+                    host.getparent().remove(host)
+            
+            
+            report_task_id = "{}-{}-{}-{}-{}-{}".format(
+                secrets.token_hex(4),
+                secrets.token_hex(2),
+                secrets.token_hex(2),
+                secrets.token_hex(2),
+                secrets.token_hex(2),
+                secrets.token_hex(14)
+            )
+            report_node = host_nessus.xpath("/NessusClientData_v2/Policy/Preferences/ServerPreferences/preference[./name = 'report_task_id']/value")
+            if report_node:
+                report_node[0].text = report_task_id
+            
+            host_tree = host_nessus.getroottree()
+            host_tree.write(report_name) 
+            
 
     def collect_scan_files(self):
         """ Collects all the files to be scanned """

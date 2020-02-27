@@ -30,6 +30,7 @@ class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
             
 class UiAddons():
     main_form = None
+    main_app = None
     tbl_selected_scans_sort_col = 0
     tbl_selected_scans_sort_order = 0
     tbl_scan_summary_sort_col = 0
@@ -137,6 +138,19 @@ class UiAddons():
                 self.main_form.tbl_scan_summary.resizeColumnsToContents()
                 self.main_form.tbl_scan_summary.horizontalHeader().setStretchLastSection(True)
     
+    def split_nessus(self):
+        logging.info('Split Nessus Clicked')
+        
+        options = QtWidgets.QFileDialog.Options()
+        files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"QFileDialog.getOpenFileNames()", "","Nessus Files (*.nessus);;", options=options)
+        if files:
+            filepaths = []
+            for file in files:
+                logging.info('Splitting {}'.format(file))
+                print('Splitting {}'.format(file))
+                self.main_app.split_nessus_file(file)
+                
+        
     def btn_execute_on_click(self):
         logging.info('Execute Clicked')
         self.main_app.contact_info['command'] = self.main_form.txt_command.text()
@@ -211,6 +225,10 @@ To utilize the tool, follow the steps below:
 
         self.main_form.tbl_selected_scans.horizontalHeader().sectionClicked.connect(self.sort_tbl_selected_scans)
         self.main_form.tbl_scan_summary.horizontalHeader().sectionClicked.connect(self.sort_tbl_scan_summary)
+
+
+        self.main_form.actionMerge_Nessus.triggered.connect( self.show_about )
+        self.main_form.actionSplit_Nessus.triggered.connect( self.split_nessus )
 
         self.main_form.actionAbout.triggered.connect( self.show_about )
         self.main_form.actionHelp.triggered.connect( self.show_help )
