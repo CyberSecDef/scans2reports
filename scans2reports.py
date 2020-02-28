@@ -81,6 +81,104 @@ class Scans2Reports:
         }
         self.source_folder = args.folder
 
+    def merge_nessus_files(self, files):
+        #open the first file for structure
+        file = files[0]
+        
+        with open(file, 'r', errors='replace', encoding='utf-8') as content_file:
+            content = content_file.readlines()
+        content = ''.join(content)
+        tree = etree.fromstring( str(content ) )
+        
+        #make structure by removing hosts
+        master_nessus = copy.deepcopy(tree)
+        for host in master_nessus.xpath("/NessusClientData_v2/Report/ReportHost"):            
+            host.getparent().remove(host)
+        
+        #loop through each file
+        for file in files:
+            logging.info("Merging file {} into master nessus file".format(file))
+            with open(file, 'r', errors='replace', encoding='utf-8') as content_file:
+                content = content_file.readlines()
+            content = ''.join(content)
+            current_scan_file = etree.fromstring( str(content ) )
+        
+            #loop through each host in the current scan file
+            for current_host in current_scan_file.xpath("/NessusClientData_v2/Report/ReportHost"):
+                if next(iter(current_host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
+                    fqdn_val = str( next(iter(current_host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
+                elif next(iter(current_host.xpath("./HostProperties/tag[@name='hostname']/text()")),''):
+                    fqdn_val =  str(next(iter(current_host.xpath("./HostProperties/tag[@name='hostname']/text()")),'')).lower()
+                elif next(iter(current_host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''):
+                    fqdn_val = str(next(iter(current_host.xpath("./HostProperties/tag[@name='host-ip']/text()")),'')).lower()
+                else:
+                    fqdn_val = 'UNKNOWN'
+                
+                current_scan_date = datetime.datetime.strptime(
+                    str(next(iter(current_host.xpath("//HostProperties/tag[@name='HOST_START']/text()")), ''))
+                    , '%a %b %d %H:%M:%S %Y'
+                )
+                logging.info("Processing host: {}, scan date: {}".format(fqdn_val, current_scan_date) )
+                
+                #see if the current host from the current scan file is in the master nessus file
+                master_date = ""
+                found = False
+                for master_host in master_nessus.xpath("/NessusClientData_v2/Report/ReportHost"):
+                    if next(iter(master_host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
+                        master_fqdn_val = str( next(iter(master_host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
+                    elif next(iter(master_host.xpath("./HostProperties/tag[@name='hostname']/text()")),''):
+                        master_fqdn_val =  str(next(iter(master_host.xpath("./HostProperties/tag[@name='hostname']/text()")),'')).lower()
+                    elif next(iter(master_host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''):
+                        master_fqdn_val = str(next(iter(master_host.xpath("./HostProperties/tag[@name='host-ip']/text()")),'')).lower()
+                    else:
+                        master_fqdn_val = 'UNKNOWN'
+                    
+                    #the host from the current scan is already present in master nessus
+                    if master_fqdn_val == fqdn_val:
+                        found = True
+                        master_date = datetime.datetime.strptime(
+                            str(next(iter(master_host.xpath("./HostProperties/tag[@name='HOST_START']/text()")), ''))
+                            , '%a %b %d %H:%M:%S %Y'
+                        )
+                        master_node = master_host
+                        logging.info("Found host {} already present in master nessus file with scan date {}".format(master_fqdn_val, master_date))
+                
+                #the current host in the current scan is already found in the master nessus file
+                if found:
+                    logging.info("Master Nessus Scandate for host {}: {}".format(master_fqdn_val, master_date) )
+                    logging.info("Current Scandate for host {}: {}".format(fqdn_val, current_scan_date) )
+                    if current_scan_date >= master_date:
+                        logging.info("Replacing host {} in Master Nessus File".format(master_fqdn_val) )
+                        master_node.getparent().remove(master_node)
+                        report_host_node = next(iter(master_nessus.xpath("/NessusClientData_v2/Report")),'')
+                        report_host_node.append(current_host)
+                else:
+                    logging.info("Inserting host {} in Master Nessus File".format(fqdn_val) )
+                    report_host_node = next(iter(master_nessus.xpath("/NessusClientData_v2/Report")),'')
+                    report_host_node.append(current_host)
+                        
+        logging.info('Saving Merged Nessus File')
+        report_name = "{}/results/{}".format(
+            os.path.dirname(os.path.realpath(__file__)),
+            datetime.datetime.now().strftime("merged-%Y%m%d_%H%M%S.nessus")
+        )
+            
+        report_task_id = "{}-{}-{}-{}-{}-{}".format(
+            secrets.token_hex(4),
+            secrets.token_hex(2),
+            secrets.token_hex(2),
+            secrets.token_hex(2),
+            secrets.token_hex(2),
+            secrets.token_hex(14)
+        )
+        report_node = master_nessus.xpath("/NessusClientData_v2/Policy/Preferences/ServerPreferences/preference[./name = 'report_task_id']/value")
+        if report_node:
+            report_node[0].text = report_task_id
+        
+        merged_tree = master_nessus.getroottree()
+        merged_tree.write(report_name)
+        print("Merged Nessus File is in results folder")
+            
     def split_nessus_file(self, file):
         with open(file, 'r', errors='replace', encoding='utf-8') as content_file:
             content = content_file.readlines()
@@ -97,13 +195,12 @@ class Scans2Reports:
             else:
                 fqdn_val = 'UNKNOWN'
             
-            
             scanDate = datetime.datetime.strptime(
                 str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), ''))
                 , '%a %b %d %H:%M:%S %Y'
             ).strftime("%Y%m%d_%H%M%S")
             
-            print(f"{fqdn_val}_{scanDate}.nessus")
+            logging.info("Processing host: {}, scan date: {}".format(fqdn_val, scanDate) )
             
             report_name = "{}/results/{}_{}.nessus".format(
                 os.path.dirname(os.path.realpath(__file__)),
@@ -125,7 +222,6 @@ class Scans2Reports:
                 if host_fqdn_val != fqdn_val:
                     host.getparent().remove(host)
             
-            
             report_task_id = "{}-{}-{}-{}-{}-{}".format(
                 secrets.token_hex(4),
                 secrets.token_hex(2),
@@ -140,7 +236,7 @@ class Scans2Reports:
             
             host_tree = host_nessus.getroottree()
             host_tree.write(report_name) 
-            
+        print("Split Nessus Files are in results folder")
 
     def collect_scan_files(self):
         """ Collects all the files to be scanned """
