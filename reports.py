@@ -382,7 +382,7 @@ class Reports:
 
         row = 0
         bold = self.workbook.add_format({'bold': True})
-        cell_format = self.workbook.add_format({'font_size':8, 'text_wrap': True, 'align': 'justify', 'valign':'bottom'})
+        cell_format = self.workbook.add_format({'font_size':8, 'text_wrap': True, 'align': 'justify', 'valign':'top'})
 
         date_fmt = self.workbook.add_format({'num_format':'mm/dd/yyyy', 'font_size': 8})
 
@@ -397,9 +397,9 @@ class Reports:
                 col = 0
                 for value in result:
                     if col == 6:
-                        worksheet.write(row, col, result[value], date_fmt)
+                        worksheet.write(row, col, str(result[value]).strip(), date_fmt)
                     else:
-                        worksheet.write(row, col, result[value], cell_format)
+                        worksheet.write(row, col, str(result[value]).strip(), cell_format)
                     col += 1
                 row += 1
 
@@ -584,7 +584,7 @@ Plugin ID: {pluginId}
 
         row = 0
         bold = self.workbook.add_format({'bold': True})
-        cell_format = self.workbook.add_format({'font_size':8, 'text_wrap': True, 'align' : 'justify', 'valign' : 'vcenter'})
+        cell_format = self.workbook.add_format({'font_size':8, 'text_wrap': True, 'align' : 'justify', 'valign' : 'top'})
         date_fmt = self.workbook.add_format({'num_format':'mm/dd/yyyy'})
 
         if report:
@@ -598,9 +598,9 @@ Plugin ID: {pluginId}
                 col = 0
                 for value in result:
                     if col == 6:
-                        worksheet.write(row, col, result[value], date_fmt)
+                        worksheet.write(row, col, str(result[value]).strip(), date_fmt)
                     else:
-                        worksheet.write(row, col, result[value], cell_format)
+                        worksheet.write(row, col, str(result[value]).strip(), cell_format)
                     col += 1
                 row += 1
 
