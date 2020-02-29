@@ -238,8 +238,10 @@ class Reports:
                     for req in host['requirements']:
                         if Utils.status(req['status'], 'HUMAN') == Utils.status(status, 'HUMAN'):
                             if(
-                                datetime.datetime.strptime(req['publicationDate'],'%Y/%m/%d')  <
-                                datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] )
+                                str(req['publicationDate']).strip() == '' or (
+                                    datetime.datetime.strptime(req['publicationDate'],'%Y/%m/%d')  <
+                                    datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] )
+                                )
                             ):
                                 acas_plugins.append(req['pluginId'])
                                 
@@ -427,8 +429,10 @@ class Reports:
                     for req in host['requirements']:
                         if Utils.status(req['status'], 'HUMAN') == Utils.status(status, 'HUMAN'):
                             if(
-                                datetime.datetime.strptime(req['publicationDate'],'%Y/%m/%d')  <
-                                datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] )
+                                str(req['publicationDate']).strip() == '' or (
+                                    datetime.datetime.strptime(req['publicationDate'],'%Y/%m/%d')  <
+                                    datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] )
+                                )
                             ):
                                 acas_plugins.append(req['pluginId'])
             acas_plugins_by_status = sorted(list(set(acas_plugins)))
