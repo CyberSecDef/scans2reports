@@ -95,9 +95,17 @@ class Scans2Reports:
         for host in master_nessus.xpath("/NessusClientData_v2/Report/ReportHost"):            
             host.getparent().remove(host)
         
+        total_files = len(files)
+        index = 0
         #loop through each file
         for file in files:
-            logging.info("Merging file {} into master nessus file".format(file))
+            index += 1
+            status = f"Merging file {os.path.basename(file)} into master nessus file"
+            S2R.scans_to_reports.statusBar().showMessage(status)
+            S2R.scans_to_reports.progressBar.setValue(int(100*index/total_files*.9)   )
+            QtGui.QGuiApplication.processEvents() 
+            logging.info(status)
+            
             with open(file, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
             content = ''.join(content)
@@ -118,7 +126,10 @@ class Scans2Reports:
                     str(next(iter(current_host.xpath("//HostProperties/tag[@name='HOST_START']/text()")), ''))
                     , '%a %b %d %H:%M:%S %Y'
                 )
-                logging.info("Processing host: {}, scan date: {}".format(fqdn_val, current_scan_date) )
+                
+                status = f"Processing host: {fqdn_val}, scan date: {current_scan_date}"
+                QtGui.QGuiApplication.processEvents() 
+                logging.info(status)
                 
                 #see if the current host from the current scan file is in the master nessus file
                 master_date = ""
@@ -141,23 +152,36 @@ class Scans2Reports:
                             , '%a %b %d %H:%M:%S %Y'
                         )
                         master_node = master_host
-                        logging.info("Found host {} already present in master nessus file with scan date {}".format(master_fqdn_val, master_date))
+                        
+                        status = f"Found host {master_fqdn_val} already present in master nessus file with scan date {master_date}"
+                        QtGui.QGuiApplication.processEvents() 
+                        logging.info(status)
                 
                 #the current host in the current scan is already found in the master nessus file
                 if found:
                     logging.info("Master Nessus Scandate for host {}: {}".format(master_fqdn_val, master_date) )
                     logging.info("Current Scandate for host {}: {}".format(fqdn_val, current_scan_date) )
                     if current_scan_date >= master_date:
-                        logging.info("Replacing host {} in Master Nessus File".format(master_fqdn_val) )
+                        status = f"Replacing host {master_fqdn_val} in Master Nessus File"
+                        QtGui.QGuiApplication.processEvents() 
+                        logging.info(status)
+                    
                         master_node.getparent().remove(master_node)
                         report_host_node = next(iter(master_nessus.xpath("/NessusClientData_v2/Report")),'')
                         report_host_node.append(current_host)
                 else:
-                    logging.info("Inserting host {} in Master Nessus File".format(fqdn_val) )
+                    status = f"Inserting host {fqdn_val} in Master Nessus File"
+                    QtGui.QGuiApplication.processEvents() 
+                    logging.info(status)
+                        
                     report_host_node = next(iter(master_nessus.xpath("/NessusClientData_v2/Report")),'')
                     report_host_node.append(current_host)
                         
-        logging.info('Saving Merged Nessus File')
+        status = f"Updating Server Preferences"
+
+        QtGui.QGuiApplication.processEvents() 
+        logging.info(status)
+                    
         report_name = "{}/results/{}".format(
             os.path.dirname(os.path.realpath(__file__)),
             datetime.datetime.now().strftime("merged-%Y%m%d_%H%M%S.nessus")
@@ -175,8 +199,35 @@ class Scans2Reports:
         if report_node:
             report_node[0].text = report_task_id
         
+        plugins = []
+        for current_host in master_nessus.xpath("/NessusClientData_v2/Report/ReportHost/ReportItem"):
+             plugins.append(int(next(iter(current_host.xpath("./@pluginID")),'')))
+        plugins = sorted(list(set(plugins)))
+        plugs = [str(p) for p in plugins] 
+        plugins = (";".join(plugs))
+        plugin_node = master_nessus.xpath("/NessusClientData_v2/Policy/Preferences/ServerPreferences/preference[./name = 'plugin_set']/value")
+        if plugin_node:
+            plugin_node[0].text = plugins
+        
+        targets = []
+        for current_host in master_nessus.xpath("/NessusClientData_v2/Report/ReportHost"):
+             targets.append(next(iter(current_host.xpath("./@name")),''))
+        targets = sorted(list(set(targets)))
+        target_node = master_nessus.xpath("/NessusClientData_v2/Policy/Preferences/ServerPreferences/preference[./name = 'TARGET']/value")
+        if target_node:
+            target_node[0].text = ",".join(targets)
+        
+        
+        status = f"Saving merged Nessus file to results folder"
+        S2R.scans_to_reports.statusBar().showMessage(status)
+        QtGui.QGuiApplication.processEvents() 
+        logging.info(status)
+        
         merged_tree = master_nessus.getroottree()
         merged_tree.write(report_name)
+        
+        S2R.scans_to_reports.progressBar.setValue( 0 )
+        S2R.scans_to_reports.statusBar().showMessage("Ready")
         print("Merged Nessus File is in results folder")
             
     def split_nessus_file(self, file):
@@ -185,7 +236,13 @@ class Scans2Reports:
         content = ''.join(content)
         tree = etree.fromstring( str(content ) )
         
-        for host in tree.xpath("/NessusClientData_v2/Report/ReportHost"):
+        report_hosts = tree.xpath("/NessusClientData_v2/Report/ReportHost")
+        total_hosts = len(report_hosts)
+        index = 0
+        
+        for host in report_hosts:
+            index += 1
+            
             if next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
                 fqdn_val = str( next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
             elif next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),''):
@@ -199,9 +256,13 @@ class Scans2Reports:
                 str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), ''))
                 , '%a %b %d %H:%M:%S %Y'
             ).strftime("%Y%m%d_%H%M%S")
-            
-            logging.info("Processing host: {}, scan date: {}".format(fqdn_val, scanDate) )
-            
+        
+            status = f"Processing host: {fqdn_val}, scan date: {scanDate}"
+            S2R.scans_to_reports.statusBar().showMessage(status)
+            S2R.scans_to_reports.progressBar.setValue(int(100*index/total_hosts*.9)   )
+            QtGui.QGuiApplication.processEvents() 
+            logging.info(status)
+        
             report_name = "{}/results/{}_{}.nessus".format(
                 os.path.dirname(os.path.realpath(__file__)),
                 fqdn_val,
@@ -236,7 +297,13 @@ class Scans2Reports:
             
             host_tree = host_nessus.getroottree()
             host_tree.write(report_name) 
-        print("Split Nessus Files are in results folder")
+        
+        status = f"Merged Nessus File is in results folder"
+        S2R.scans_to_reports.statusBar().showMessage("Ready")
+        S2R.scans_to_reports.progressBar.setValue( 0 )
+        QtGui.QGuiApplication.processEvents() 
+        logging.info(status)
+        print(status)
 
     def collect_scan_files(self):
         """ Collects all the files to be scanned """
@@ -357,6 +424,7 @@ if __name__ == "__main__":
         print("GUI Mode")
         app = QtWidgets.QApplication(sys.argv)
         S2R.scans_to_reports = QtWidgets.QMainWindow()
+
         ui = UiScansToReports()
         ui.setupUi(S2R.scans_to_reports)
 
@@ -365,6 +433,12 @@ if __name__ == "__main__":
         ui_addons.update_scan_headers()
         ui_addons.update_summary_headers()
 
+        S2R.scans_to_reports.statusBar().showMessage(f"Ready")
+        S2R.scans_to_reports.progressBar = QtWidgets.QProgressBar()
+        S2R.scans_to_reports.progressBar.setGeometry(0, 0, 200, 25)
+        S2R.scans_to_reports.progressBar.setValue(0)
+        S2R.scans_to_reports.statusBar().addPermanentWidget(S2R.scans_to_reports.progressBar)
+        
         S2R.scans_to_reports.show()
         
         sys.exit(app.exec_())
