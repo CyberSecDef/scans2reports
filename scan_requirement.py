@@ -29,7 +29,6 @@ class ScanRequirement(dict):
     credentialed = False
     port_range = ""
     
-    
     def __init__(self, data):
         """ Constructor """
         dict.__init__(self)

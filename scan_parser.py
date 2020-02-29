@@ -250,6 +250,7 @@ class ScanParser:
             
             for host in tree.xpath("/NessusClientData_v2/Report/ReportHost"):
                 scanUser = ""
+                port_range = ""
                 scan_info = str( host.xpath("./ReportItem[@pluginID=19506]/plugin_output/text()") ).split("\\n")
                 for line in scan_info:
                     if 'Credentialed checks' in line:
@@ -264,11 +265,10 @@ class ScanParser:
                         except:
                             scanUser = 'UNKNOWN'
                             
-                    port_range = ""
                     if 'Port range' in line:
                         k,v = line.split(':', 1)
                         port_range = str(v).strip()
-                        
+                
                 wmi_info = str( host.xpath("./ReportItem[@pluginID=24270]/plugin_output/text()") ).split("\\n")
                 device_type = ""
                 manufacturer = ""

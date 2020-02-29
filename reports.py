@@ -923,7 +923,7 @@ Plugin ID: {pluginId}
                     'ACAS Scanner Versions'                  : scan_file['version'],
                     'ACAS Scanner Types'                     : '',
                     'ACAS Scan Policy'                       : scan_file['policy'],
-                    'ACAS Port Range 0-65535'                : 'True' if host['port_range'] == '0-65535' or host['port_range'] == 'all ports' else 'False',
+                    'ACAS Port Range 0-65535'                : 'True' if str(host['port_range']).strip() == '0-65535' or str(host['port_range']).strip() == 'all ports' else 'False',
                     'ACAS Scan Users'                        : host['scanUser'],
                     'ACAS Credentialed Checks'               : host['credentialed'],
                     'ACAS Feed Version'                      : scan_file['feed'],
