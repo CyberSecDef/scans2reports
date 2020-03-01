@@ -1,8 +1,40 @@
 import re
-
+import pprint
+import logging
+from PyQt5 import QtCore, QtGui, QtWidgets
 """ Utilities module of static methods """
 class Utils(object):
     """Utilities class """
+
+
+
+    @staticmethod
+    def update_status(S2R=None, status=None, progress=None):
+        if status:
+            FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+            logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
+            logging.info(status)        
+            
+        if S2R and S2R.scans_to_reports:
+            if status:
+                S2R.scans_to_reports.statusBar().showMessage(status)
+            if progress is not None:
+                S2R.scans_to_reports.progressBar.setValue( progress )
+            QtGui.QGuiApplication.processEvents() 
+                
+    @staticmethod
+    def fqdn(current_host ):
+        fqdn_val = 'UNKNOWN'
+
+        #TODO scap and ckl
+        if 'name' in current_host.attrib:
+            if next(iter(current_host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
+                fqdn_val = str( next(iter(current_host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
+            elif next(iter(current_host.xpath("./HostProperties/tag[@name='hostname']/text()")),''):
+                fqdn_val =  str(next(iter(current_host.xpath("./HostProperties/tag[@name='hostname']/text()")),'')).lower()
+            elif next(iter(current_host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''):
+                fqdn_val = str(next(iter(current_host.xpath("./HostProperties/tag[@name='host-ip']/text()")),'')).lower()
+        return fqdn_val
 
     @staticmethod
     def is_ip(val):

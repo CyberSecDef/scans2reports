@@ -297,7 +297,7 @@ class ScanParser:
                             manufacturer = ""
                             model = ""
                             serial = ""
-                            
+                
                 fqdn_val = ""
                 if next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
                     fqdn_val = str( next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()

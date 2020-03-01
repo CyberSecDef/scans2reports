@@ -138,13 +138,13 @@ class UiAddons():
                 self.main_form.tbl_scan_summary.resizeColumnsToContents()
                 self.main_form.tbl_scan_summary.horizontalHeader().setStretchLastSection(True)
     
-    def merge_nessus(self):
+    def merge_nessus(self, host_count):
         logging.info('Merge Nessus Clicked')
         
         options = QtWidgets.QFileDialog.Options(  )
         files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"QFileDialog.getOpenFileNames()", "","Nessus Files (*.nessus);;", options=options)
         if files:
-            self.main_app.merge_nessus_files(files)
+            self.main_app.merge_nessus_files(files, host_count)
                 
     def split_nessus(self):
         logging.info('Split Nessus Clicked')
@@ -235,7 +235,15 @@ To utilize the tool, follow the steps below:
         self.main_form.tbl_scan_summary.horizontalHeader().sectionClicked.connect(self.sort_tbl_scan_summary)
 
 
-        self.main_form.actionMerge_Nessus.triggered.connect( self.merge_nessus )
+        self.main_form.action5_Hosts.triggered.connect( partial( self.merge_nessus, 5) )
+        self.main_form.action10_Hosts.triggered.connect( partial(self.merge_nessus, 10) )
+        self.main_form.action15_Hosts.triggered.connect( partial(self.merge_nessus, 15) )
+        self.main_form.action25_Hosts.triggered.connect( partial(self.merge_nessus, 25) )
+        self.main_form.action50_Hosts.triggered.connect( partial(self.merge_nessus, 50) )
+        self.main_form.actionAll_Hosts.triggered.connect( partial(self.merge_nessus, 0) )
+        
+        
+        
         self.main_form.actionSplit_Nessus.triggered.connect( self.split_nessus )
 
         self.main_form.actionAbout.triggered.connect( self.show_about )

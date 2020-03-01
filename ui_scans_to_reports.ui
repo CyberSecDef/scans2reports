@@ -986,7 +986,7 @@ Files</string>
    </property>
    <widget class="QMenu" name="mnu_file">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionSelect"/>
     <addaction name="actionParse_Scans"/>
@@ -996,7 +996,7 @@ Files</string>
    </widget>
    <widget class="QMenu" name="mnu_help">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionHelp"/>
     <addaction name="separator"/>
@@ -1004,9 +1004,20 @@ Files</string>
    </widget>
    <widget class="QMenu" name="menuScans">
     <property name="title">
-     <string>Scans</string>
+     <string>&amp;Scans</string>
     </property>
-    <addaction name="actionMerge_Nessus"/>
+    <widget class="QMenu" name="menuMerge_Nessus">
+     <property name="title">
+      <string>Merge Nessus</string>
+     </property>
+     <addaction name="action5_Hosts"/>
+     <addaction name="action10_Hosts"/>
+     <addaction name="action15_Hosts"/>
+     <addaction name="action25_Hosts"/>
+     <addaction name="action50_Hosts"/>
+     <addaction name="actionAll_Hosts"/>
+    </widget>
+    <addaction name="menuMerge_Nessus"/>
     <addaction name="actionSplit_Nessus"/>
    </widget>
    <addaction name="mnu_file"/>
@@ -1054,14 +1065,39 @@ Files</string>
     <string>About</string>
    </property>
   </action>
-  <action name="actionMerge_Nessus">
-   <property name="text">
-    <string>Merge Nessus</string>
-   </property>
-  </action>
   <action name="actionSplit_Nessus">
    <property name="text">
     <string>Split Nessus</string>
+   </property>
+  </action>
+  <action name="action5_Hosts">
+   <property name="text">
+    <string>5 Hosts</string>
+   </property>
+  </action>
+  <action name="action10_Hosts">
+   <property name="text">
+    <string>10 Hosts</string>
+   </property>
+  </action>
+  <action name="action15_Hosts">
+   <property name="text">
+    <string>15 Hosts</string>
+   </property>
+  </action>
+  <action name="action25_Hosts">
+   <property name="text">
+    <string>25 Hosts</string>
+   </property>
+  </action>
+  <action name="action50_Hosts">
+   <property name="text">
+    <string>50 Hosts</string>
+   </property>
+  </action>
+  <action name="actionAll_Hosts">
+   <property name="text">
+    <string>All Hosts</string>
    </property>
   </action>
  </widget>
