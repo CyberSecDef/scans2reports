@@ -6,6 +6,7 @@ import os.path
 import string
 import datetime
 import logging
+from PyQt5 import QtCore, QtGui, QtWidgets
 from functools import reduce
 from dateutil import parser
 
@@ -65,6 +66,8 @@ class Reports:
         report = []
         #differences between scap status and ckl status
         for scap in filter(lambda x: x['type'] == 'SCAP', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             for sreq in filter(lambda x: x['status'] != 'C', scap['requirements']):
                 #see if there are any matching stig (CKL) requirements
                 for ckl in filter(lambda x: x['type'] == 'CKL', self.scan_results):
@@ -97,6 +100,8 @@ class Reports:
 
         #executed in scap, not in ckl
         for scap in filter(lambda x: x['type'] == 'SCAP', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             for sreq in filter(lambda x: x['status'] != 'C', scap['requirements']):
                 ckl_count = 0
                 for ckl in filter(lambda x: x['type'] == 'CKL', self.scan_results):
@@ -166,6 +171,8 @@ class Reports:
 
         report = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS' and len(x['hosts']) > 0, self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             report.append({
                 'Title': scan_file['title'],
                 'Version': scan_file['version'],
@@ -177,6 +184,8 @@ class Reports:
             })
 
         for scan_file in filter(lambda x: x['type'] == 'SCAP', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             report.append({
                 'Title': f"SCAP - {scan_file['title']}",
                 'Version': f"V{int(str(scan_file['version']))}R{int(str(scan_file['release']))}",
@@ -186,6 +195,8 @@ class Reports:
             })
 
         for scan_file in filter(lambda x: x['type'] == 'CKL', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             report.append({
                 'Title': f"CKL - {scan_file['title']}",
                 'Version': f"V{int(str(scan_file['version']))}R{int(str(scan_file['release']))}",
@@ -220,6 +231,7 @@ class Reports:
         worksheet = self.workbook.add_worksheet('POAM')
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'POAM' Tab")
+            QtGui.QGuiApplication.processEvents() 
         
         widths = [1,40,15,25,25,15,30,15,30,45,20,30,25,40,40,40,25,25,40,25,25,40,25,40,50]
         ascii = string.ascii_uppercase
@@ -230,12 +242,18 @@ class Reports:
 
         report = []
         for status in ['Ongoing', 'Not Applicable', 'Not Reviewed', 'Error', 'Completed']:
-            print(f"    {status}")
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
+            # print(f"    {status}")
             #get unique list of all acas plugins that match each statusacas_plugins
             acas_plugins = []
             for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
                 for host in scan_file['hosts']:
                     for req in host['requirements']:
+                        if self.scans_to_reports:
+                            QtGui.QGuiApplication.processEvents() 
                         if Utils.status(req['status'], 'HUMAN') == Utils.status(status, 'HUMAN'):
                             if(
                                 str(req['publicationDate']).strip() == '' or (
@@ -252,7 +270,12 @@ class Reports:
             for plugin in acas_plugins_by_status:
                 acas_plugin_hosts[plugin] = []
                 for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
+                    if self.scans_to_reports:
+                        QtGui.QGuiApplication.processEvents() 
+                
                     for host in scan_file['hosts']:
+                        if self.scans_to_reports:
+                            QtGui.QGuiApplication.processEvents() 
                         for req in filter(lambda x: x['pluginId'] == plugin and Utils.status(x['status'], 'HUMAN') == Utils.status(status, 'HUMAN'), host['requirements']):
                             acas_plugin_hosts[plugin].append(host['hostname'] if host['hostname'] != '' else host['ip'])
 
@@ -260,6 +283,9 @@ class Reports:
             for plugin in acas_plugins_by_status:
                 for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
                     for host in scan_file['hosts']:
+                        if self.scans_to_reports:
+                            QtGui.QGuiApplication.processEvents() 
+                
                         for req in filter(lambda x: x['pluginId'] == plugin, host['requirements']):
                             if not list(filter(lambda x: str(x['Security Checks']).strip() == f"{req['pluginId']}" and str(x['Raw Severity']).strip() == Utils.risk_val(req['severity'], 'MIN'), report)):
                                 # pylint: disable=C0330
@@ -310,6 +336,8 @@ class Reports:
             scap_req = []
             ckl_req = []
             for scan_file in filter(lambda x: x['type'] == 'CKL' or x['type'] == 'SCAP', self.scan_results):
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
                 for req in filter(lambda x: Utils.status(x['status'], 'HUMAN') == Utils.status(status, 'HUMAN'), scan_file['requirements']):
                     disa_rules.append(req['ruleId'].replace('xccdf_mil.disa.stig_rule_', ''))
                     if scan_file['type'] == 'SCAP':
@@ -324,6 +352,8 @@ class Reports:
             for rule in disa_plugins_by_status:
                 disa_rule_hosts[rule] = []
                 for scan_file in filter(lambda x: x['type'] == 'CKL' or x['type'] == 'SCAP', self.scan_results):
+                    if self.scans_to_reports:
+                        QtGui.QGuiApplication.processEvents() 
                     for req in filter(lambda x: x['ruleId'].replace('xccdf_mil.disa.stig_rule_', '') == rule and Utils.status(x['status'], 'HUMAN') == Utils.status(status, 'HUMAN'), scan_file['requirements']):
                         host = scan_file['hostname'] if scan_file['hostname'] != '' else scan_file['ip']
                         if host.strip() != '':
@@ -332,6 +362,9 @@ class Reports:
             #loop through all gathered vulns
             for rule in disa_plugins_by_status:
                 for scan_file in filter(lambda x: x['type'] == 'CKL' or x['type'] == 'SCAP', self.scan_results):
+                    if self.scans_to_reports:
+                        QtGui.QGuiApplication.processEvents() 
+                
                     for req in filter(lambda x: x['ruleId'].replace('xccdf_mil.disa.stig_rule_', '') == rule and Utils.status(x['status'], 'HUMAN') == Utils.status(status, 'HUMAN'), scan_file['requirements']):
                         #determine if this is ckl, scap or ckl/scap
                         prefix = []
@@ -421,12 +454,16 @@ class Reports:
 
         report = []
         for status in ['Ongoing', 'Not Applicable', 'Not Reviewed', 'Error', 'Completed']:
-            print(f"    {status}")
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
+                
             #get unique list of all acas plugins that match each statusacas_plugins
             acas_plugins = []
             for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
                 for host in scan_file['hosts']:
                     for req in host['requirements']:
+                        if self.scans_to_reports:
+                            QtGui.QGuiApplication.processEvents() 
                         if Utils.status(req['status'], 'HUMAN') == Utils.status(status, 'HUMAN'):
                             if(
                                 str(req['publicationDate']).strip() == '' or (
@@ -443,6 +480,9 @@ class Reports:
                 acas_plugin_hosts[plugin] = []
                 for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
                     for host in scan_file['hosts']:
+                        if self.scans_to_reports:
+                            QtGui.QGuiApplication.processEvents() 
+                
                         for req in filter(lambda x: x['pluginId'] == plugin and Utils.status(x['status'], 'HUMAN') == Utils.status(status, 'HUMAN'), host['requirements']):
                             acas_plugin_hosts[plugin].append(host['hostname'] if host['hostname'] != '' else host['ip'])
 
@@ -450,6 +490,8 @@ class Reports:
             for plugin in acas_plugins_by_status:
                 for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
                     for host in scan_file['hosts']:
+                        if self.scans_to_reports:
+                            QtGui.QGuiApplication.processEvents() 
                         for req in filter(lambda x: x['pluginId'] == plugin, host['requirements']):
                             if not list(filter(lambda x: str(x['Vulnerability ID(16a.3)']).strip() == f"{req['pluginId']}", report)):
                                 
@@ -500,6 +542,8 @@ class Reports:
             scap_req = []
             ckl_req = []
             for scan_file in filter(lambda x: x['type'] == 'CKL' or x['type'] == 'SCAP', self.scan_results):
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
                 for req in filter(lambda x: Utils.status(x['status'], 'HUMAN') == Utils.status(status, 'HUMAN'), scan_file['requirements']):
                     disa_rules.append(req['ruleId'].replace('xccdf_mil.disa.stig_rule_', ''))
                     if scan_file['type'] == 'SCAP':
@@ -514,6 +558,8 @@ class Reports:
             for rule in disa_plugins_by_status:
                 disa_rule_hosts[rule] = []
                 for scan_file in filter(lambda x: x['type'] == 'CKL' or x['type'] == 'SCAP', self.scan_results):
+                    if self.scans_to_reports:
+                        QtGui.QGuiApplication.processEvents() 
                     for req in filter(lambda x: x['ruleId'].replace('xccdf_mil.disa.stig_rule_', '') == rule and Utils.status(x['status'], 'HUMAN') == Utils.status(status, 'HUMAN'), scan_file['requirements']):
                         host = scan_file['hostname'] if scan_file['hostname'] != '' else scan_file['ip']
                         if host.strip() != '':
@@ -522,6 +568,8 @@ class Reports:
             #loop through all gathered vulns
             for rule in disa_plugins_by_status:
                 for scan_file in filter(lambda x: x['type'] == 'CKL' or x['type'] == 'SCAP', self.scan_results):
+                    if self.scans_to_reports:
+                        QtGui.QGuiApplication.processEvents() 
                     for req in filter(lambda x: x['ruleId'].replace('xccdf_mil.disa.stig_rule_', '') == rule and Utils.status(x['status'], 'HUMAN') == Utils.status(status, 'HUMAN'), scan_file['requirements']):
                     
                         objectives = []
@@ -628,6 +676,8 @@ Plugin ID: {pluginId}
         report = []
 
         for scan_file in filter(lambda x: x['type'] == 'SCAP', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             info_details = {
                 'Scan File Type': 'SCAP',
                 'Scan File': os.path.basename(scan_file['fileName']),
@@ -647,6 +697,8 @@ Plugin ID: {pluginId}
 
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
             for host in scan_file['hosts']:
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
                 for req in host['requirements']:
                     if int(req['pluginId']) == 19506:
                         scan_data = {}
@@ -723,6 +775,9 @@ Plugin ID: {pluginId}
         software = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
             for host in scan_file['hosts']:
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
+                
                 for req in filter(lambda r: int(r['pluginId']) == 22869, host['requirements']):
                     for line in filter(lambda l: l.strip() != '', req['comments'].split("\n")):
                         if 'list of packages installed' not in line:
@@ -817,6 +872,9 @@ Plugin ID: {pluginId}
         software = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
             for host in scan_file['hosts']:
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
+                
                 for req in filter(lambda r: int(r['pluginId']) == 20811, host['requirements']):
                     for line in filter(lambda l: l.strip() != '', req['comments'].split("\n")):
                         if 'The following updates are installed' not in line:
@@ -905,7 +963,8 @@ Plugin ID: {pluginId}
         
         hardware = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
-            
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             for host in scan_file['hosts']:
                 if Utils.is_ip(str(host['hostname'])):
                     fqdn_val = (str(host['hostname']))
@@ -948,6 +1007,8 @@ Plugin ID: {pluginId}
                 })
                 
         for scan_file in filter(lambda x: x['type'] == 'SCAP', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             if Utils.is_ip(str(scan_file['hostname'])):
                 fqdn_val = (str(scan_file['hostname']))
             elif '.' in str(scan_file['hostname']):
@@ -987,6 +1048,8 @@ Plugin ID: {pluginId}
             
         
         for scan_file in filter(lambda x: x['type'] == 'CKL', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             if Utils.is_ip(str(scan_file['hostname'])):
                 fqdn_val = (str(scan_file['hostname']))
             elif '.' in str(scan_file['hostname']):
@@ -1064,6 +1127,8 @@ Plugin ID: {pluginId}
         hardware = []
         hosts = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             for host in scan_file['hosts']:
                 if Utils.is_ip(str(host['hostname'])):
                     fqdn_val = (str(host['hostname']))
@@ -1091,6 +1156,8 @@ Plugin ID: {pluginId}
                     })
                 
         for scan_file in filter(lambda x: x['type'] == 'SCAP', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             if Utils.is_ip(str(scan_file['hostname'])):
                 fqdn_val = (str(scan_file['hostname']))
             elif '.' in str(scan_file['hostname']):
@@ -1118,6 +1185,8 @@ Plugin ID: {pluginId}
                     
         
         for scan_file in filter(lambda x: x['type'] == 'CKL', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             if Utils.is_ip(str(scan_file['hostname'])):
                 fqdn_val = (str(scan_file['hostname']))
             elif '.' in str(scan_file['hostname']):
@@ -1187,6 +1256,8 @@ Plugin ID: {pluginId}
 
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
             for host in scan_file['hosts']:
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
                 for req in filter(lambda r: int(r['pluginId']) == 11219 or int(r['pluginId']) == 14272, host['requirements']):
                     if not list(filter(lambda x: x['Port'] == req['port'], ports)):
                         ports.append({
@@ -1232,6 +1303,8 @@ Plugin ID: {pluginId}
         ccis = []
 
         for cci in self.data_mapping['rmf_cci']:
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             ccis.append({
                 'Control' : cci['control'],
                 'Title' : cci['title'],
@@ -1281,6 +1354,9 @@ Plugin ID: {pluginId}
         plugins_rpt = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
             for host in scan_file['hosts']:
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
+                
                 for req in host['requirements']:
                     if not list(filter(lambda x: x['pluginId'] == req['pluginId'], plugins)):
                         plugins.append(req)
@@ -1336,6 +1412,9 @@ Plugin ID: {pluginId}
         plugins_rpt = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
             for host in scan_file['hosts']:
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
+                
                 for req in filter(lambda r: str(r['iava']).strip() != '', host['requirements']):
                     if not list(filter(lambda x: x['pluginId'] == req['pluginId'], plugins)):
                         plugins.append(req)
@@ -1392,6 +1471,8 @@ Plugin ID: {pluginId}
 
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
             for host in scan_file['hosts']:
+                if self.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents() 
                 for req in filter(lambda r: int(r['pluginId']) == 66334, host['requirements']):
                     for patch in re.findall(r'\+ Action to take : (.+)+', req['comments']):
                         patches.append({
@@ -1441,6 +1522,9 @@ Plugin ID: {pluginId}
         summary_results = []
 
         for scan_file in self.scan_results:
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
+                
             if scan_file['type'] == 'SCAP':
                 summary_results.append({
                     'Type': 'SCAP',
@@ -1550,6 +1634,8 @@ Plugin ID: {pluginId}
 
         raw_results = []
         for scan_file in self.scan_results:
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             if scan_file['type'] == 'SCAP':
                 for req in scan_file['requirements']:
                     raw_results.append({
@@ -1682,6 +1768,8 @@ Plugin ID: {pluginId}
 
         os_list = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             for host in scan_file['hosts']:
                 if not any(host['os'] in x['os'] for x in os_list):
                     os_list.append({
@@ -1724,6 +1812,8 @@ Plugin ID: {pluginId}
 
         users = []
         for scan_file in filter(lambda x: x['type'] == 'ACAS', self.scan_results):
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents() 
             for host in scan_file['hosts']:
                 for requirement in filter(lambda lambda_requirement: int(lambda_requirement['pluginId']) == 10860 or int(lambda_requirement['pluginId']) == 95928, host['requirements']):
                     if int(requirement['pluginId']) == 10860:

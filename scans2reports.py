@@ -29,7 +29,7 @@ from ui_addons import UiAddons
 
 class Scans2Reports:
     """ Scans2Reports python suite, main file """
-    source_folder = ""
+    input_folder = ""
     scan_files = []
     scan_results = []
     q = Queue(maxsize=0)
@@ -47,7 +47,7 @@ class Scans2Reports:
         logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
         logging.info('Started')
         
-        if args.gui or args.folder is None:
+        if args.gui or args.input_folder is None:
             logging.info('Executing GUI mode')
             self.operating_mode = 'gui'
         
@@ -79,7 +79,7 @@ class Scans2Reports:
             'lower_risk' : args.lower_risk, 
             'exclude_plugins' : args.exclude_plugins 
         }
-        self.source_folder = args.folder
+        self.input_folder = args.input_folder
 
     def merge_nessus_files(self, files):
         #open the first file for structure
@@ -100,11 +100,13 @@ class Scans2Reports:
         #loop through each file
         for file in files:
             index += 1
+            
             status = f"Merging file {os.path.basename(file)} into master nessus file"
-            S2R.scans_to_reports.statusBar().showMessage(status)
-            S2R.scans_to_reports.progressBar.setValue(int(100*index/total_files*.9)   )
-            QtGui.QGuiApplication.processEvents() 
-            logging.info(status)
+            logging.info(status)        
+            if S2R.scans_to_reports:
+                S2R.scans_to_reports.statusBar().showMessage(status)
+                S2R.scans_to_reports.progressBar.setValue(int(100*index/total_files*.9)   )
+                QtGui.QGuiApplication.processEvents() 
             
             with open(file, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
@@ -219,16 +221,22 @@ class Scans2Reports:
         
         
         status = f"Saving merged Nessus file to results folder"
-        S2R.scans_to_reports.statusBar().showMessage(status)
-        QtGui.QGuiApplication.processEvents() 
         logging.info(status)
+        if S2R.scans_to_reports:
+            S2R.scans_to_reports.statusBar().showMessage(status)
+            QtGui.QGuiApplication.processEvents() 
+        
         
         merged_tree = master_nessus.getroottree()
         merged_tree.write(report_name)
         
-        S2R.scans_to_reports.progressBar.setValue( 0 )
-        S2R.scans_to_reports.statusBar().showMessage("Ready")
-        print("Merged Nessus File is in results folder")
+        status = "Merged Nessus File is in results folder"
+        logging.info(status)
+        print(status)
+        if S2R.scans_to_reports:
+            S2R.scans_to_reports.progressBar.setValue( 0 )
+            S2R.scans_to_reports.statusBar().showMessage("Ready")
+            
             
     def split_nessus_file(self, file):
         with open(file, 'r', errors='replace', encoding='utf-8') as content_file:
@@ -258,11 +266,12 @@ class Scans2Reports:
             ).strftime("%Y%m%d_%H%M%S")
         
             status = f"Processing host: {fqdn_val}, scan date: {scanDate}"
-            S2R.scans_to_reports.statusBar().showMessage(status)
-            S2R.scans_to_reports.progressBar.setValue(int(100*index/total_hosts*.9)   )
-            QtGui.QGuiApplication.processEvents() 
             logging.info(status)
-        
+            if S2R.scans_to_reports:
+                S2R.scans_to_reports.statusBar().showMessage(status)
+                S2R.scans_to_reports.progressBar.setValue(int(100*index/total_hosts*.9)   )
+                QtGui.QGuiApplication.processEvents() 
+            
             report_name = "{}/results/{}_{}.nessus".format(
                 os.path.dirname(os.path.realpath(__file__)),
                 fqdn_val,
@@ -299,26 +308,41 @@ class Scans2Reports:
             host_tree.write(report_name) 
         
         status = f"Merged Nessus File is in results folder"
-        S2R.scans_to_reports.statusBar().showMessage("Ready")
-        S2R.scans_to_reports.progressBar.setValue( 0 )
-        QtGui.QGuiApplication.processEvents() 
         logging.info(status)
         print(status)
+        if S2R.scans_to_reports:
+            S2R.scans_to_reports.statusBar().showMessage("Ready")
+            S2R.scans_to_reports.progressBar.setValue( 0 )
+            QtGui.QGuiApplication.processEvents() 
+        
 
     def collect_scan_files(self):
         """ Collects all the files to be scanned """
-        logging.info('Collecting scan files')
         
-        root_directory = Path(self.source_folder)
+        status = f"Collecting scan files"
+        logging.info(status)
+        if S2R.scans_to_reports:
+            S2R.scans_to_reports.statusBar().showMessage(status)
+            S2R.scans_to_reports.progressBar.setValue( 0 )
+            QtGui.QGuiApplication.processEvents() 
+            
+        root_directory = Path(self.input_folder)
         self.scan_files = list(root_directory.glob('**/*'))
         self.scan_results = [{} for x in self.scan_files]
 
     def parse_scan_files(self):
         """ Add scan file to parsing thread """
-        logging.info('Parsing scan files')
+        
+        status = f"Parsing scan files"
+        logging.info(status)
+        if S2R.scans_to_reports:
+            S2R.scans_to_reports.statusBar().showMessage(status)
+            S2R.scans_to_reports.progressBar.setValue( 0 )
+            QtGui.QGuiApplication.processEvents() 
         
         #add scan job to queue
-        for i in range(len(self.scan_files)):
+        num_files = len(self.scan_files)
+        for i in range(num_files):
             self.q.put((i, self.scan_files[i]))
 
         #start parse threads
@@ -326,22 +350,32 @@ class Scans2Reports:
             worker = Thread(target=self.start_parse_thread, args=(self.q, self.scan_results))
             worker.setDaemon(True)
             worker.start()
-
+        
+        #make sure the main gui doesn't get blocked while waiting for queue to finish
+        while self.q.qsize() > 0:
+            if S2R.scans_to_reports:
+                #S2R.scans_to_reports.statusBar().showMessage(status)
+                S2R.scans_to_reports.progressBar.setValue( ( num_files - self.q.qsize())/num_files * 100 )
+                QtGui.QGuiApplication.processEvents() 
+                time.sleep(1)
+        
         #wait for threads to all complete
         self.q.join()
 
         #show completed parse jobs
-        print('All scans parsed.')
-        print('')
+        status = f"All scans parsed"
+        logging.info(status)
+        print(status)
         if S2R.scans_to_reports:
-
-            S2R.scans_to_reports.statusBar().showMessage("All scans parsed")
-
+            S2R.scans_to_reports.statusBar().showMessage(status)
+            S2R.scans_to_reports.progressBar.setValue( 0 )
+            QtGui.QGuiApplication.processEvents() 
+        
     def start_parse_thread(self, queue, result):
         """ Create / Start parsing thread """
         logging.info('Starting Parse Thread')
         
-        scan_parser = ScanParser(self.data_mapping)
+        scan_parser = ScanParser(self.data_mapping, S2R)
 
         while not queue.empty():
             work = queue.get()
@@ -373,7 +407,10 @@ class Scans2Reports:
                     work[0], round(time.time() - start_time, 3), work[1]
                 )
             )
+
             queue.task_done()
+            if S2R.scans_to_reports:
+                QtGui.QGuiApplication.processEvents()
         return True
 
     def generate_reports(self):
@@ -388,15 +425,27 @@ class Scans2Reports:
             S2R.scans_to_reports
         )
 
-        for report in filter(lambda x: x.startswith('rpt'), dir(reports)):
-            print(report)
-            logging.info('Generating Report %s', report)
+        total_reports = list(filter(lambda x: x.startswith('rpt'), dir(reports)))
+        index = 0
+        for report in total_reports:
+            index += 1
+            status = f"Generating Report {report}"
+            print(status)
+            logging.info(status)        
+            
+            if S2R.scans_to_reports:
+                S2R.scans_to_reports.progressBar.setValue(int(100*index/(len(total_reports))*.9)   )
+                QtGui.QGuiApplication.processEvents() 
             getattr(reports, report)()
-            QtWidgets.QApplication.processEvents()
-
+            
         reports.close()
+        
+        status = f"Report Generated"
+        logging.info(status)        
         if S2R.scans_to_reports:
-            S2R.scans_to_reports.statusBar().showMessage("Report Generated")
+            S2R.scans_to_reports.statusBar().showMessage(status)
+            S2R.scans_to_reports.progressBar.setValue( 0 )
+            QtGui.QGuiApplication.processEvents() 
 
 # pylint: disable=C0103
 # Disable default help
@@ -412,7 +461,7 @@ optional.add_argument('-e', '--email', help='Add POC Email Address to POAM')
 optional.add_argument('-s', '--scd', help='Prefill Estimated SCD to POAM', action='store_true')
 optional.add_argument('-x', '--exclude-plugins', help='Exclude plugins newer than this number of days', type=int, default=30)
 optional.add_argument('-l', '--lower-risk', help='Automatically Lower Risk on POAM', action='store_true')
-optional.add_argument('-folder', '--folder', required=False)
+optional.add_argument('-if', '--input-folder', required=False)
 optional.add_argument('-h', '--help', action='help', default=SUPPRESS, help='show this help message and exit')
 
 
@@ -446,8 +495,8 @@ if __name__ == "__main__":
         pass
     else:
         print("Console Mode")
-        if S2R.source_folder is not None and S2R.source_folder.strip() != '':
-            print(S2R.source_folder)
+        if S2R.input_folder is not None and S2R.input_folder.strip() != '':
+            print(S2R.input_folder)
             S2R.collect_scan_files()
             S2R.parse_scan_files()
             S2R.generate_reports()

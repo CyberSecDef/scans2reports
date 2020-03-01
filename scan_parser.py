@@ -9,10 +9,13 @@ from scan_file import ScanFile
 from scan_requirement import ScanRequirement
 from utils import Utils
 from datetime import datetime
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class ScanParser:
     data_mapping = {}
-    def __init__(self, data_mapping):
+    S2R = None
+    def __init__(self, data_mapping, S2R):
+        self.S2R = S2R
         self.data_mapping = data_mapping
         FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
         logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
@@ -109,6 +112,9 @@ class ScanParser:
             sf['score'] = 10*sf['catI'] + 3*sf['catII'] + sf['catIII']
 
             for vuln in tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result", namespaces = ns):
+                if self.S2R.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents()
+                
                 idref = next(iter(vuln.xpath("./@idref", namespaces = ns)), '')
 
                 if str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:description/text()", namespaces = ns)), '')).strip() != '':
@@ -333,6 +339,9 @@ class ScanParser:
                 host_data['score'] = 10*host_data['catI'] + 3*host_data['catII'] + host_data['catIII']
                 
                 for req in host.xpath("./ReportItem"):
+                    if self.S2R.scans_to_reports:
+                        QtGui.QGuiApplication.processEvents()
+                    
                     req = {
                         'cci'              : [],
                         'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),
@@ -453,6 +462,9 @@ class ScanParser:
             sf['score'] = 10*sf['catI'] + 3*sf['catII'] + sf['catIII']
 
             for vuln in tree.xpath("//VULN"):
+                if self.S2R.scans_to_reports:
+                    QtGui.QGuiApplication.processEvents()
+                
                 rmf = ""
                 ap = ""
                 cci = str(next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='CCI_REF']/ATTRIBUTE_DATA/text()")), ''))
