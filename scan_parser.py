@@ -20,7 +20,7 @@ class ScanParser:
         self.S2R = S2R
         self.data_mapping = data_mapping
         self.application_path = application_path
-        FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
         logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
 
     def parseScap(self, filename):
@@ -218,7 +218,8 @@ class ScanParser:
 
         except Exception as e:
             sf = None
-            logging.info('Error parsing scap file %s', filename)
+            logging.error('Error parsing scap file %s', filename)
+            logging.error(str(e))
             print(filename)
             print(str(e))
 
@@ -380,7 +381,8 @@ class ScanParser:
 
         except Exception as e:
             sf = None
-            logging.info('Error parsing scap file %s', filename)
+            logging.error('Error parsing scap file %s', filename)
+            logging.error(str(e))
             print(filename)
             print(str(e))
 
@@ -519,7 +521,8 @@ class ScanParser:
 
         except Exception as e:
             sf = None
-            logging.info('Error parsing scap file %s', filename)
+            logging.error('Error parsing scap file %s', filename)
+            logging.error(str(e))
             print(filename)
             print(repr(e))
 

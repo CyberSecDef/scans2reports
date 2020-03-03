@@ -41,7 +41,7 @@ class UiAddons():
         self.main_app = main_app
         self.main_form.tbl_selected_scans.horizontalHeader().setSortIndicatorShown(True)
         self.main_form.tbl_scan_summary.horizontalHeader().setSortIndicatorShown(True)
-        FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
         logging.basicConfig(filename='{self.main_app.applcation_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
         
 

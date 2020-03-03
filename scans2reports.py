@@ -58,7 +58,7 @@ class Scans2Reports:
         else:
             self.application_path = os.path.dirname(os.path.abspath(__file__))
             
-        FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
         logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
         logging.info('Started')
         
@@ -330,7 +330,7 @@ class Scans2Reports:
             S2R.scans_to_reports.progressBar.setValue( 0 )
             QtGui.QGuiApplication.processEvents() 
                 
-        if self.input_folder.endswith('"'):
+        if self.input_folder.endswith('"') or self.input_folder.endswith("'"):
             self.input_folder = self.input_folder[:-1]
         
         self.scan_files = list( Path(self.input_folder).glob('**/*') )
@@ -368,8 +368,6 @@ class Scans2Reports:
         #wait for threads to all complete
         self.q.join()
 
-            
-        
         self.scan_results = [ i for i in self.scan_results if type(i) == ScanFile ]
             
         #show completed parse jobs
@@ -401,17 +399,24 @@ class Scans2Reports:
                 
                 if file.is_file() and all(ord(c) < 128 for c in str(file)):
                     extension = os.path.splitext(file)[1]
-                    if extension == '.xml':
+                    if 'xccdf' in str(file).lower() and extension == '.xml':
                         data = scan_parser.parseScap(file)
                     elif extension == '.ckl':
                         data = scan_parser.parseCkl(file)
                     elif extension == '.nessus':
                         data = scan_parser.parseNessus(file)
-
+                    else:
+                        data = None
+                        logging.warning(f'Skipping scan file: {str(file)}');
+                        print(f'Skipping scan file: {str(file)}')
                 if data is not None:
                     result[work[0]] = data
 
             except Exception as err:
+                logging.error('Error with scan check!')
+                logging.error(err)
+                logging.error(work[0])
+                logging.error(work[1])
                 print(err)
                 print('Error with scan check!')
                 result[work[0]] = {}

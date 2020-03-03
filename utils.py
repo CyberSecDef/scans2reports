@@ -11,7 +11,7 @@ class Utils(object):
     @staticmethod
     def update_status(application_path="", S2R=None, status=None, progress=None):
         if status:
-            FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+            FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
             logging.basicConfig(filename=f'{application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
             logging.info(status)        
             
