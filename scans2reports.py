@@ -329,7 +329,10 @@ class Scans2Reports:
             S2R.scans_to_reports.statusBar().showMessage(status)
             S2R.scans_to_reports.progressBar.setValue( 0 )
             QtGui.QGuiApplication.processEvents() 
-            
+                
+        if self.input_folder.endswith('"'):
+            self.input_folder = self.input_folder[:-1]
+        
         self.scan_files = list( Path(self.input_folder).glob('**/*') )
         self.scan_results = [{} for x in self.scan_files]
 
@@ -472,9 +475,9 @@ optional.add_argument('-e', '--email', help='Add POC Email Address to POAM')
 optional.add_argument('-s', '--scd', help='Prefill Estimated SCD to POAM', action='store_true')
 optional.add_argument('-x', '--exclude-plugins', help='Exclude plugins newer than this number of days', type=int, default=30)
 optional.add_argument('-l', '--lower-risk', help='Automatically Lower Risk on POAM', action='store_true')
-optional.add_argument('-if', '--input-folder', required=False)
-optional.add_argument('-h', '--help', action='help', default=SUPPRESS, help='show this help message and exit')
 
+optional.add_argument('-h', '--help', action='help', default=SUPPRESS, help='show this help message and exit')
+optional.add_argument('input_folder', nargs='?')
 
 # pylint: enable=C0103
 if __name__ == "__main__":
