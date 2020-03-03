@@ -29,6 +29,7 @@ import psutil
 from ui_scans_to_reports import UiScansToReports
 from ui_addons import UiAddons
 from utils import Utils
+from scan_file import ScanFile
 
 
 class Scans2Reports:
@@ -329,8 +330,7 @@ class Scans2Reports:
             S2R.scans_to_reports.progressBar.setValue( 0 )
             QtGui.QGuiApplication.processEvents() 
             
-        root_directory = Path(self.input_folder)
-        self.scan_files = list(root_directory.glob('**/*'))
+        self.scan_files = list( Path(self.input_folder).glob('**/*') )
         self.scan_results = [{} for x in self.scan_files]
 
     def parse_scan_files(self):
@@ -365,6 +365,10 @@ class Scans2Reports:
         #wait for threads to all complete
         self.q.join()
 
+            
+        
+        self.scan_results = [ i for i in self.scan_results if type(i) == ScanFile ]
+            
         #show completed parse jobs
         status = f"All scans parsed"
         logging.info(status)
@@ -400,7 +404,10 @@ class Scans2Reports:
                         data = scan_parser.parseCkl(file)
                     elif extension == '.nessus':
                         data = scan_parser.parseNessus(file)
-                result[work[0]] = data
+
+                if data is not None:
+                    result[work[0]] = data
+
             except Exception as err:
                 print(err)
                 print('Error with scan check!')

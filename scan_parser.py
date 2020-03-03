@@ -25,6 +25,7 @@ class ScanParser:
 
     def parseScap(self, filename):
         logging.info('Parsing scap file %s', filename)
+        sf = None
         try:
             with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
@@ -216,14 +217,16 @@ class ScanParser:
                 )
 
         except Exception as e:
+            sf = None
+            logging.info('Error parsing scap file %s', filename)
             print(filename)
             print(str(e))
-            pass
 
         return sf
 
     def parseNessus(self, filename):
         logging.info('Parsing ACAS File %s', filename)
+        sf = None
         try:
             with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
@@ -376,15 +379,17 @@ class ScanParser:
 
 
         except Exception as e:
+            sf = None
+            logging.info('Error parsing scap file %s', filename)
             print(filename)
             print(str(e))
-            pass
 
         return sf
 
 
     def parseCkl(self, filename):
         logging.info('Parsing CKL file %s', filename)
+        sf = None
         try:
             with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
@@ -511,12 +516,11 @@ class ScanParser:
                         'resources'     : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Responsibility']/ATTRIBUTE_DATA/text()")), ''),
                     })
                 )
-                pass
 
         except Exception as e:
+            sf = None
+            logging.info('Error parsing scap file %s', filename)
             print(filename)
             print(repr(e))
-            
-            pass
 
         return sf
