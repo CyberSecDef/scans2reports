@@ -44,31 +44,35 @@ class Scans2Reports:
     operating_mode = "console"
     ui = None
     scans_to_reports = None
+    application_path = ""
     
     def __init__(self, args):
         """ Constructor """
+        
+        if getattr(sys, 'frozen', False):
+            # If the application is run as a bundle, the pyInstaller bootloader
+            # extends the sys module by a flag frozen=True and sets the app 
+            # path into variable _MEIPASS'.
+            self.application_path = sys._MEIPASS
+        else:
+            self.application_path = os.path.dirname(os.path.abspath(__file__))
+            
         FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-        logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
+        logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
         logging.info('Started')
         
         if args.gui or args.input_folder is None:
             logging.info('Executing GUI mode')
             self.operating_mode = 'gui'
         
-        if getattr(sys, 'frozen', False):
-            # If the application is run as a bundle, the pyInstaller bootloader
-            # extends the sys module by a flag frozen=True and sets the app 
-            # path into variable _MEIPASS'.
-            application_path = sys._MEIPASS
-        else:
-            application_path = os.path.dirname(os.path.abspath(__file__))
-        logging.info('Application Path: %s', application_path)
+        
+        logging.info('Application Path: %s', self.application_path)
         
         self.num_theads = int(psutil.cpu_count()) - 2
         
         logging.info('Threads: %s', self.num_theads)
         
-        with open(os.path.join(application_path, "data/dataset.json"), "r") as read_file:
+        with open(os.path.join(self.application_path, "data/dataset.json"), "r") as read_file:
             self.data_mapping = json.load(read_file)
         
         self.contact_info = {
@@ -106,7 +110,7 @@ class Scans2Reports:
             index += 1
             
             status = f"Merging file {os.path.basename(file)} into master nessus file"
-            Utils.update_status(S2R, status, (int(100*index/total_files*.9)) ) 
+            Utils.update_status(self.application_path, S2R, status, (int(100*index/total_files*.9)) ) 
             
             with open(file, 'r', errors='replace', encoding='utf-8') as content_file:
                 content = content_file.readlines()
@@ -157,7 +161,7 @@ class Scans2Reports:
 
         if host_count == 0:
             status = f"Updating Server Preferences"
-            Utils.update_status(S2R, status )
+            Utils.update_status(self.application_path, S2R, status )
                         
             report_name = "{}/results/{}".format( os.path.dirname(os.path.realpath(__file__)), datetime.datetime.now().strftime("merged-%Y%m%d_%H%M%S.nessus") )
             report_task_id = "{}-{}-{}-{}-{}-{}".format( secrets.token_hex(4), secrets.token_hex(2), secrets.token_hex(2), secrets.token_hex(2), secrets.token_hex(2), secrets.token_hex(14) )         
@@ -184,7 +188,7 @@ class Scans2Reports:
                 target_node[0].text = ",".join(targets)
             
             status = f"Saving merged Nessus file to results folder"
-            Utils.update_status(S2R, status )
+            Utils.update_status(self.application_path, S2R, status )
             
             merged_tree = master_nessus.getroottree()
             merged_tree.write(report_name)
@@ -197,7 +201,7 @@ class Scans2Reports:
                 
             while current_chunk <= total_hosts:
                 status = f"Saving hosts {current_chunk} to {(current_chunk + host_count - 1)}"
-                Utils.update_status(S2R, status )
+                Utils.update_status(self.application_path, S2R, status )
             
                 chunked_nessus = copy.deepcopy(master_nessus)
                 count = 1
@@ -249,7 +253,7 @@ class Scans2Reports:
             
             
         status = "Merged Nessus File is in results folder"
-        Utils.update_status(S2R, status, 0 )
+        Utils.update_status(self.application_path, S2R, status, 0 )
             
             
     def split_nessus_file(self, file):
@@ -351,9 +355,9 @@ class Scans2Reports:
             worker.start()
         
         #make sure the main gui doesn't get blocked while waiting for queue to finish
-        while self.q.qsize() > 0:
-            if S2R.scans_to_reports:
-                #S2R.scans_to_reports.statusBar().showMessage(status)
+        if S2R.scans_to_reports:
+            while self.q.qsize() > 0:
+                S2R.scans_to_reports.statusBar().showMessage(status)
                 S2R.scans_to_reports.progressBar.setValue( ( num_files - self.q.qsize())/num_files * 100 )
                 QtGui.QGuiApplication.processEvents() 
                 time.sleep(1)
@@ -374,7 +378,7 @@ class Scans2Reports:
         """ Create / Start parsing thread """
         logging.info('Starting Parse Thread')
         
-        scan_parser = ScanParser(self.data_mapping, S2R)
+        scan_parser = ScanParser(self.application_path, self.data_mapping, S2R)
 
         while not queue.empty():
             work = queue.get()
@@ -417,6 +421,7 @@ class Scans2Reports:
         logging.info('Generating Reports')
         
         reports = Reports(
+            self.application_path,
             self.scan_results,
             self.data_mapping,
             self.contact_info,

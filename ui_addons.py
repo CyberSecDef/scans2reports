@@ -37,12 +37,13 @@ class UiAddons():
     tbl_scan_summary_sort_order = 0
     
     def __init__(self,main_app, main_form):
-        FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-        logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
         self.main_form = main_form
         self.main_app = main_app
         self.main_form.tbl_selected_scans.horizontalHeader().setSortIndicatorShown(True)
         self.main_form.tbl_scan_summary.horizontalHeader().setSortIndicatorShown(True)
+        FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        logging.basicConfig(filename='{self.main_app.applcation_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
+        
 
     def btn_select_scan_files_on_click(self):
         logging.info('Select Scan Files Clicked')

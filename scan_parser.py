@@ -14,11 +14,14 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class ScanParser:
     data_mapping = {}
     S2R = None
-    def __init__(self, data_mapping, S2R):
+    application_path = ""
+    
+    def __init__(self, application_path, data_mapping, S2R):
         self.S2R = S2R
         self.data_mapping = data_mapping
+        self.application_path = application_path
         FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-        logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
+        logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
 
     def parseScap(self, filename):
         logging.info('Parsing scap file %s', filename)

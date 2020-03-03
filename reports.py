@@ -26,11 +26,13 @@ class Reports:
         'STIG' : 'Security Technical Implementation Guide',
         'IGN_SOFT' : r'/driver|library|framework|patch|update|runtime|chipset|redistributable|kb[0-9]+'
     }
+    application_path = ""
 
-    def __init__(self, scan_results, data_mapping, contact_info, poam_conf, scans_to_reports=None):
+    def __init__(self, application_path, scan_results, data_mapping, contact_info, poam_conf, scans_to_reports=None):
         """ constructor """
+        self.application_path = application_path
         FORMAT = "[%(asctime)s | %(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
-        logging.basicConfig(filename='scans2reports.log', level=logging.INFO, format=FORMAT)
+        logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
         logging.info('Building Reports Object')
         self.scan_results = scan_results
 
