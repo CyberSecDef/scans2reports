@@ -1,59 +1,59 @@
-<li> <a href="http://github.com/jerel/<project>/commit/5d23d868b5fe12f25208072a2af6bbc1f32d8d3a">view commit &bull;</a> Initial commit</li>
-<li> <a href="http://github.com/jerel/<project>/commit/78ca390bc25f73ae01067a7bcc6f5bc8b773fe90">view commit &bull;</a> Initial Commit</li>
-<li> <a href="http://github.com/jerel/<project>/commit/85e6058f1f21d917a260d64fdfd0b28f92e0d0e9">view commit &bull;</a> Create dataset.json</li>
-<li> <a href="http://github.com/jerel/<project>/commit/19ec23ab552de6baa0e5f3ce46c5279d6af8ebfd">view commit &bull;</a> Add files via upload</li>
-<li> <a href="http://github.com/jerel/<project>/commit/66ceee3514fa9c7554aba33e5425cdeecd344d98">view commit &bull;</a> Create results.txt</li>
-<li> <a href="http://github.com/jerel/<project>/commit/f70090e12fc0d4ad5f583cf45a9aa1f122681f49">view commit &bull;</a> Create LICENSE.md</li>
-<li> <a href="http://github.com/jerel/<project>/commit/ee91a9ceaa8b78943f78eed32e8a36bcfcdcfe24">view commit &bull;</a> Create CONTRIBUTING.md</li>
-<li> <a href="http://github.com/jerel/<project>/commit/e99691968547e8219fefdd34938b27f127d41724">view commit &bull;</a> Removed bad reference</li>
-<li> <a href="http://github.com/jerel/<project>/commit/c645fb9efef9e6b52c90842e5d0477bd553e4c75">view commit &bull;</a> Fixes #1</li>
-<li> <a href="http://github.com/jerel/<project>/commit/af67b3c963257fd40afcac06cf7bdac23d2e7080">view commit &bull;</a> Fixes #2 Changed Status for human readable exports Added ignore file for results folder Updated parser to better handle malformed CKL files</li>
-<li> <a href="http://github.com/jerel/<project>/commit/a62139717c6e84ea3591a475c863aa93aedca5db">view commit &bull;</a> Adding gitignore</li>
-<li> <a href="http://github.com/jerel/<project>/commit/87d7aca8ab3946bf811608b241283d98f2176534">view commit &bull;</a> Fixes #3 Updated column header</li>
-<li> <a href="http://github.com/jerel/<project>/commit/c9a0bcfc628ddf68381e5ff8affb5df5c2fe1d5a">view commit &bull;</a> Fixes #4 Added 'description' field to POAM for ACAS scans</li>
-<li> <a href="http://github.com/jerel/<project>/commit/2e135b8c8df33fced2fc6465408ebbbd8faa7a28">view commit &bull;</a> Fixes #5 Fixed typo on Select Scan Files button</li>
-<li> <a href="http://github.com/jerel/<project>/commit/adba35afffdd59cf6bd58b4c11f2e782b4fa523f">view commit &bull;</a> Fixes #6 Extended auto filter to all columns</li>
-<li> <a href="http://github.com/jerel/<project>/commit/3d7aec46428bc5b25cbb65e9cf8fe230dba91fc3">view commit &bull;</a> Fixes #8</li>
-<li> <a href="http://github.com/jerel/<project>/commit/ed7fbb594c2aa7bbd40ff980553926fa00f6aa0f">view commit &bull;</a> Fixes #9 Removed all calls to https://cyber.trackr.live Removed all 'requests' modules</li>
-<li> <a href="http://github.com/jerel/<project>/commit/5b1fa6f26fa69e9bc0e3fbb3fb683eba6b0c1d82">view commit &bull;</a> Fixes #13 Added alignment to POAM and RAR tabs</li>
-<li> <a href="http://github.com/jerel/<project>/commit/96cff37333a87d9d4dd3d13209ec21d685097596">view commit &bull;</a> Fixes #12</li>
-<li> <a href="http://github.com/jerel/<project>/commit/6e6fd50a7891e7b016215ea9e74910098b4aab5e">view commit &bull;</a> Also Fixes #12 Added exclusion filter to RAR tab</li>
-<li> <a href="http://github.com/jerel/<project>/commit/9bbe2a9d02ec6a4b94b9a825186502faa846502e">view commit &bull;</a> Also Fixes #12</li>
-<li> <a href="http://github.com/jerel/<project>/commit/b99eed5aaec31cc05538dfb6438dc17fe4a69e46">view commit &bull;</a> Fixes #11</li>
-<li> <a href="http://github.com/jerel/<project>/commit/ed736fd768aaab8f29ea0321f4dc2adee910840c">view commit &bull;</a> Fixed #17 Added logging functionality</li>
-<li> <a href="http://github.com/jerel/<project>/commit/3b07015f6ed351cb5b269244f0de1fa1afe45842">view commit &bull;</a> Fixed #14</li>
-<li> <a href="http://github.com/jerel/<project>/commit/33b83e045791bd5677f08fa7f9e6db970d82c652">view commit &bull;</a> Delete LICENSE.md</li>
-<li> <a href="http://github.com/jerel/<project>/commit/11f0aa80f83f75ca9740393351f7c5938d563f19">view commit &bull;</a> Create LICENSE</li>
-<li> <a href="http://github.com/jerel/<project>/commit/f1454534dfc80360af0609af6f9ff2970a672edc">view commit &bull;</a> Delete CONTRIBUTING.md</li>
-<li> <a href="http://github.com/jerel/<project>/commit/4be3fbc7c8d7bfe7437d2c8d8166eef7ee50eb33">view commit &bull;</a> Create CONTRIBUTING.MD</li>
-<li> <a href="http://github.com/jerel/<project>/commit/bc20255742791035359987e0619e9b50075079cf">view commit &bull;</a> Rename LICENSE to LICENSE.MD</li>
-<li> <a href="http://github.com/jerel/<project>/commit/e182ef641dc46e052754a0d67cae9ab404f62fd9">view commit &bull;</a> Delete scans2reports.spec</li>
-<li> <a href="http://github.com/jerel/<project>/commit/05be2dcf7e9f21d0b3fa489e246822d8512b2506">view commit &bull;</a> Project Cleanup</li>
-<li> <a href="http://github.com/jerel/<project>/commit/c4db47c1b4e7da2e45a43a4f59650790ce094c16">view commit &bull;</a> Project Cleanup</li>
-<li> <a href="http://github.com/jerel/<project>/commit/9e3b6a4204d78ce6b2c7605b6534c9ece8220d8b">view commit &bull;</a> Merge branch 'master' of https://github.com/CyberSecDef/scans2reports</li>
-<li> <a href="http://github.com/jerel/<project>/commit/5ddb0464d7f64548a2143b59923b217548ca4269">view commit &bull;</a> Changed perms on build scripts</li>
-<li> <a href="http://github.com/jerel/<project>/commit/72b75969b67fb3b0f81889664d4bdbd6979fbcdf">view commit &bull;</a> Project updates</li>
-<li> <a href="http://github.com/jerel/<project>/commit/b1a0186bc68e4151a081c5bbf789728a692e217d">view commit &bull;</a> Fixes #26 Fixes #24</li>
-<li> <a href="http://github.com/jerel/<project>/commit/108927006a6d882001fb01939be4e68cf2e004bd">view commit &bull;</a> Fixes #23</li>
-<li> <a href="http://github.com/jerel/<project>/commit/acdb5afdefa762e626553a496ef520eca9f200e0">view commit &bull;</a> Fixes #22 Dropped the Policy field from the Source column in the POAM tab</li>
-<li> <a href="http://github.com/jerel/<project>/commit/161cc38d24dec0fe3e7fa8d2b7381f8a6eec41d6">view commit &bull;</a> Fixes #21</li>
-<li> <a href="http://github.com/jerel/<project>/commit/0e32f7dab426042e4650f55a4f922f30f898dde3">view commit &bull;</a> Fixes #28</li>
-<li> <a href="http://github.com/jerel/<project>/commit/d30f531811a96b252056a4fa5104b34f45821af0">view commit &bull;</a> Fixes #27</li>
-<li> <a href="http://github.com/jerel/<project>/commit/3bcd576158630a3d38a67daf11a69d908e4078c8">view commit &bull;</a> Fixes #19</li>
-<li> <a href="http://github.com/jerel/<project>/commit/ffdda5cfc7bd922aed79a176aa86e9261f072363">view commit &bull;</a> Fixed #20</li>
-<li> <a href="http://github.com/jerel/<project>/commit/7920079ea6602f8676ec33e7d7cac388db80e883">view commit &bull;</a> Addresses #31</li>
-<li> <a href="http://github.com/jerel/<project>/commit/c0be6606addae0f014988c0713ee5692bb64b1ec">view commit &bull;</a> Refs #31</li>
-<li> <a href="http://github.com/jerel/<project>/commit/c1cb69ef9a614e3b480b07ba3f0462d2d3566725">view commit &bull;</a> Fixes #36</li>
-<li> <a href="http://github.com/jerel/<project>/commit/bce510c52322df58b3456f5be4fde412b9c06964">view commit &bull;</a> Fixes #34</li>
-<li> <a href="http://github.com/jerel/<project>/commit/bcfbd54c24a71a7d94154add94d6915cbef18496">view commit &bull;</a> Fixes #37</li>
-<li> <a href="http://github.com/jerel/<project>/commit/79885d6c7203a4c82e8b1fd58f8ea6639e07239d">view commit &bull;</a> Fixes #31</li>
-<li> <a href="http://github.com/jerel/<project>/commit/40da714211cb181b04dd43024ec73afa02227877">view commit &bull;</a> References #38 Updated threading system to efficiently handle multiple threads Updated executtion process to keep the GUI from locking up Ready for beta testing</li>
-<li> <a href="http://github.com/jerel/<project>/commit/5ae0bf7c4fe1b199ee6d50ccceb32394cbcae80b">view commit &bull;</a> Fixes #33</li>
-<li> <a href="http://github.com/jerel/<project>/commit/71ff0d856b508b5311d1e5648f5420c47e6fad1c">view commit &bull;</a> Fixes #18</li>
-<li> <a href="http://github.com/jerel/<project>/commit/a3605c15cf7c6d76b7f36537b4c5f2b046da0269">view commit &bull;</a> Fixes #42 Added full path to logfile (application_path) for all callers.</li>
-<li> <a href="http://github.com/jerel/<project>/commit/77a6d14ca4fb6c86d0269ae768e3642e105e906a">view commit &bull;</a> Fixes #40 Reports would fail to generate if a parsed scan result wasn't a valid scan result. Added better 'tests' and catches to prevent invalid files from making it to the result set.</li>
-<li> <a href="http://github.com/jerel/<project>/commit/f4976e2d087c0f1504e22afa6c43fa011fa38224">view commit &bull;</a> Fixes #41 This was a problem with the shell escaping the last double quote. Updated arguments to take the folder position as the final positional argument vice a named argument updated input_folder parser to strip a quote from end of the input_folder argument</li>
-<li> <a href="http://github.com/jerel/<project>/commit/4e400666478edb4c4a9c7494f41629cadc05628a">view commit &bull;</a> Fixes #29 Revamped logging system</li>
-<li> <a href="http://github.com/jerel/<project>/commit/98e3a9b25cb61098f8f9435322a7d003b29d8b81">view commit &bull;</a> Fixes #45 Added option to skip non-required informational findings.  This is a major performance increase!</li>
-<li> <a href="http://github.com/jerel/<project>/commit/48feb59af8c6410674c0c20cfaf7806719b8ff6d">view commit &bull;</a> References #44 Added test to ensure files dropped were not null.  This might fix the odd application crash.  Will await testing</li>
-<li> <a href="http://github.com/jerel/<project>/commit/a64949ec89fba6ce3ce6b6059ac56eb4ad24324e">view commit &bull;</a> Fixes #39 Added column to the Summary page to show the number of CKLs with no comments or finding details</li>
+* [Initial commit](https://github.com/CyberSecDef/scans2reports/commit/5d23d868b5fe12f25208072a2af6bbc1f32d8d3a)
+* [Initial Commit](https://github.com/CyberSecDef/scans2reports/commit/78ca390bc25f73ae01067a7bcc6f5bc8b773fe90)
+* [Create dataset.json](https://github.com/CyberSecDef/scans2reports/commit/85e6058f1f21d917a260d64fdfd0b28f92e0d0e9)
+* [Add files via upload](https://github.com/CyberSecDef/scans2reports/commit/19ec23ab552de6baa0e5f3ce46c5279d6af8ebfd)
+* [Create results.txt](https://github.com/CyberSecDef/scans2reports/commit/66ceee3514fa9c7554aba33e5425cdeecd344d98)
+* [Create LICENSE.md](https://github.com/CyberSecDef/scans2reports/commit/f70090e12fc0d4ad5f583cf45a9aa1f122681f49)
+* [Create CONTRIBUTING.md](https://github.com/CyberSecDef/scans2reports/commit/ee91a9ceaa8b78943f78eed32e8a36bcfcdcfe24)
+* [Removed bad reference](https://github.com/CyberSecDef/scans2reports/commit/e99691968547e8219fefdd34938b27f127d41724)
+* [Fixes #1](https://github.com/CyberSecDef/scans2reports/commit/c645fb9efef9e6b52c90842e5d0477bd553e4c75)
+* [Fixes #2 Changed Status for human readable exports Added ignore file for results folder Updated parser to better handle malformed CKL files](https://github.com/CyberSecDef/scans2reports/commit/af67b3c963257fd40afcac06cf7bdac23d2e7080)
+* [Adding gitignore](https://github.com/CyberSecDef/scans2reports/commit/a62139717c6e84ea3591a475c863aa93aedca5db)
+* [Fixes #3 Updated column header](https://github.com/CyberSecDef/scans2reports/commit/87d7aca8ab3946bf811608b241283d98f2176534)
+* [Fixes #4 Added 'description' field to POAM for ACAS scans](https://github.com/CyberSecDef/scans2reports/commit/c9a0bcfc628ddf68381e5ff8affb5df5c2fe1d5a)
+* [Fixes #5 Fixed typo on Select Scan Files button](https://github.com/CyberSecDef/scans2reports/commit/2e135b8c8df33fced2fc6465408ebbbd8faa7a28)
+* [Fixes #6 Extended auto filter to all columns](https://github.com/CyberSecDef/scans2reports/commit/adba35afffdd59cf6bd58b4c11f2e782b4fa523f)
+* [Fixes #8](https://github.com/CyberSecDef/scans2reports/commit/3d7aec46428bc5b25cbb65e9cf8fe230dba91fc3)
+* [Fixes #9 Removed all calls to https://cyber.trackr.live Removed all 'requests' modules](https://github.com/CyberSecDef/scans2reports/commit/ed7fbb594c2aa7bbd40ff980553926fa00f6aa0f)
+* [Fixes #13 Added alignment to POAM and RAR tabs](https://github.com/CyberSecDef/scans2reports/commit/5b1fa6f26fa69e9bc0e3fbb3fb683eba6b0c1d82)
+* [Fixes #12](https://github.com/CyberSecDef/scans2reports/commit/96cff37333a87d9d4dd3d13209ec21d685097596)
+* [Also Fixes #12 Added exclusion filter to RAR tab](https://github.com/CyberSecDef/scans2reports/commit/6e6fd50a7891e7b016215ea9e74910098b4aab5e)
+* [Also Fixes #12](https://github.com/CyberSecDef/scans2reports/commit/9bbe2a9d02ec6a4b94b9a825186502faa846502e)
+* [Fixes #11](https://github.com/CyberSecDef/scans2reports/commit/b99eed5aaec31cc05538dfb6438dc17fe4a69e46)
+* [Fixed #17 Added logging functionality](https://github.com/CyberSecDef/scans2reports/commit/ed736fd768aaab8f29ea0321f4dc2adee910840c)
+* [Fixed #14](https://github.com/CyberSecDef/scans2reports/commit/3b07015f6ed351cb5b269244f0de1fa1afe45842)
+* [Delete LICENSE.md](https://github.com/CyberSecDef/scans2reports/commit/33b83e045791bd5677f08fa7f9e6db970d82c652)
+* [Create LICENSE](https://github.com/CyberSecDef/scans2reports/commit/11f0aa80f83f75ca9740393351f7c5938d563f19)
+* [Delete CONTRIBUTING.md](https://github.com/CyberSecDef/scans2reports/commit/f1454534dfc80360af0609af6f9ff2970a672edc)
+* [Create CONTRIBUTING.MD](https://github.com/CyberSecDef/scans2reports/commit/4be3fbc7c8d7bfe7437d2c8d8166eef7ee50eb33)
+* [Rename LICENSE to LICENSE.MD](https://github.com/CyberSecDef/scans2reports/commit/bc20255742791035359987e0619e9b50075079cf)
+* [Delete scans2reports.spec](https://github.com/CyberSecDef/scans2reports/commit/e182ef641dc46e052754a0d67cae9ab404f62fd9)
+* [Project Cleanup](https://github.com/CyberSecDef/scans2reports/commit/05be2dcf7e9f21d0b3fa489e246822d8512b2506)
+* [Project Cleanup](https://github.com/CyberSecDef/scans2reports/commit/c4db47c1b4e7da2e45a43a4f59650790ce094c16)
+* [Merge branch 'master' of https://github.com/CyberSecDef/scans2reports](https://github.com/CyberSecDef/scans2reports/commit/9e3b6a4204d78ce6b2c7605b6534c9ece8220d8b)
+* [Changed perms on build scripts](https://github.com/CyberSecDef/scans2reports/commit/5ddb0464d7f64548a2143b59923b217548ca4269)
+* [Project updates](https://github.com/CyberSecDef/scans2reports/commit/72b75969b67fb3b0f81889664d4bdbd6979fbcdf)
+* [Fixes #26 Fixes #24](https://github.com/CyberSecDef/scans2reports/commit/b1a0186bc68e4151a081c5bbf789728a692e217d)
+* [Fixes #23](https://github.com/CyberSecDef/scans2reports/commit/108927006a6d882001fb01939be4e68cf2e004bd)
+* [Fixes #22 Dropped the Policy field from the Source column in the POAM tab](https://github.com/CyberSecDef/scans2reports/commit/acdb5afdefa762e626553a496ef520eca9f200e0)
+* [Fixes #21](https://github.com/CyberSecDef/scans2reports/commit/161cc38d24dec0fe3e7fa8d2b7381f8a6eec41d6)
+* [Fixes #28](https://github.com/CyberSecDef/scans2reports/commit/0e32f7dab426042e4650f55a4f922f30f898dde3)
+* [Fixes #27](https://github.com/CyberSecDef/scans2reports/commit/d30f531811a96b252056a4fa5104b34f45821af0)
+* [Fixes #19](https://github.com/CyberSecDef/scans2reports/commit/3bcd576158630a3d38a67daf11a69d908e4078c8)
+* [Fixed #20](https://github.com/CyberSecDef/scans2reports/commit/ffdda5cfc7bd922aed79a176aa86e9261f072363)
+* [Addresses #31](https://github.com/CyberSecDef/scans2reports/commit/7920079ea6602f8676ec33e7d7cac388db80e883)
+* [Refs #31](https://github.com/CyberSecDef/scans2reports/commit/c0be6606addae0f014988c0713ee5692bb64b1ec)
+* [Fixes #36](https://github.com/CyberSecDef/scans2reports/commit/c1cb69ef9a614e3b480b07ba3f0462d2d3566725)
+* [Fixes #34](https://github.com/CyberSecDef/scans2reports/commit/bce510c52322df58b3456f5be4fde412b9c06964)
+* [Fixes #37](https://github.com/CyberSecDef/scans2reports/commit/bcfbd54c24a71a7d94154add94d6915cbef18496)
+* [Fixes #31](https://github.com/CyberSecDef/scans2reports/commit/79885d6c7203a4c82e8b1fd58f8ea6639e07239d)
+* [References #38 Updated threading system to efficiently handle multiple threads Updated executtion process to keep the GUI from locking up Ready for beta testing](https://github.com/CyberSecDef/scans2reports/commit/40da714211cb181b04dd43024ec73afa02227877)
+* [Fixes #33](https://github.com/CyberSecDef/scans2reports/commit/5ae0bf7c4fe1b199ee6d50ccceb32394cbcae80b)
+* [Fixes #18](https://github.com/CyberSecDef/scans2reports/commit/71ff0d856b508b5311d1e5648f5420c47e6fad1c)
+* [Fixes #42 Added full path to logfile (application_path) for all callers.](https://github.com/CyberSecDef/scans2reports/commit/a3605c15cf7c6d76b7f36537b4c5f2b046da0269)
+* [Fixes #40 Reports would fail to generate if a parsed scan result wasn't a valid scan result. Added better 'tests' and catches to prevent invalid files from making it to the result set.](https://github.com/CyberSecDef/scans2reports/commit/77a6d14ca4fb6c86d0269ae768e3642e105e906a)
+* [Fixes #41 This was a problem with the shell escaping the last double quote. Updated arguments to take the folder position as the final positional argument vice a named argument updated input_folder parser to strip a quote from end of the input_folder argument](https://github.com/CyberSecDef/scans2reports/commit/f4976e2d087c0f1504e22afa6c43fa011fa38224)
+* [Fixes #29 Revamped logging system](https://github.com/CyberSecDef/scans2reports/commit/4e400666478edb4c4a9c7494f41629cadc05628a)
+* [Fixes #45 Added option to skip non-required informational findings.  This is a major performance increase!](https://github.com/CyberSecDef/scans2reports/commit/98e3a9b25cb61098f8f9435322a7d003b29d8b81)
+* [References #44 Added test to ensure files dropped were not null.  This might fix the odd application crash.  Will await testing](https://github.com/CyberSecDef/scans2reports/commit/48feb59af8c6410674c0c20cfaf7806719b8ff6d)
+* [Fixes #39 Added column to the Summary page to show the number of CKLs with no comments or finding details](https://github.com/CyberSecDef/scans2reports/commit/a64949ec89fba6ce3ce6b6059ac56eb4ad24324e)
