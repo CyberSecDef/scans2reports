@@ -14,12 +14,18 @@ class UiScansToReports(object):
     def setupUi(self, ScansToReports):
         ScansToReports.setObjectName("ScansToReports")
         ScansToReports.resize(934, 823)
+        ScansToReports.setStyleSheet("background: #ffffff;")
         self.main_content = QtWidgets.QWidget(ScansToReports)
         self.main_content.setStyleSheet("")
         self.main_content.setObjectName("main_content")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.main_content)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.grp_selected_scans = QtWidgets.QGroupBox(self.main_content)
+        self.grp_selected_scans.setStyleSheet("QGroupBox{\n"
+"background-color: #c1dbc7;\n"
+"border-radius:15px;\n"
+"border:1px solid #000000;\n"
+"}")
         self.grp_selected_scans.setObjectName("grp_selected_scans")
         self.gridLayout_7 = QtWidgets.QGridLayout(self.grp_selected_scans)
         self.gridLayout_7.setContentsMargins(0, 0, 12, 0)
@@ -29,7 +35,14 @@ class UiScansToReports(object):
         self.tbl_selected_scans = QtWidgets.QTableWidget(self.grp_selected_scans)
         self.tbl_selected_scans.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.tbl_selected_scans.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-        self.tbl_selected_scans.setStyleSheet("QHeaderView::section{\n"
+        self.tbl_selected_scans.setStyleSheet("QTableWidget{\n"
+"background:#ffffff;\n"
+"border-radius:0px;\n"
+"border: 1px solid black;\n"
+"margin-left:10px;\n"
+"margin-bottom:10px;\n"
+"}\n"
+"QHeaderView::section{\n"
 "            border-top:0px solid #D8D8D8;\n"
 "            border-left:0px solid #D8D8D8;\n"
 "            border-right:1px solid #D8D8D8;\n"
@@ -50,20 +63,26 @@ class UiScansToReports(object):
         self.tbl_selected_scans.setRowCount(0)
         self.grid_selected_scans.addWidget(self.tbl_selected_scans, 0, 0, 1, 1)
         self.btn_parse_scan_files = QtWidgets.QPushButton(self.grp_selected_scans)
-        self.btn_parse_scan_files.setMinimumSize(QtCore.QSize(150, 150))
-        self.btn_parse_scan_files.setMaximumSize(QtCore.QSize(150, 150))
+        self.btn_parse_scan_files.setMinimumSize(QtCore.QSize(50, 150))
+        self.btn_parse_scan_files.setMaximumSize(QtCore.QSize(50, 150))
         font = QtGui.QFont()
         font.setFamily("Arial")
-        font.setPointSize(20)
+        font.setPointSize(14)
         self.btn_parse_scan_files.setFont(font)
         self.btn_parse_scan_files.setStyleSheet("background-color: rgb(30, 126, 52);\n"
 "color: #ffffff;\n"
-"font-size:20pt;")
+"border-radius: 15px;\n"
+"font-size:14pt;")
         self.btn_parse_scan_files.setObjectName("btn_parse_scan_files")
         self.grid_selected_scans.addWidget(self.btn_parse_scan_files, 0, 1, 1, 1)
         self.gridLayout_7.addLayout(self.grid_selected_scans, 0, 0, 1, 1)
         self.gridLayout_2.addWidget(self.grp_selected_scans, 1, 0, 1, 2)
         self.grp_scan_summary = QtWidgets.QGroupBox(self.main_content)
+        self.grp_scan_summary.setStyleSheet("QGroupBox{\n"
+"background: #f5d7d9;\n"
+"border-radius:15px;\n"
+"border:1px solid #000000;\n"
+"}")
         self.grp_scan_summary.setObjectName("grp_scan_summary")
         self.gridLayout_9 = QtWidgets.QGridLayout(self.grp_scan_summary)
         self.gridLayout_9.setContentsMargins(0, 0, 12, 0)
@@ -72,7 +91,14 @@ class UiScansToReports(object):
         self.grid_scan_summary.setObjectName("grid_scan_summary")
         self.tbl_scan_summary = QtWidgets.QTableWidget(self.grp_scan_summary)
         self.tbl_scan_summary.setFocusPolicy(QtCore.Qt.ClickFocus)
-        self.tbl_scan_summary.setStyleSheet("QHeaderView::section{\n"
+        self.tbl_scan_summary.setStyleSheet("QTableWidget{\n"
+"background: #ffffff;\n"
+"border-radius: 0px;\n"
+"margin-left:10px;\n"
+"margin-bottom:10px;\n"
+"border: 1px solid black;\n"
+"}\n"
+"QHeaderView::section{\n"
 "            border-top:0px solid #D8D8D8;\n"
 "            border-left:0px solid #D8D8D8;\n"
 "            border-right:1px solid #D8D8D8;\n"
@@ -93,17 +119,18 @@ class UiScansToReports(object):
         self.tbl_scan_summary.setRowCount(0)
         self.grid_scan_summary.addWidget(self.tbl_scan_summary, 0, 0, 1, 1)
         self.btn_execute = QtWidgets.QPushButton(self.grp_scan_summary)
-        self.btn_execute.setMinimumSize(QtCore.QSize(150, 150))
-        self.btn_execute.setMaximumSize(QtCore.QSize(150, 150))
+        self.btn_execute.setMinimumSize(QtCore.QSize(50, 150))
+        self.btn_execute.setMaximumSize(QtCore.QSize(50, 150))
         font = QtGui.QFont()
         font.setFamily("Arial")
-        font.setPointSize(20)
+        font.setPointSize(14)
         font.setBold(False)
         font.setWeight(50)
         self.btn_execute.setFont(font)
         self.btn_execute.setStyleSheet("background-color: rgb(200, 35, 51);\n"
 "color: #ffffff;\n"
-"font-size:20pt;")
+"border-radius: 15px;\n"
+"font-size:14pt;")
         self.btn_execute.setObjectName("btn_execute")
         self.grid_scan_summary.addWidget(self.btn_execute, 0, 1, 1, 1)
         self.gridLayout_9.addLayout(self.grid_scan_summary, 0, 0, 1, 1)
@@ -115,6 +142,7 @@ class UiScansToReports(object):
 "background: rgb(226, 240, 251); \n"
 "border:1px solid #000000;\n"
 "padding-top:10px;\n"
+"border-radius:15px;\n"
 "}")
         self.grp_file_drop.setObjectName("grp_file_drop")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.grp_file_drop)
@@ -151,7 +179,7 @@ class UiScansToReports(object):
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.ButtonText, brush)
-        brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
+        brush = QtGui.QBrush(QtGui.QColor(226, 240, 251))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Active, QtGui.QPalette.Base, brush)
         brush = QtGui.QBrush(QtGui.QColor(226, 240, 251))
@@ -199,7 +227,7 @@ class UiScansToReports(object):
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.ButtonText, brush)
-        brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
+        brush = QtGui.QBrush(QtGui.QColor(226, 240, 251))
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Inactive, QtGui.QPalette.Base, brush)
         brush = QtGui.QBrush(QtGui.QColor(226, 240, 251))
@@ -270,32 +298,35 @@ class UiScansToReports(object):
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.PlaceholderText, brush)
         self.frm_file_drop.setPalette(palette)
         self.frm_file_drop.setAcceptDrops(False)
-        self.frm_file_drop.setAutoFillBackground(True)
-        self.frm_file_drop.setStyleSheet("")
+        self.frm_file_drop.setAutoFillBackground(False)
+        self.frm_file_drop.setStyleSheet("background: rgb(226, 240, 251); ")
         self.frm_file_drop.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frm_file_drop.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frm_file_drop.setObjectName("frm_file_drop")
         self.gridLayout = QtWidgets.QGridLayout(self.frm_file_drop)
         self.gridLayout.setObjectName("gridLayout")
-        self.lbl_file_drop = FileDrop( QtWidgets.QLabel(self.frm_file_drop), self )
-        self.lbl_file_drop.setMinimumSize(QtCore.QSize(200, 150))
+        self.btn_select_scan_files = QtWidgets.QPushButton(self.frm_file_drop)
+        self.btn_select_scan_files.setMinimumSize(QtCore.QSize(50, 150))
+        self.btn_select_scan_files.setMaximumSize(QtCore.QSize(50, 150))
+        self.btn_select_scan_files.setStyleSheet("background-color: rgb(0, 98, 204);\n"
+"color: #ffffff;\n"
+"border-radius: 15px;\n"
+"font-size:14pt;")
+        self.btn_select_scan_files.setObjectName("btn_select_scan_files")
+        self.gridLayout.addWidget(self.btn_select_scan_files, 0, 2, 1, 1)
+        self.lbl_file_drop = FileDrop(QtWidgets.QLabel(self.frm_file_drop), self)
+        self.lbl_file_drop.setMinimumSize(QtCore.QSize(200, 250))
         self.lbl_file_drop.setAcceptDrops(True)
         self.lbl_file_drop.setStyleSheet("QLabel#lbl_file_drop{\n"
 "border: 1px dashed #3490dc;\n"
 "font-size:12px;\n"
+"background: #d2e0fb;\n"
+"border-radius:15px;\n"
 "}")
         self.lbl_file_drop.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_file_drop.setWordWrap(True)
         self.lbl_file_drop.setObjectName("lbl_file_drop")
         self.gridLayout.addWidget(self.lbl_file_drop, 0, 0, 1, 1)
-        self.btn_select_scan_files = QtWidgets.QPushButton(self.frm_file_drop)
-        self.btn_select_scan_files.setMinimumSize(QtCore.QSize(150, 150))
-        self.btn_select_scan_files.setMaximumSize(QtCore.QSize(150, 150))
-        self.btn_select_scan_files.setStyleSheet("background-color: rgb(0, 98, 204);\n"
-"color: #ffffff;\n"
-"font-size:20pt;")
-        self.btn_select_scan_files.setObjectName("btn_select_scan_files")
-        self.gridLayout.addWidget(self.btn_select_scan_files, 0, 1, 1, 1)
         self.grid_file_drop.addWidget(self.frm_file_drop, 1, 0, 1, 1)
         self.verticalLayout.addLayout(self.grid_file_drop)
         self.gridLayout_2.addWidget(self.grp_file_drop, 0, 1, 1, 1)
@@ -303,18 +334,27 @@ class UiScansToReports(object):
         self.grid_data_points.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
         self.grid_data_points.setObjectName("grid_data_points")
         self.grp_data_points = QtWidgets.QGroupBox(self.main_content)
-        self.grp_data_points.setMinimumSize(QtCore.QSize(400, 0))
-        self.grp_data_points.setMaximumSize(QtCore.QSize(400, 16777215))
+        self.grp_data_points.setMinimumSize(QtCore.QSize(300, 0))
+        self.grp_data_points.setMaximumSize(QtCore.QSize(350, 16777215))
+        self.grp_data_points.setStyleSheet("QGroupBox{\n"
+"background: #fbecd8;\n"
+"border:1px solid #000000;\n"
+"padding-top:10px;\n"
+"border-radius: 15px;\n"
+"}")
         self.grp_data_points.setObjectName("grp_data_points")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.grp_data_points)
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.chk_lower_risk = QtWidgets.QCheckBox(self.grp_data_points)
         self.chk_lower_risk.setMinimumSize(QtCore.QSize(0, 25))
         self.chk_lower_risk.setMaximumSize(QtCore.QSize(16777215, 25))
+        self.chk_lower_risk.setStyleSheet("background: #fbecd8;")
         self.chk_lower_risk.setChecked(True)
         self.chk_lower_risk.setObjectName("chk_lower_risk")
         self.gridLayout_3.addWidget(self.chk_lower_risk, 5, 1, 1, 1)
         self.spnExcludeDays = QtWidgets.QSpinBox(self.grp_data_points)
+        self.spnExcludeDays.setMinimumSize(QtCore.QSize(200, 0))
+        self.spnExcludeDays.setMaximumSize(QtCore.QSize(200, 16777215))
         self.spnExcludeDays.setMaximum(365)
         self.spnExcludeDays.setProperty("value", 30)
         self.spnExcludeDays.setObjectName("spnExcludeDays")
@@ -322,6 +362,7 @@ class UiScansToReports(object):
         self.chk_prefill_scd = QtWidgets.QCheckBox(self.grp_data_points)
         self.chk_prefill_scd.setMinimumSize(QtCore.QSize(0, 25))
         self.chk_prefill_scd.setMaximumSize(QtCore.QSize(16777215, 25))
+        self.chk_prefill_scd.setStyleSheet("background: #fbecd8;")
         self.chk_prefill_scd.setChecked(True)
         self.chk_prefill_scd.setObjectName("chk_prefill_scd")
         self.gridLayout_3.addWidget(self.chk_prefill_scd, 6, 1, 1, 1)
@@ -331,8 +372,8 @@ class UiScansToReports(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.txt_email.sizePolicy().hasHeightForWidth())
         self.txt_email.setSizePolicy(sizePolicy)
-        self.txt_email.setMinimumSize(QtCore.QSize(235, 25))
-        self.txt_email.setMaximumSize(QtCore.QSize(235, 25))
+        self.txt_email.setMinimumSize(QtCore.QSize(200, 25))
+        self.txt_email.setMaximumSize(QtCore.QSize(200, 25))
         self.txt_email.setObjectName("txt_email")
         self.gridLayout_3.addWidget(self.txt_email, 3, 1, 1, 1)
         self.txt_command = QtWidgets.QLineEdit(self.grp_data_points)
@@ -341,12 +382,13 @@ class UiScansToReports(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.txt_command.sizePolicy().hasHeightForWidth())
         self.txt_command.setSizePolicy(sizePolicy)
-        self.txt_command.setMinimumSize(QtCore.QSize(235, 25))
-        self.txt_command.setMaximumSize(QtCore.QSize(235, 25))
+        self.txt_command.setMinimumSize(QtCore.QSize(200, 25))
+        self.txt_command.setMaximumSize(QtCore.QSize(200, 25))
         self.txt_command.setPlaceholderText("")
         self.txt_command.setObjectName("txt_command")
         self.gridLayout_3.addWidget(self.txt_command, 0, 1, 1, 1)
         self.lbl_phone = QtWidgets.QLabel(self.grp_data_points)
+        self.lbl_phone.setStyleSheet("background: #fbecd8;")
         self.lbl_phone.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.lbl_phone.setObjectName("lbl_phone")
         self.gridLayout_3.addWidget(self.lbl_phone, 2, 0, 1, 1)
@@ -356,8 +398,8 @@ class UiScansToReports(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.txt_phone.sizePolicy().hasHeightForWidth())
         self.txt_phone.setSizePolicy(sizePolicy)
-        self.txt_phone.setMinimumSize(QtCore.QSize(235, 25))
-        self.txt_phone.setMaximumSize(QtCore.QSize(235, 25))
+        self.txt_phone.setMinimumSize(QtCore.QSize(200, 25))
+        self.txt_phone.setMaximumSize(QtCore.QSize(200, 25))
         self.txt_phone.setObjectName("txt_phone")
         self.gridLayout_3.addWidget(self.txt_phone, 2, 1, 1, 1)
         self.lbl_poc = QtWidgets.QLabel(self.grp_data_points)
@@ -366,10 +408,13 @@ class UiScansToReports(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lbl_poc.sizePolicy().hasHeightForWidth())
         self.lbl_poc.setSizePolicy(sizePolicy)
+        self.lbl_poc.setStyleSheet("background: #fbecd8;\n"
+"")
         self.lbl_poc.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.lbl_poc.setObjectName("lbl_poc")
         self.gridLayout_3.addWidget(self.lbl_poc, 1, 0, 1, 1)
         self.lbl_command = QtWidgets.QLabel(self.grp_data_points)
+        self.lbl_command.setStyleSheet("background: #fbecd8;")
         self.lbl_command.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.lbl_command.setObjectName("lbl_command")
         self.gridLayout_3.addWidget(self.lbl_command, 0, 0, 1, 1)
@@ -379,20 +424,28 @@ class UiScansToReports(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.txt_poc.sizePolicy().hasHeightForWidth())
         self.txt_poc.setSizePolicy(sizePolicy)
-        self.txt_poc.setMinimumSize(QtCore.QSize(235, 25))
-        self.txt_poc.setMaximumSize(QtCore.QSize(235, 25))
+        self.txt_poc.setMinimumSize(QtCore.QSize(200, 25))
+        self.txt_poc.setMaximumSize(QtCore.QSize(200, 25))
         self.txt_poc.setObjectName("txt_poc")
         self.gridLayout_3.addWidget(self.txt_poc, 1, 1, 1, 1)
         self.lbl_email = QtWidgets.QLabel(self.grp_data_points)
+        self.lbl_email.setStyleSheet("background: #fbecd8;")
         self.lbl_email.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.lbl_email.setObjectName("lbl_email")
         self.gridLayout_3.addWidget(self.lbl_email, 3, 0, 1, 1)
         self.label = QtWidgets.QLabel(self.grp_data_points)
+        self.label.setStyleSheet("background: #fbecd8;\n"
+"")
         self.label.setTextFormat(QtCore.Qt.PlainText)
         self.label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label.setWordWrap(True)
         self.label.setObjectName("label")
         self.gridLayout_3.addWidget(self.label, 7, 1, 1, 1)
+        self.chkSkipInfo = QtWidgets.QCheckBox(self.grp_data_points)
+        self.chkSkipInfo.setStyleSheet("background: #fbecd8;")
+        self.chkSkipInfo.setChecked(True)
+        self.chkSkipInfo.setObjectName("chkSkipInfo")
+        self.gridLayout_3.addWidget(self.chkSkipInfo, 4, 1, 1, 1)
         self.grid_data_points.addWidget(self.grp_data_points, 0, 1, 1, 1)
         self.gridLayout_2.addLayout(self.grid_data_points, 0, 0, 1, 1)
         ScansToReports.setCentralWidget(self.main_content)
@@ -476,16 +529,27 @@ class UiScansToReports(object):
         _translate = QtCore.QCoreApplication.translate
         ScansToReports.setWindowTitle(_translate("ScansToReports", "Scans To Reports"))
         self.grp_selected_scans.setTitle(_translate("ScansToReports", "Selected Scan Files"))
-        self.btn_parse_scan_files.setText(_translate("ScansToReports", "Parse Scan \n"
-"Files"))
+        self.btn_parse_scan_files.setText(_translate("ScansToReports", "P\n"
+"A\n"
+"R\n"
+"S\n"
+"E"))
         self.grp_scan_summary.setTitle(_translate("ScansToReports", "Scan Summary"))
-        self.btn_execute.setText(_translate("ScansToReports", "Generate\n"
-"Report"))
+        self.btn_execute.setText(_translate("ScansToReports", "R\n"
+"E\n"
+"P\n"
+"O\n"
+"R\n"
+"T"))
         self.grp_file_drop.setTitle(_translate("ScansToReports", "Scan Drop"))
+        self.btn_select_scan_files.setText(_translate("ScansToReports", "S\n"
+"E\n"
+"L\n"
+"E\n"
+"C\n"
+"T"))
         self.lbl_file_drop.setText(_translate("ScansToReports", " Select multiple files with the file dialog or by dragging and dropping scan files into this region "))
-        self.btn_select_scan_files.setText(_translate("ScansToReports", "Select Scan\n"
-"Files"))
-        self.grp_data_points.setTitle(_translate("ScansToReports", "Report Data Points"))
+        self.grp_data_points.setTitle(_translate("ScansToReports", "Options"))
         self.chk_lower_risk.setText(_translate("ScansToReports", "Automatically Lower Risk"))
         self.chk_prefill_scd.setText(_translate("ScansToReports", "Prefill SCD"))
         self.lbl_phone.setText(_translate("ScansToReports", "Phone"))
@@ -493,6 +557,7 @@ class UiScansToReports(object):
         self.lbl_command.setText(_translate("ScansToReports", "Command"))
         self.lbl_email.setText(_translate("ScansToReports", "Email"))
         self.label.setText(_translate("ScansToReports", "Exclude ACAS Plugins Published Less Than X Days Ago:"))
+        self.chkSkipInfo.setText(_translate("ScansToReports", "Skip Informationals"))
         self.mnu_file.setTitle(_translate("ScansToReports", "&File"))
         self.mnu_help.setTitle(_translate("ScansToReports", "&Help"))
         self.menuScans.setTitle(_translate("ScansToReports", "&Scans"))

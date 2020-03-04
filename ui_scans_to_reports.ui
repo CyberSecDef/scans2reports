@@ -14,6 +14,9 @@
   <property name="windowTitle">
    <string>Scans To Reports</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background: #ffffff;</string>
+  </property>
   <widget class="QWidget" name="main_content">
    <property name="styleSheet">
     <string notr="true"/>
@@ -21,6 +24,13 @@
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="1" column="0" colspan="2">
      <widget class="QGroupBox" name="grp_selected_scans">
+      <property name="styleSheet">
+       <string notr="true">QGroupBox{
+background-color: #c1dbc7;
+border-radius:15px;
+border:1px solid #000000;
+}</string>
+      </property>
       <property name="title">
        <string>Selected Scan Files</string>
       </property>
@@ -48,7 +58,14 @@
             <enum>Qt::ActionsContextMenu</enum>
            </property>
            <property name="styleSheet">
-            <string notr="true">QHeaderView::section{
+            <string notr="true">QTableWidget{
+background:#eeeeee;
+border-radius:0px;
+border: 1px solid black;
+margin-left:10px;
+margin-bottom:10px;
+}
+QHeaderView::section{
             border-top:0px solid #D8D8D8;
             border-left:0px solid #D8D8D8;
             border-right:1px solid #D8D8D8;
@@ -73,30 +90,34 @@ QTableCornerButton::section{
           <widget class="QPushButton" name="btn_parse_scan_files">
            <property name="minimumSize">
             <size>
-             <width>150</width>
+             <width>50</width>
              <height>150</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>150</width>
+             <width>50</width>
              <height>150</height>
             </size>
            </property>
            <property name="font">
             <font>
              <family>Arial</family>
-             <pointsize>20</pointsize>
+             <pointsize>14</pointsize>
             </font>
            </property>
            <property name="styleSheet">
             <string notr="true">background-color: rgb(30, 126, 52);
 color: #ffffff;
-font-size:20pt;</string>
+border-radius: 15px;
+font-size:14pt;</string>
            </property>
            <property name="text">
-            <string>Parse Scan 
-Files</string>
+            <string>P
+A
+R
+S
+E</string>
            </property>
           </widget>
          </item>
@@ -107,6 +128,13 @@ Files</string>
     </item>
     <item row="2" column="0" colspan="2">
      <widget class="QGroupBox" name="grp_scan_summary">
+      <property name="styleSheet">
+       <string notr="true">QGroupBox{
+background: #f5d7d9;
+border-radius:15px;
+border:1px solid #000000;
+}</string>
+      </property>
       <property name="title">
        <string>Scan Summary</string>
       </property>
@@ -131,7 +159,14 @@ Files</string>
             <enum>Qt::ClickFocus</enum>
            </property>
            <property name="styleSheet">
-            <string notr="true">QHeaderView::section{
+            <string notr="true">QTableWidget{
+background: #eeeeee;
+border-radius: 0px;
+margin-left:10px;
+margin-bottom:10px;
+border: 1px solid black;
+}
+QHeaderView::section{
             border-top:0px solid #D8D8D8;
             border-left:0px solid #D8D8D8;
             border-right:1px solid #D8D8D8;
@@ -156,20 +191,20 @@ QTableCornerButton::section{
           <widget class="QPushButton" name="btn_execute">
            <property name="minimumSize">
             <size>
-             <width>150</width>
+             <width>50</width>
              <height>150</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>150</width>
+             <width>50</width>
              <height>150</height>
             </size>
            </property>
            <property name="font">
             <font>
              <family>Arial</family>
-             <pointsize>20</pointsize>
+             <pointsize>14</pointsize>
              <weight>50</weight>
              <bold>false</bold>
             </font>
@@ -177,11 +212,16 @@ QTableCornerButton::section{
            <property name="styleSheet">
             <string notr="true">background-color: rgb(200, 35, 51);
 color: #ffffff;
-font-size:20pt;</string>
+border-radius: 15px;
+font-size:14pt;</string>
            </property>
            <property name="text">
-            <string>Generate
-Report</string>
+            <string>R
+E
+P
+O
+R
+T</string>
            </property>
           </widget>
          </item>
@@ -203,6 +243,7 @@ Report</string>
 background: rgb(226, 240, 251); 
 border:1px solid #000000;
 padding-top:10px;
+border-radius:15px;
 }</string>
       </property>
       <property name="title">
@@ -312,9 +353,9 @@ padding-top:10px;
               <colorrole role="Base">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                 <red>226</red>
+                 <green>240</green>
+                 <blue>251</blue>
                 </color>
                </brush>
               </colorrole>
@@ -458,9 +499,9 @@ padding-top:10px;
               <colorrole role="Base">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
-                 <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                 <red>226</red>
+                 <green>240</green>
+                 <blue>251</blue>
                 </color>
                </brush>
               </colorrole>
@@ -671,10 +712,10 @@ padding-top:10px;
             <bool>false</bool>
            </property>
            <property name="autoFillBackground">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
            <property name="styleSheet">
-            <string notr="true"/>
+            <string notr="true">background: rgb(226, 240, 251); </string>
            </property>
            <property name="frameShape">
             <enum>QFrame::StyledPanel</enum>
@@ -683,12 +724,42 @@ padding-top:10px;
             <enum>QFrame::Raised</enum>
            </property>
            <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="2">
+             <widget class="QPushButton" name="btn_select_scan_files">
+              <property name="minimumSize">
+               <size>
+                <width>50</width>
+                <height>150</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>50</width>
+                <height>150</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(0, 98, 204);
+color: #ffffff;
+border-radius: 15px;
+font-size:14pt;</string>
+              </property>
+              <property name="text">
+               <string>S
+E
+L
+E
+C
+T</string>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="lbl_file_drop">
               <property name="minimumSize">
                <size>
                 <width>200</width>
-                <height>150</height>
+                <height>250</height>
                </size>
               </property>
               <property name="acceptDrops">
@@ -698,6 +769,8 @@ padding-top:10px;
                <string notr="true">QLabel#lbl_file_drop{
 border: 1px dashed #3490dc;
 font-size:12px;
+background: #d2e0fb;
+border-radius:15px;
 }</string>
               </property>
               <property name="text">
@@ -708,31 +781,6 @@ font-size:12px;
               </property>
               <property name="wordWrap">
                <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QPushButton" name="btn_select_scan_files">
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>150</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>150</width>
-                <height>150</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">background-color: rgb(0, 98, 204);
-color: #ffffff;
-font-size:20pt;</string>
-              </property>
-              <property name="text">
-               <string>Select Scan
-Files</string>
               </property>
              </widget>
             </item>
@@ -753,18 +801,26 @@ Files</string>
        <widget class="QGroupBox" name="grp_data_points">
         <property name="minimumSize">
          <size>
-          <width>400</width>
+          <width>300</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>400</width>
+          <width>350</width>
           <height>16777215</height>
          </size>
         </property>
+        <property name="styleSheet">
+         <string notr="true">QGroupBox{
+background: #fbecd8;
+border:1px solid #000000;
+padding-top:10px;
+border-radius: 15px;
+}</string>
+        </property>
         <property name="title">
-         <string>Report Data Points</string>
+         <string>Options</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="5" column="1">
@@ -781,6 +837,9 @@ Files</string>
              <height>25</height>
             </size>
            </property>
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;</string>
+           </property>
            <property name="text">
             <string>Automatically Lower Risk</string>
            </property>
@@ -791,6 +850,18 @@ Files</string>
          </item>
          <item row="8" column="1">
           <widget class="QSpinBox" name="spnExcludeDays">
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="maximum">
             <number>365</number>
            </property>
@@ -813,6 +884,9 @@ Files</string>
              <height>25</height>
             </size>
            </property>
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;</string>
+           </property>
            <property name="text">
             <string>Prefill SCD</string>
            </property>
@@ -831,13 +905,13 @@ Files</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>235</width>
+             <width>200</width>
              <height>25</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>235</width>
+             <width>200</width>
              <height>25</height>
             </size>
            </property>
@@ -853,13 +927,13 @@ Files</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>235</width>
+             <width>200</width>
              <height>25</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>235</width>
+             <width>200</width>
              <height>25</height>
             </size>
            </property>
@@ -870,6 +944,9 @@ Files</string>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="lbl_phone">
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;</string>
+           </property>
            <property name="text">
             <string>Phone</string>
            </property>
@@ -888,13 +965,13 @@ Files</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>235</width>
+             <width>200</width>
              <height>25</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>235</width>
+             <width>200</width>
              <height>25</height>
             </size>
            </property>
@@ -908,6 +985,10 @@ Files</string>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;
+</string>
+           </property>
            <property name="text">
             <string>Contact Name</string>
            </property>
@@ -918,6 +999,9 @@ Files</string>
          </item>
          <item row="0" column="0">
           <widget class="QLabel" name="lbl_command">
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;</string>
+           </property>
            <property name="text">
             <string>Command</string>
            </property>
@@ -936,13 +1020,13 @@ Files</string>
            </property>
            <property name="minimumSize">
             <size>
-             <width>235</width>
+             <width>200</width>
              <height>25</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>235</width>
+             <width>200</width>
              <height>25</height>
             </size>
            </property>
@@ -950,6 +1034,9 @@ Files</string>
          </item>
          <item row="3" column="0">
           <widget class="QLabel" name="lbl_email">
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;</string>
+           </property>
            <property name="text">
             <string>Email</string>
            </property>
@@ -960,6 +1047,10 @@ Files</string>
          </item>
          <item row="7" column="1">
           <widget class="QLabel" name="label">
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;
+</string>
+           </property>
            <property name="text">
             <string>Exclude ACAS Plugins Published Less Than X Days Ago:</string>
            </property>
@@ -970,6 +1061,19 @@ Files</string>
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
            <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QCheckBox" name="chkSkipInfo">
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;</string>
+           </property>
+           <property name="text">
+            <string>Skip Informationals</string>
+           </property>
+           <property name="checked">
             <bool>true</bool>
            </property>
           </widget>

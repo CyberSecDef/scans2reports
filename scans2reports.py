@@ -4,7 +4,7 @@
 # NOTES:
 # Python Path: C:\Users\admin\AppData\Local\Programs\Python\Python37
 # Convert UI to PU: .\Scripts\pyuic5.exe -x S:\Misc\Development\scans2reports\src\ui_scans_to_reports.ui -o S:\Misc\Development\scans2reports\src\ui_scans_to_reports.py
-# Execute Applet: clear; .\python.exe D:\development\scans2poam\scans2report.py
+# Execute Applet: clear; .\python.exe S:\Misc\Development\scans2reports\src\scans2reports.py
 # from ui_addons import FileDrop
 
 from argparse import ArgumentParser, SUPPRESS
@@ -84,6 +84,7 @@ class Scans2Reports:
         }
         
         self.poam_conf = { 
+            'skip_info' : args.skip_info,
             'scd' : args.scd, 
             'lower_risk' : args.lower_risk, 
             'exclude_plugins' : args.exclude_plugins 
@@ -383,7 +384,7 @@ class Scans2Reports:
         """ Create / Start parsing thread """
         logging.info('Starting Parse Thread')
         
-        scan_parser = ScanParser(self.application_path, self.data_mapping, S2R)
+        scan_parser = ScanParser(self.application_path, self.data_mapping, S2R, self.poam_conf['skip_info'])
 
         while not queue.empty():
             work = queue.get()
@@ -478,6 +479,7 @@ optional.add_argument('-n', '--name', help='Add POC Name to POAM')
 optional.add_argument('-p', '--phone', help='Add POC Phone Number to POAM')
 optional.add_argument('-e', '--email', help='Add POC Email Address to POAM')
 optional.add_argument('-s', '--scd', help='Prefill Estimated SCD to POAM', action='store_true')
+optional.add_argument('-i', '--skip-info', help='Skip Informational Findings', action='store_true')
 optional.add_argument('-x', '--exclude-plugins', help='Exclude plugins newer than this number of days', type=int, default=30)
 optional.add_argument('-l', '--lower-risk', help='Automatically Lower Risk on POAM', action='store_true')
 

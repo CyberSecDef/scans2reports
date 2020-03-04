@@ -77,6 +77,13 @@ class UiAddons():
                         self.main_form.tbl_selected_scans.horizontalHeader().setStretchLastSection(True)
                         
     def btn_parse_scan_files_on_click(self):
+        self.main_app.poam_conf = { 
+            'skip_info' : self.main_form.chkSkipInfo.isChecked(), 
+            'scd' : self.main_form.chk_prefill_scd.isChecked(), 
+            'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
+            'exclude_plugins' : self.main_form.spnExcludeDays.value()
+        }
+        
         logging.info('Parse Scan Files Clicked')
         self.main_form.tbl_scan_summary.setRowCount(0)
         
@@ -168,6 +175,7 @@ class UiAddons():
         self.main_app.contact_info['email'] = self.main_form.txt_email.text()
         
         self.main_app.poam_conf = { 
+            'skip_info' : self.main_form.chkSkipInfo.isChecked(), 
             'scd' : self.main_form.chk_prefill_scd.isChecked(), 
             'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
             'exclude_plugins' : self.main_form.spnExcludeDays.value()

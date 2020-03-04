@@ -16,10 +16,11 @@ class ScanParser:
     S2R = None
     application_path = ""
     
-    def __init__(self, application_path, data_mapping, S2R):
+    def __init__(self, application_path, data_mapping, S2R, skip_info):
         self.S2R = S2R
         self.data_mapping = data_mapping
         self.application_path = application_path
+        self.skip_info = skip_info
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
         logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
 
@@ -333,7 +334,7 @@ class ScanParser:
                     'catI'          : len(host.xpath("./ReportItem[@severity>=3]") ),
                     'catII'         : len(host.xpath("./ReportItem[@severity=2]") ),
                     'catIII'        : len(host.xpath("./ReportItem[@severity=1]") ),
-                    'catIV'         : len(host.xpath("./ReportItem[@severity=0]") ),
+                    'catIV'         : len(host.xpath("./ReportItem[@severity=0]") ) if not self.skip_info else 0,
                     'open'          : len(host.xpath("./ReportItem[@severity>0]") ),
                     'closed'        : 0,
                     'error'         : 0,
@@ -349,33 +350,37 @@ class ScanParser:
                     if self.S2R.scans_to_reports:
                         QtGui.QGuiApplication.processEvents()
                     
-                    req = {
-                        'cci'              : [],
-                        'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),
-                        'description'      : next(iter(req.xpath("./synopsis/text()")),'') + "\n\n" + next(iter(req.xpath("./description/text()")),''),
-                        'findingDetails'   : '',
-                        'fixId'            : '',
-                        'mitigation'       : '',
-                        'port'             : int(next(iter(req.xpath("./@port")),'')),
-                        'protocol'         : next(iter(req.xpath("./@protocol")),''),
-                        'service'          : next(iter(req.xpath("./@svc_name")),''),
-                        'grpId'            : next(iter(req.xpath("./@pluginFamily")),''),
-                        'iava'             : next(iter(req.xpath("./iava/text()")),''),
-                        'pluginId'         : next(iter(req.xpath("./@pluginID")),''),
-                        'resources'        : '',
-                        'ruleId'           : '',
-                        'solution'         : next(iter(req.xpath("./solution/text()")),''),
-                        'references'       : '',
-                        'severity'         : int(next(iter(req.xpath("./@severity")),'')),
-                        'reqTitle'         : next(iter(req.xpath("./@pluginName")),''),
-                        'vulnId'           : '',
-                        'iaControls'       : [],
-                        'status'           : 'Ongoing',
-                        'publicationDate'  : next(iter(req.xpath("./plugin_publication_date/text()")),''),
-                        'modificationDate' : next(iter(req.xpath("./plugin_modification_date/text()")),'')
-                    }
+                    severity = int(next(iter(req.xpath("./@severity")),''))
+                    pluginId = int(next(iter(req.xpath("./@pluginID")),''))
+                    
+                    if not self.skip_info or ( severity != 0 or pluginId in self.data_mapping['acas_required_info'] ):
+                        req = {
+                            'cci'              : [],
+                            'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),
+                            'description'      : next(iter(req.xpath("./synopsis/text()")),'') + "\n\n" + next(iter(req.xpath("./description/text()")),''),
+                            'findingDetails'   : '',
+                            'fixId'            : '',
+                            'mitigation'       : '',
+                            'port'             : int(next(iter(req.xpath("./@port")),'')),
+                            'protocol'         : next(iter(req.xpath("./@protocol")),''),
+                            'service'          : next(iter(req.xpath("./@svc_name")),''),
+                            'grpId'            : next(iter(req.xpath("./@pluginFamily")),''),
+                            'iava'             : next(iter(req.xpath("./iava/text()")),''),
+                            'pluginId'         : pluginId,
+                            'resources'        : '',
+                            'ruleId'           : '',
+                            'solution'         : next(iter(req.xpath("./solution/text()")),''),
+                            'references'       : '',
+                            'severity'         : severity,
+                            'reqTitle'         : next(iter(req.xpath("./@pluginName")),''),
+                            'vulnId'           : '',
+                            'iaControls'       : [],
+                            'status'           : 'Ongoing',
+                            'publicationDate'  : next(iter(req.xpath("./plugin_publication_date/text()")),''),
+                            'modificationDate' : next(iter(req.xpath("./plugin_modification_date/text()")),'')
+                        }
 
-                    host_data['requirements'].append(req)
+                        host_data['requirements'].append(req)
                 sf['hosts'].append( host_data )
 
 
