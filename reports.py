@@ -1514,7 +1514,7 @@ Plugin ID: {pluginId}
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Summary' Tab")
         
-        widths = [10,30,20,50,50,10,10,10,10,10,10,25]
+        widths = [10,30,20,50,50,10,10,10,10,10,10,25,20]
         ascii = string.ascii_uppercase
         for index, w in enumerate(widths):
             worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
@@ -1541,6 +1541,7 @@ Plugin ID: {pluginId}
                     'Total': scan_file['total'],
                     'Score': scan_file['score'],
                     'Credentialed': scan_file['credentialed'],
+                    'Blank Comments' : ''
                 })
             elif scan_file['type'] == 'CKL':
                 summary_results.append({
@@ -1556,6 +1557,7 @@ Plugin ID: {pluginId}
                     'Total': scan_file['total'],
                     'Score': scan_file['score'],
                     'Credentialed': scan_file['credentialed'],
+                    'Blank Comments' : scan_file['missing_cf']
                 })
             elif scan_file['type'] == 'ACAS':
                 for host in scan_file['hosts']:
@@ -1572,6 +1574,7 @@ Plugin ID: {pluginId}
                         'Total': host['total'],
                         'Score': host['score'],
                         'Credentialed': host['credentialed'],
+                        'Blank Comments' : ''
                     })
 
         summary_results = sorted(

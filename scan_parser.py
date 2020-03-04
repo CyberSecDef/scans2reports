@@ -106,6 +106,7 @@ class ScanParser:
                 'catII'        : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@severity='medium' and ./cdf:result != 'pass']", namespaces = ns) ),
                 'catIII'       : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@severity='low' and ./cdf:result != 'pass']", namespaces = ns) ),
                 'catIV'        : 0,
+                'missing_cf'   : 0,
                 'open'         : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[./cdf:result = 'fail']", namespaces = ns) ),
                 'closed'       : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[./cdf:result = 'pass']", namespaces = ns) ),
                 'error'        : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[./cdf:result = 'error']", namespaces = ns) ),
@@ -335,6 +336,7 @@ class ScanParser:
                     'catII'         : len(host.xpath("./ReportItem[@severity=2]") ),
                     'catIII'        : len(host.xpath("./ReportItem[@severity=1]") ),
                     'catIV'         : len(host.xpath("./ReportItem[@severity=0]") ) if not self.skip_info else 0,
+                    'missing_cf'    : 0,
                     'open'          : len(host.xpath("./ReportItem[@severity>0]") ),
                     'closed'        : 0,
                     'error'         : 0,
@@ -467,6 +469,9 @@ class ScanParser:
                 'catII'        : len(tree.xpath("//VULN[(./STATUS!='NotAFinding' and ./STATUS!='Not_Applicable' ) and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='medium']]") ),
                 'catIII'       : len(tree.xpath("//VULN[(./STATUS!='NotAFinding' and ./STATUS!='Not_Applicable' ) and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='low']]") ),
                 'catIV'        : '',
+                
+                'missing_cf'   : len(tree.xpath("//VULN[normalize-space(./FINDING_DETAILS)='' or  normalize-space(./COMMENTS)='']") ),
+                
                 'open'         : len(tree.xpath("//VULN[./STATUS='Open']") ),
                 'closed'       : len(tree.xpath("//VULN[./STATUS='NotAFinding']") ),
                 'error'        : len(tree.xpath("//VULN[./STATUS='Error']") ),

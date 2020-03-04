@@ -29,6 +29,7 @@ class ScanFile(dict):
     catII = 0
     catIII = 0
     catIV = 0
+    missing_cf = 0
     credentialed = False
     requirements = []
     hosts = []
