@@ -337,28 +337,29 @@ class FileDrop(QtWidgets.QLabel):
                 filepaths.append(cell_widget.data(QtCore.Qt.UserRole))
 
         data = event.mimeData()
-        urls = data.urls()
-        if urls and urls[0].scheme() == 'file':
-            for url in urls:
-                filepath = str(url.path())[1:]
-                extension = os.path.splitext(filepath)[1].lower()
-                
-                if filepath not in filepaths:
-                    if extension in ['.ckl', '.xml', '.nessus']:
-                        self.main_form.tbl_selected_scans.insertRow(0)
-                        
-                        btn = QtWidgets.QPushButton(self.main_form.tbl_selected_scans)
-                        btn.setText('Del')
-                        btn.clicked.connect(self.remove_row)
-                        self.main_form.tbl_selected_scans.setCellWidget(0, 0,  btn )
-                        
-                        item = QtWidgets.QTableWidgetItem( os.path.basename( filepath ))
-                        item.setData(QtCore.Qt.UserRole, filepath)
-                        self.main_form.tbl_selected_scans.setItem(0, 1, item)
-                        
-                        self.main_form.tbl_selected_scans.setItem(0, 2, QtWidgets.QTableWidgetItem( time.strftime( '%Y-%m-%d %H:%M:%S', time.gmtime( os.path.getmtime( filepath ))) ) )
-                        self.main_form.tbl_selected_scans.setItem(0, 3, QNumericTableWidgetItem( QtWidgets.QTableWidgetItem( str( os.path.getsize( filepath ))) ) )
-                        self.main_form.tbl_selected_scans.setItem(0, 4, QtWidgets.QTableWidgetItem( extension ))
-                        
-                        self.main_form.tbl_selected_scans.resizeColumnsToContents()
-                        self.main_form.tbl_selected_scans.horizontalHeader().setStretchLastSection(True)
+        if data:
+            urls = data.urls()
+            if urls and urls[0].scheme() == 'file':
+                for url in urls:
+                    filepath = str(url.path())[1:]
+                    extension = os.path.splitext(filepath)[1].lower()
+                    
+                    if filepath not in filepaths:
+                        if extension in ['.ckl', '.xml', '.nessus']:
+                            self.main_form.tbl_selected_scans.insertRow(0)
+                            
+                            btn = QtWidgets.QPushButton(self.main_form.tbl_selected_scans)
+                            btn.setText('Del')
+                            btn.clicked.connect(self.remove_row)
+                            self.main_form.tbl_selected_scans.setCellWidget(0, 0,  btn )
+                            
+                            item = QtWidgets.QTableWidgetItem( os.path.basename( filepath ))
+                            item.setData(QtCore.Qt.UserRole, filepath)
+                            self.main_form.tbl_selected_scans.setItem(0, 1, item)
+                            
+                            self.main_form.tbl_selected_scans.setItem(0, 2, QtWidgets.QTableWidgetItem( time.strftime( '%Y-%m-%d %H:%M:%S', time.gmtime( os.path.getmtime( filepath ))) ) )
+                            self.main_form.tbl_selected_scans.setItem(0, 3, QNumericTableWidgetItem( QtWidgets.QTableWidgetItem( str( os.path.getsize( filepath ))) ) )
+                            self.main_form.tbl_selected_scans.setItem(0, 4, QtWidgets.QTableWidgetItem( extension ))
+                            
+                            self.main_form.tbl_selected_scans.resizeColumnsToContents()
+                            self.main_form.tbl_selected_scans.horizontalHeader().setStretchLastSection(True)
