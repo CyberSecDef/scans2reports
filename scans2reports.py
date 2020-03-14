@@ -17,6 +17,7 @@ import copy
 import secrets
 import pprint
 import dumper
+import jmespath
 from lxml import etree
 from pathlib import Path
 from threading import Thread
@@ -69,7 +70,7 @@ class Scans2Reports:
         
         logging.info('Application Path: %s', self.application_path)
         
-        self.num_theads = int(psutil.cpu_count()) - 2
+        self.num_theads = int(psutil.cpu_count()) * 2
         
         logging.info('Threads: %s', self.num_theads)
         
@@ -90,7 +91,7 @@ class Scans2Reports:
             'exclude_plugins' : args.exclude_plugins 
         }
         self.input_folder = args.input_folder
-
+        
     def merge_nessus_files(self, files, host_count):
         #open the first file for structure
         file = files[0]
@@ -339,6 +340,9 @@ class Scans2Reports:
 
     def parse_scan_files(self):
         """ Add scan file to parsing thread """
+            
+        start_time = datetime.datetime.now()
+        print( "{} - Parsing Scan Files".format(datetime.datetime.now() - start_time ) )
         
         status = f"Parsing scan files"
         logging.info(status)
@@ -360,19 +364,37 @@ class Scans2Reports:
         
         #make sure the main gui doesn't get blocked while waiting for queue to finish
         if S2R.scans_to_reports:
+            eta_start = datetime.datetime.now()
+            
             while self.q.qsize() > 0:
+                run_time = (datetime.datetime.now() - eta_start )
+                current_scan = num_files - self.q.qsize()
+                time_per = run_time.seconds / (current_scan + 1)
+                time_left = datetime.timedelta(seconds= ( (num_files - current_scan)  * time_per) )
+                
+                status = "Parsing scan files: {} / {} - Runtime: {}, Time Per Scan: {}s, ETA: {}".format(
+                    str(current_scan),
+                    str(num_files),
+                    str( run_time ),
+                    str( round(time_per, 2)),
+                    str( time_left)
+                )
+                
                 S2R.scans_to_reports.statusBar().showMessage(status)
                 S2R.scans_to_reports.progressBar.setValue( ( num_files - self.q.qsize())/num_files * 100 )
                 QtGui.QGuiApplication.processEvents() 
-                time.sleep(1)
+                # time.sleep(1)
         
         #wait for threads to all complete
         self.q.join()
 
         self.scan_results = [ i for i in self.scan_results if type(i) == ScanFile ]
+
+        # print(type(self.scan_results))
+        # pprint.pprint( jmespath.search("results[?type=='ACAS'].fileName", { 'results' : self.scan_results} ), width=200 )
             
         #show completed parse jobs
-        status = f"All scans parsed"
+        status = "{} - Finished Parsing Scan Files".format(datetime.datetime.now() - start_time )
         logging.info(status)
         print(status)
         if S2R.scans_to_reports:
@@ -458,10 +480,11 @@ class Scans2Reports:
                 QtGui.QGuiApplication.processEvents() 
             getattr(reports, report)()
             
-        reports.close()
+        reports.close_workbook()
         
         status = f"Report Generated"
         logging.info(status)        
+        print(status)
         if S2R.scans_to_reports:
             S2R.scans_to_reports.statusBar().showMessage(status)
             S2R.scans_to_reports.progressBar.setValue( 0 )

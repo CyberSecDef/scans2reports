@@ -13,7 +13,7 @@ from ui_addons import FileDrop
 class UiScansToReports(object):
     def setupUi(self, ScansToReports):
         ScansToReports.setObjectName("ScansToReports")
-        ScansToReports.resize(934, 823)
+        ScansToReports.resize(1400, 864)
         ScansToReports.setStyleSheet("background: #ffffff;")
         self.main_content = QtWidgets.QWidget(ScansToReports)
         self.main_content.setStyleSheet("")
@@ -41,6 +41,7 @@ class UiScansToReports(object):
 "border: 1px solid black;\n"
 "margin-left:10px;\n"
 "margin-bottom:10px;\n"
+"font-size:8pt;\n"
 "}\n"
 "QHeaderView::section{\n"
 "            border-top:0px solid #D8D8D8;\n"
@@ -97,6 +98,7 @@ class UiScansToReports(object):
 "margin-left:10px;\n"
 "margin-bottom:10px;\n"
 "border: 1px solid black;\n"
+"font-size:8pt;\n"
 "}\n"
 "QHeaderView::section{\n"
 "            border-top:0px solid #D8D8D8;\n"

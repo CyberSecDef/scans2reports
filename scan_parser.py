@@ -11,6 +11,7 @@ from utils import Utils
 from datetime import datetime
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+#TODO Make faster
 class ScanParser:
     data_mapping = {}
     S2R = None
@@ -23,7 +24,178 @@ class ScanParser:
         self.skip_info = skip_info
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
         logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
+    
+    def parseNessus(self, filename):
+        logging.info('Parsing ACAS File %s', filename)
+        sf = None
+        try:
+            with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
+                content = content_file.readlines()
+            content = ''.join(content)
+            tree = etree.fromstring( str(content ) )
 
+            version = re.search(
+                'Nessus version : ([0-9.]+)',
+                str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/ReportItem[@pluginID='19506']/plugin_output/text()")), ''))
+            )
+            version =  version.group(1) if version is not None else ''
+
+            feed = re.search(
+                'Plugin feed version : ([0-9.]+)',
+                str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/ReportItem[@pluginID='19506']/plugin_output/text()")), ''))
+            )
+            feed =  feed.group(1) if feed is not None else ''
+            
+            sf = ScanFile({
+                'type'         :'ACAS',
+                'fileName'     : str(filename),
+                'scanDate'     : str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), '')),
+                'title'        : "Assured Compliance Assessment Solution (ACAS) Nessus Scanner\nVersion: {}\nFeed: {}".format(version, feed),
+                'uuid'         : str(uuid.uuid4()),
+                'version'      : version,
+                'policy'       : str(next(iter(tree.xpath("/NessusClientData_v2/Policy/policyName/text()")), '')),
+                'hostname'     : '',
+                'os'           : '',
+                'ip'           : '',
+                'hosts'        : [],
+                'feed'         : feed,
+            })
+            
+            for host in tree.xpath("/NessusClientData_v2/Report/ReportHost"):
+                scanUser = ""
+                port_range = ""
+                scan_info = str( host.xpath("./ReportItem[@pluginID=19506]/plugin_output/text()") ).split("\\n")
+                for line in scan_info:
+                    if 'Credentialed checks' in line:
+                        k,v = line.split(':', 1)
+                        try:
+                            if str(v).strip() == 'no':
+                                scanUser = 'NONE'
+                            elif len( v.split(' as ') ) > 0:
+                                scanUser = str(v.split(' as ')[1]).strip().replace('\\\\','\\')
+                            else:
+                                scanUser = str(v)
+                        except:
+                            scanUser = 'UNKNOWN'
+                            
+                    if 'Port range' in line:
+                        k,v = line.split(':', 1)
+                        port_range = str(v).strip()
+                
+                wmi_info = str( host.xpath("./ReportItem[@pluginID=24270]/plugin_output/text()") ).split("\\n")
+                device_type = ""
+                manufacturer = ""
+                model = ""
+                serial = ""
+                for line in wmi_info:
+                    if ':' in line:
+                        k,v = line.split(':', 1)
+                        try:
+                            if str(k).strip() == 'Computer Manufacturer':
+                                manufacturer = str(v).strip()
+                            elif str(k).strip() == 'Computer Model':
+                                model = str(v).strip()
+                            elif str(k).strip() == 'Computer SerialNumber':
+                                serial = str(v).strip()
+                            elif str(k).strip() == 'Computer Type':
+                                device_type = str(v).strip()
+                        except:
+                            device_type = ""
+                            manufacturer = ""
+                            model = ""
+                            serial = ""
+                
+                fqdn_val = ""
+                if next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
+                    fqdn_val = str( next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
+                elif next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),''):
+                    fqdn_val =  str(next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),'')).lower()
+                elif next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''):
+                    fqdn_val = str(next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),'')).lower()
+                else:
+                    fqdn_val = 'UNKNOWN'
+                
+                host_data = {
+                    'hostname'      : fqdn_val,
+                    'ip'            : next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''),
+                    'mac'           : next(iter(host.xpath("./HostProperties/tag[@name='mac-address']/text()")),''),
+                    'os'            : next(iter(host.xpath("./HostProperties/tag[@name='operating-system']/text()")),''),
+                    
+                    'device_type'   : device_type,
+                    'manufacturer'  : manufacturer,
+                    'model'         : model,
+                    'serial'        : serial,
+                    
+                    'host_date'     : str(next(iter(host.xpath("./HostProperties/tag[@name='HOST_START']/text()")), '')),
+                    'credentialed'  : Utils.parse_bool(str(next(iter( host.xpath("./HostProperties/tag[@name='Credentialed_Scan']/text()"))))),
+                    'scanUser'      : scanUser,
+                    'port_range'     : port_range,
+                    
+                    'catI'          : len(host.xpath("./ReportItem[@severity>=3]") ),
+                    'catII'         : len(host.xpath("./ReportItem[@severity=2]") ),
+                    'catIII'        : len(host.xpath("./ReportItem[@severity=1]") ),
+                    'catIV'         : len(host.xpath("./ReportItem[@severity=0]") ) if not self.skip_info else 0,
+                    'missing_cf'    : 0,
+                    'open'          : len(host.xpath("./ReportItem[@severity>0]") ),
+                    'closed'        : 0,
+                    'error'         : 0,
+                    'notReviewed'   : 0,
+                    'notApplicable' : 0,
+                    'requirements'  : [],
+                }
+
+                host_data['total'] = host_data['catI'] + host_data['catII'] + host_data['catIII']
+                host_data['score'] = 10*host_data['catI'] + 3*host_data['catII'] + host_data['catIII']
+                
+                for req in host.xpath("./ReportItem"):
+                    if self.S2R.scans_to_reports:
+                        QtGui.QGuiApplication.processEvents()
+                    
+                    severity = int(next(iter(req.xpath("./@severity")),''))
+                    pluginId = int(next(iter(req.xpath("./@pluginID")),''))
+                    
+                    if not self.skip_info or ( severity != 0 or pluginId in self.data_mapping['acas_required_info'] ):
+                        req = {
+                            'cci'              : [],
+                            'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),
+                            'description'      : next(iter(req.xpath("./synopsis/text()")),'') + "\n\n" + next(iter(req.xpath("./description/text()")),''),
+                            'findingDetails'   : '',
+                            'fixId'            : '',
+                            'mitigation'       : '',
+                            'port'             : int(next(iter(req.xpath("./@port")),'')),
+                            'protocol'         : next(iter(req.xpath("./@protocol")),''),
+                            'service'          : next(iter(req.xpath("./@svc_name")),''),
+                            'grpId'            : next(iter(req.xpath("./@pluginFamily")),''),
+                            'iava'             : next(iter(req.xpath("./iava/text()")),''),
+                            'pluginId'         : pluginId,
+                            'resources'        : '',
+                            'ruleId'           : '',
+                            'solution'         : next(iter(req.xpath("./solution/text()")),''),
+                            'references'       : '',
+                            'severity'         : severity,
+                            'reqTitle'         : next(iter(req.xpath("./@pluginName")),''),
+                            'vulnId'           : '',
+                            'iaControls'       : [],
+                            'status'           : 'O',
+                            'publicationDate'  : next(iter(req.xpath("./plugin_publication_date/text()")),''),
+                            'modificationDate' : next(iter(req.xpath("./plugin_modification_date/text()")),''),
+                        }
+
+                        host_data['requirements'].append(req)
+                sf['hosts'].append( host_data )
+
+
+        except Exception as e:
+            sf = None
+            logging.error('Error parsing scap file %s', filename)
+            logging.error(str(e))
+            print(filename)
+            print(str(e))
+
+        return sf
+        
+        
+        
     def parseScap(self, filename):
         logging.info('Parsing scap file %s', filename)
         sf = None
@@ -181,11 +353,20 @@ class ScanParser:
                     
                     if cci in self.data_mapping['ap_mapping']:
                         ap = self.data_mapping['ap_mapping'][cci]
+                        
+                ruleId = next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/@id", namespaces = ns)), '').replace('xccdf_mil.disa.stig_rule_','')
+                status = Utils.status(
+                    str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@idref='{idref}']/cdf:result/text()", namespaces = ns)), '')) ,
+                    'ABBREV'
+                )
+                
+                
+                
                             
                 sf.add_requirement(
                     ScanRequirement({
                         'vulnId'        : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/@id", namespaces = ns)), '').replace('xccdf_mil.disa.stig_group_',''),
-                        'ruleId'        : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/@id", namespaces = ns)), '').replace('xccdf_mil.disa.stig_rule_',''),
+                        'ruleId'        : ruleId,
                         'grpId'         : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:title/text()", namespaces = ns)), '') ,
                         'pluginId'      : '',
                         'ruleVer'       : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:version/text()", namespaces = ns)), '') ,
@@ -201,10 +382,7 @@ class ScanParser:
                             str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/@severity", namespaces = ns)), '')) ,
                             'NUM'
                         ),
-                        'status'        : Utils.status(
-                            str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@idref='{idref}']/cdf:result/text()", namespaces = ns)), '')) ,
-                            'ABBREV'
-                        ),
+                        'status'        : status,
                         'findingDetails': "SCAP scan found this requirement result was '{}'".format(
                             str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@idref='{idref}']/cdf:result/text()", namespaces = ns)), ''))
                         ),
@@ -224,177 +402,7 @@ class ScanParser:
             logging.error(str(e))
             print(filename)
             print(str(e))
-
         return sf
-
-    def parseNessus(self, filename):
-        logging.info('Parsing ACAS File %s', filename)
-        sf = None
-        try:
-            with open(filename, 'r', errors='replace', encoding='utf-8') as content_file:
-                content = content_file.readlines()
-            content = ''.join(content)
-            tree = etree.fromstring( str(content ) )
-
-            version = re.search(
-                'Nessus version : ([0-9.]+)',
-                str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/ReportItem[@pluginID='19506']/plugin_output/text()")), ''))
-            )
-            version =  version.group(1) if version is not None else ''
-
-            feed = re.search(
-                'Plugin feed version : ([0-9.]+)',
-                str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/ReportItem[@pluginID='19506']/plugin_output/text()")), ''))
-            )
-            feed =  feed.group(1) if feed is not None else ''
-            
-            sf = ScanFile({
-                'type'         :'ACAS',
-                'fileName'     : str(filename),
-                'scanDate'     : str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), '')),
-                'title'        : "Assured Compliance Assessment Solution (ACAS) Nessus Scanner\nVersion: {}\nFeed: {}".format(version, feed),
-                'uuid'         : str(uuid.uuid4()),
-                'version'      : version,
-                'policy'       : str(next(iter(tree.xpath("/NessusClientData_v2/Policy/policyName/text()")), '')),
-                'hostname'     : '',
-                'os'           : '',
-                'ip'           : '',
-                'hosts'        : [],
-                'feed'         : feed
-            })
-            
-            for host in tree.xpath("/NessusClientData_v2/Report/ReportHost"):
-                scanUser = ""
-                port_range = ""
-                scan_info = str( host.xpath("./ReportItem[@pluginID=19506]/plugin_output/text()") ).split("\\n")
-                for line in scan_info:
-                    if 'Credentialed checks' in line:
-                        k,v = line.split(':', 1)
-                        try:
-                            if str(v).strip() == 'no':
-                                scanUser = 'NONE'
-                            elif len( v.split(' as ') ) > 0:
-                                scanUser = str(v.split(' as ')[1]).strip().replace('\\\\','\\')
-                            else:
-                                scanUser = str(v)
-                        except:
-                            scanUser = 'UNKNOWN'
-                            
-                    if 'Port range' in line:
-                        k,v = line.split(':', 1)
-                        port_range = str(v).strip()
-                
-                wmi_info = str( host.xpath("./ReportItem[@pluginID=24270]/plugin_output/text()") ).split("\\n")
-                device_type = ""
-                manufacturer = ""
-                model = ""
-                serial = ""
-                for line in wmi_info:
-                    if ':' in line:
-                        k,v = line.split(':', 1)
-                        try:
-                            if str(k).strip() == 'Computer Manufacturer':
-                                manufacturer = str(v).strip()
-                            elif str(k).strip() == 'Computer Model':
-                                model = str(v).strip()
-                            elif str(k).strip() == 'Computer SerialNumber':
-                                serial = str(v).strip()
-                            elif str(k).strip() == 'Computer Type':
-                                device_type = str(v).strip()
-                        except:
-                            device_type = ""
-                            manufacturer = ""
-                            model = ""
-                            serial = ""
-                
-                fqdn_val = ""
-                if next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),''):
-                    fqdn_val = str( next(iter(host.xpath("./HostProperties/tag[@name='host-fqdn']/text()")),'') ).lower()
-                elif next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),''):
-                    fqdn_val =  str(next(iter(host.xpath("./HostProperties/tag[@name='hostname']/text()")),'')).lower()
-                elif next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''):
-                    fqdn_val = str(next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),'')).lower()
-                else:
-                    fqdn_val = 'UNKNOWN'
-                
-                host_data = {
-                    'hostname'      : fqdn_val,
-                    'ip'            : next(iter(host.xpath("./HostProperties/tag[@name='host-ip']/text()")),''),
-                    'mac'           : next(iter(host.xpath("./HostProperties/tag[@name='mac-address']/text()")),''),
-                    'os'            : next(iter(host.xpath("./HostProperties/tag[@name='operating-system']/text()")),''),
-                    
-                    'device_type'   : device_type,
-                    'manufacturer'  : manufacturer,
-                    'model'         : model,
-                    'serial'        : serial,
-                    
-                    'credentialed'  : Utils.parse_bool(str(next(iter( host.xpath("./HostProperties/tag[@name='Credentialed_Scan']/text()"))))),
-                    'scanUser'      : scanUser,
-                    'port_range'     : port_range,
-                    
-                    'catI'          : len(host.xpath("./ReportItem[@severity>=3]") ),
-                    'catII'         : len(host.xpath("./ReportItem[@severity=2]") ),
-                    'catIII'        : len(host.xpath("./ReportItem[@severity=1]") ),
-                    'catIV'         : len(host.xpath("./ReportItem[@severity=0]") ) if not self.skip_info else 0,
-                    'missing_cf'    : 0,
-                    'open'          : len(host.xpath("./ReportItem[@severity>0]") ),
-                    'closed'        : 0,
-                    'error'         : 0,
-                    'notReviewed'   : 0,
-                    'notApplicable' : 0,
-                    'requirements'  : [],
-                }
-
-                host_data['total'] = host_data['catI'] + host_data['catII'] + host_data['catIII']
-                host_data['score'] = 10*host_data['catI'] + 3*host_data['catII'] + host_data['catIII']
-                
-                for req in host.xpath("./ReportItem"):
-                    if self.S2R.scans_to_reports:
-                        QtGui.QGuiApplication.processEvents()
-                    
-                    severity = int(next(iter(req.xpath("./@severity")),''))
-                    pluginId = int(next(iter(req.xpath("./@pluginID")),''))
-                    
-                    if not self.skip_info or ( severity != 0 or pluginId in self.data_mapping['acas_required_info'] ):
-                        req = {
-                            'cci'              : [],
-                            'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),
-                            'description'      : next(iter(req.xpath("./synopsis/text()")),'') + "\n\n" + next(iter(req.xpath("./description/text()")),''),
-                            'findingDetails'   : '',
-                            'fixId'            : '',
-                            'mitigation'       : '',
-                            'port'             : int(next(iter(req.xpath("./@port")),'')),
-                            'protocol'         : next(iter(req.xpath("./@protocol")),''),
-                            'service'          : next(iter(req.xpath("./@svc_name")),''),
-                            'grpId'            : next(iter(req.xpath("./@pluginFamily")),''),
-                            'iava'             : next(iter(req.xpath("./iava/text()")),''),
-                            'pluginId'         : pluginId,
-                            'resources'        : '',
-                            'ruleId'           : '',
-                            'solution'         : next(iter(req.xpath("./solution/text()")),''),
-                            'references'       : '',
-                            'severity'         : severity,
-                            'reqTitle'         : next(iter(req.xpath("./@pluginName")),''),
-                            'vulnId'           : '',
-                            'iaControls'       : [],
-                            'status'           : 'Ongoing',
-                            'publicationDate'  : next(iter(req.xpath("./plugin_publication_date/text()")),''),
-                            'modificationDate' : next(iter(req.xpath("./plugin_modification_date/text()")),'')
-                        }
-
-                        host_data['requirements'].append(req)
-                sf['hosts'].append( host_data )
-
-
-        except Exception as e:
-            sf = None
-            logging.error('Error parsing scap file %s', filename)
-            logging.error(str(e))
-            print(filename)
-            print(str(e))
-
-        return sf
-
 
     def parseCkl(self, filename):
         logging.info('Parsing CKL file %s', filename)
@@ -447,6 +455,7 @@ class ScanParser:
                 'fileName'     : str(filename),
                 'scanDate'     : time.strftime( '%Y-%m-%dT%H:%M:%S', time.gmtime( os.path.getmtime( filename ))),
 
+                'scannerEdition' : '',
                 'title'        : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='title']/SID_DATA/text()")), ''),
                 'uuid'         : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='uuid']/SID_DATA/text()")), ''),
                 'version'      : version,
@@ -495,11 +504,16 @@ class ScanParser:
                     
                     if cci in self.data_mapping['ap_mapping']:
                         ap = self.data_mapping['ap_mapping'][cci]
-
+                
+                ruleId = next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_ID']/ATTRIBUTE_DATA/text()")), '')
+                status = Utils.status( next(iter(vuln.xpath("./STATUS/text()")), ''), 'ABBREV')
+                
+                
+                
                 sf.add_requirement(
                     ScanRequirement({
                         'vulnId'        : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Vuln_Num']/ATTRIBUTE_DATA/text()")), ''),
-                        'ruleId'        : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_ID']/ATTRIBUTE_DATA/text()")), ''),
+                        'ruleId'        : ruleId,
                         'grpId'         : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Group_Title']/ATTRIBUTE_DATA/text()")), ''),
                         'pluginId'      : '',
                         'ruleVer'       : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_Ver']/ATTRIBUTE_DATA/text()")), ''),
@@ -513,7 +527,7 @@ class ScanParser:
                             str(next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Severity']/ATTRIBUTE_DATA/text()")), '')),
                             'NUM'
                         ),
-                        'status'        : Utils.status( next(iter(vuln.xpath("./STATUS/text()")), ''), 'ABBREV'),
+                        'status'        : status,
                         'findingDetails': next(iter(vuln.xpath("./FINDING_DETAILS/text()")), ''),
                         'comments'      : next(iter(vuln.xpath("./COMMENTS/text()")), ''),
                         'mitigation'    : '',
@@ -535,5 +549,5 @@ class ScanParser:
             logging.error(str(e))
             print(filename)
             print(repr(e))
-
+        
         return sf

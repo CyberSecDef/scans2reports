@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>934</width>
-    <height>823</height>
+    <width>1024</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,6 +64,7 @@ border-radius:0px;
 border: 1px solid black;
 margin-left:10px;
 margin-bottom:10px;
+font-size: 8pt;
 }
 QHeaderView::section{
             border-top:0px solid #D8D8D8;
@@ -165,6 +166,7 @@ border-radius: 0px;
 margin-left:10px;
 margin-bottom:10px;
 border: 1px solid black;
+font-size:10pt;
 }
 QHeaderView::section{
             border-top:0px solid #D8D8D8;
