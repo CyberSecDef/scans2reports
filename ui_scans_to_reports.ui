@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>800</height>
+    <width>1400</width>
+    <height>864</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -59,7 +59,7 @@ border:1px solid #000000;
            </property>
            <property name="styleSheet">
             <string notr="true">QTableWidget{
-background:#eeeeee;
+background:#ffffff;
 border-radius:0px;
 border: 1px solid black;
 margin-left:10px;
@@ -161,12 +161,12 @@ border:1px solid #000000;
            </property>
            <property name="styleSheet">
             <string notr="true">QTableWidget{
-background: #eeeeee;
+background: #ffffff;
 border-radius: 0px;
 margin-left:10px;
 margin-bottom:10px;
 border: 1px solid black;
-font-size:10pt;
+font-size:8pt;
 }
 QHeaderView::section{
             border-top:0px solid #D8D8D8;
@@ -825,6 +825,56 @@ border-radius: 15px;
          <string>Options</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="txt_command">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="placeholderText">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QCheckBox" name="chk_prefill_scd">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;</string>
+           </property>
+           <property name="text">
+            <string>Prefill SCD</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
          <item row="5" column="1">
           <widget class="QCheckBox" name="chk_lower_risk">
            <property name="minimumSize">
@@ -869,91 +919,6 @@ border-radius: 15px;
            </property>
            <property name="value">
             <number>30</number>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QCheckBox" name="chk_prefill_scd">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background: #fbecd8;</string>
-           </property>
-           <property name="text">
-            <string>Prefill SCD</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="txt_email">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>200</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>200</width>
-             <height>25</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="txt_command">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>200</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>200</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="placeholderText">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="lbl_phone">
-           <property name="styleSheet">
-            <string notr="true">background: #fbecd8;</string>
-           </property>
-           <property name="text">
-            <string>Phone</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -1012,6 +977,39 @@ border-radius: 15px;
            </property>
           </widget>
          </item>
+         <item row="7" column="1">
+          <widget class="QLabel" name="label">
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;
+</string>
+           </property>
+           <property name="text">
+            <string>Exclude ACAS Plugins Published Less Than X Days Ago:</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::PlainText</enum>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="lbl_phone">
+           <property name="styleSheet">
+            <string notr="true">background: #fbecd8;</string>
+           </property>
+           <property name="text">
+            <string>Phone</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="1">
           <widget class="QLineEdit" name="txt_poc">
            <property name="sizePolicy">
@@ -1047,26 +1045,6 @@ border-radius: 15px;
            </property>
           </widget>
          </item>
-         <item row="7" column="1">
-          <widget class="QLabel" name="label">
-           <property name="styleSheet">
-            <string notr="true">background: #fbecd8;
-</string>
-           </property>
-           <property name="text">
-            <string>Exclude ACAS Plugins Published Less Than X Days Ago:</string>
-           </property>
-           <property name="textFormat">
-            <enum>Qt::PlainText</enum>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
          <item row="4" column="1">
           <widget class="QCheckBox" name="chkSkipInfo">
            <property name="styleSheet">
@@ -1080,7 +1058,355 @@ border-radius: 15px;
            </property>
           </widget>
          </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="txt_email">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>200</width>
+             <height>25</height>
+            </size>
+           </property>
+          </widget>
+         </item>
         </layout>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QGroupBox" name="grpReports">
+        <property name="minimumSize">
+         <size>
+          <width>300</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>300</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QGroupBox{
+background: rgb(209, 236, 241);
+border:1px solid #000000;
+padding-top:10px;
+border-radius: 15px;
+}
+
+QCheckBox{
+
+    background: none;
+}</string>
+        </property>
+        <property name="title">
+         <string>Reports To Generate</string>
+        </property>
+        <widget class="QCheckBox" name="chk_scap_ckl_issues">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>20</y>
+           <width>121</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>SCAP/CKL Issues</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_test_plan">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>100</y>
+           <width>70</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Test Plan</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_poam">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>200</y>
+           <width>70</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>POAM</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_rar">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>240</y>
+           <width>70</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>RAR</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_automated_scan_info">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>80</y>
+           <width>161</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Automated Scan Info</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_software_linux">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>40</y>
+           <width>161</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Software - Linux</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_software_windows">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>60</y>
+           <width>161</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Software - Windows</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_asset_traceabilitiy">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>60</y>
+           <width>141</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Asset Traceability</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_hardware">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>120</y>
+           <width>70</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Hardware</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_ppsm">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>220</y>
+           <width>70</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>PPSM</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_cci">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>100</y>
+           <width>70</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>CCI</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_acas_unique_vuln">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>40</y>
+           <width>141</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>ACAS Unique Vuln</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_acas_unique_iavm">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>121</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>ACAS Unique IAVM</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_missing_patches">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>160</y>
+           <width>121</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Missing Patches</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_summary">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>80</y>
+           <width>70</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Summary</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_raw_data">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>260</y>
+           <width>70</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Raw Data</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_operating_systems">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>180</y>
+           <width>141</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Operating Systems</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="chk_local_users">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>140</y>
+           <width>111</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Local Users</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -1092,7 +1418,7 @@ border-radius: 15px;
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>934</width>
+     <width>1400</width>
      <height>21</height>
     </rect>
    </property>
@@ -1218,11 +1544,31 @@ border-radius: 15px;
   <tabstop>txt_poc</tabstop>
   <tabstop>txt_phone</tabstop>
   <tabstop>txt_email</tabstop>
+  <tabstop>chkSkipInfo</tabstop>
+  <tabstop>chk_lower_risk</tabstop>
+  <tabstop>chk_prefill_scd</tabstop>
+  <tabstop>spnExcludeDays</tabstop>
+  <tabstop>chk_acas_unique_iavm</tabstop>
+  <tabstop>chk_acas_unique_vuln</tabstop>
+  <tabstop>chk_asset_traceabilitiy</tabstop>
+  <tabstop>chk_automated_scan_info</tabstop>
+  <tabstop>chk_cci</tabstop>
+  <tabstop>chk_hardware</tabstop>
+  <tabstop>chk_local_users</tabstop>
+  <tabstop>chk_missing_patches</tabstop>
+  <tabstop>chk_operating_systems</tabstop>
+  <tabstop>chk_poam</tabstop>
+  <tabstop>chk_ppsm</tabstop>
+  <tabstop>chk_rar</tabstop>
+  <tabstop>chk_raw_data</tabstop>
+  <tabstop>chk_scap_ckl_issues</tabstop>
+  <tabstop>chk_software_linux</tabstop>
+  <tabstop>chk_software_windows</tabstop>
+  <tabstop>chk_summary</tabstop>
+  <tabstop>chk_test_plan</tabstop>
   <tabstop>btn_select_scan_files</tabstop>
   <tabstop>btn_parse_scan_files</tabstop>
   <tabstop>btn_execute</tabstop>
-  <tabstop>tbl_selected_scans</tabstop>
-  <tabstop>tbl_scan_summary</tabstop>
  </tabstops>
  <resources/>
  <connections/>

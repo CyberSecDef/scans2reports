@@ -34,7 +34,7 @@ class Reports:
     }
     application_path = ""
 
-    def __init__(self, application_path, scan_results, data_mapping, contact_info, poam_conf, scans_to_reports=None):
+    def __init__(self, application_path, scan_results, data_mapping, contact_info, skip_reports, poam_conf, scans_to_reports=None):
         """ constructor """
         self.application_path = application_path
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
@@ -50,6 +50,7 @@ class Reports:
         self.workbook = xlsxwriter.Workbook(report_name)
         self.data_mapping = data_mapping
         self.contact_info = contact_info
+        self.skip_reports = skip_reports
         self.poam_conf = poam_conf
         self.scans_to_reports = scans_to_reports
 
@@ -58,9 +59,11 @@ class Reports:
         logging.info('Closing Workbook')
         self.workbook.close()
 
-    def rpt_issues(self):
+    def rpt_scap_ckl_issues(self):
         """ SCAP - CKL Inconsistencies tab """
-
+        if 'rpt_scap_ckl_issues' in self.skip_reports:
+            return None
+            
         logging.info('Building SCAP-CKL Inconsistencies report')
         worksheet = self.workbook.add_worksheet('SCAP-CKL Inconsistencies')
         if self.scans_to_reports:
@@ -224,6 +227,9 @@ class Reports:
 
     def rpt_test_plan(self):
         """ Generates Test Plan """
+        if 'rpt_test_plan' in self.skip_reports:
+            return None
+            
         logging.info('Building Test Plan Report')
         worksheet = self.workbook.add_worksheet('Test Plan')
         if self.scans_to_reports:
@@ -328,8 +334,11 @@ class Reports:
                     col += 1
                 row += 1
 
-    def rpt_poam56(self):
+    def rpt_poam(self):
         """ Generates POAM """
+        if 'rpt_poam' in self.skip_reports:
+            return None
+        
         logging.info('Building POAM')
         worksheet = self.workbook.add_worksheet('POAM')
         if self.scans_to_reports:
@@ -547,6 +556,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_rar(self):
         """ Generates RAR """
+        if 'rpt_rar' in self.skip_reports:
+            return None
+            
         logging.info('Building RAR')
         worksheet = self.workbook.add_worksheet('RAR')
         if self.scans_to_reports:
@@ -754,8 +766,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         print( "        {} - Finished generating RAR".format(datetime.datetime.now() - start_time) )
 
 
-    def rpt_scan_info(self):
+    def rpt_automated_scan_info(self):
         """ Generates Scan Info Tab """
+        if 'rpt_automated_scan_info' in self.skip_reports:
+            return None
+            
         logging.info('Building Automated Scan Info Tab')
         worksheet = self.workbook.add_worksheet('Automated Scan Info')
         if self.scans_to_reports:
@@ -861,8 +876,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     col += 1
                 row += 1
 
-    def rpt_soft_linux(self):
+    def rpt_software_linux(self):
         """ Generates Linux Software Tab """
+        if 'rpt_software_linux' in self.skip_reports:
+            return None
+        
         logging.info('Generating Linux Software Tab')
 
         worksheet = self.workbook.add_worksheet('Software - Linux')
@@ -975,8 +993,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     col += 1
                 row += 1
 
-    def rpt_soft_windows(self):
+    def rpt_software_windows(self):
         """ Generates Windows Software Tab """
+        if 'rpt_software_windows' in self.skip_reports:
+            return None
+            
         logging.info('Building Windows Software Tab')
         worksheet = self.workbook.add_worksheet('Software - Windows')
         if self.scans_to_reports:
@@ -1076,6 +1097,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_asset_traceability(self):
         """Generates the Asset Traceability list"""
+        if 'rpt_asset_traceability' in self.skip_reports:
+            return None
+        
         logging.info('Building Asset Traceability Tab')
 
         worksheet = self.workbook.add_worksheet('Asset Traceability')
@@ -1298,6 +1322,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_hardware(self):
         """Generates the hardware list"""
+        if 'rpt_hardware' in self.skip_reports:
+            return None
+            
         logging.info('Building Hardware Tab')
 
         worksheet = self.workbook.add_worksheet('Hardware')
@@ -1408,6 +1435,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_ppsm(self):
         """ Generates PPSM Report """
+        if 'rpt_ppsm' in self.skip_reports:
+            return None
+        
         logging.info('Building PPSM Tab')
         worksheet = self.workbook.add_worksheet('PPSM')
         if self.scans_to_reports:
@@ -1471,6 +1501,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_cci(self):
         """ Generates CCI Report """
+        if 'rpt_cci' in self.skip_reports:
+            return None
+            
         logging.info('Building CCI Tab')
         worksheet = self.workbook.add_worksheet('CCI Data')
         if self.scans_to_reports:
@@ -1519,6 +1552,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_acas_uniq_vuln(self):
         """ Generates ACAS Unique Vuln tab """
+        if 'rpt_acas_uniq_vuln' in self.skip_reports:
+            return None
+            
         logging.info('Building ACAS Unique Vuln Tab')
         worksheet = self.workbook.add_worksheet('ACAS Unique Vuln')
         if self.scans_to_reports:
@@ -1592,6 +1628,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_acas_uniq_iava(self):
         """ Generates ACAS Unique IAVA Tab """
+        if 'rpt_acas_uniq_iava' in self.skip_reports:
+            return None
+        
         logging.info('Building ACAS Unique IAVA Tab')
         worksheet = self.workbook.add_worksheet('ACAS Unique IAVA')
         if self.scans_to_reports:
@@ -1667,6 +1706,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_missing_patches(self):
         """ Generates Missing Patches tab """
+        if 'rpt_missing_patches' in self.skip_reports:
+            return None
+            
         logging.info('Building Missing Patches tab')
         worksheet = self.workbook.add_worksheet('Missing Patches')
         if self.scans_to_reports:
@@ -1738,6 +1780,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_summary(self):
         """ Generates Scan Summary Tab """
+        if 'rpt_summary' in self.skip_reports:
+            return None
+            
         logging.info('Building Summary Tab')
         worksheet = self.workbook.add_worksheet('Summary')
         if self.scans_to_reports:
@@ -1871,6 +1916,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_raw_data(self):
         """ Generates RAW Data Tab """
+        if 'rpt_raw_data' in self.skip_reports:
+            return None
+            
         logging.info('Building Raw Data Tab')
         worksheet = self.workbook.add_worksheet('Raw Data')
         if self.scans_to_reports:
@@ -2011,6 +2059,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_operating_systems(self):
         """ Generates OS Tab """
+        if 'rpt_operating_systems' in self.skip_reports:
+            return None
+            
         logging.info('Building OS Tab')
         worksheet = self.workbook.add_worksheet('Operating Systems')
         if self.scans_to_reports:
@@ -2060,6 +2111,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_local_users(self):
         """ Generates Local Users tab """
+        if 'rpt_local_users' in self.skip_reports:
+            return None
+            
         logging.info('Building Local Users Tab')
         worksheet = self.workbook.add_worksheet('Local Users')
         if self.scans_to_reports:

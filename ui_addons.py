@@ -6,11 +6,11 @@ import pprint
 import dumper
 import logging
 from functools import partial
-            
+
 class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
     def __init__ (self, value):
         super(QNumericTableWidgetItem, self).__init__(value)
-        
+
     def __lt__ (self, other):
         if (isinstance(other, QNumericTableWidgetItem)):
             selfDataValue  = float(re.sub(r'[^0-9\-\.]', '', str(self.text())))
@@ -18,7 +18,7 @@ class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
             return selfDataValue < otherDataValue
         else:
             return QtWidgets.QTableWidgetItem.__lt__(self, other)
-            
+
     def __rt__ (self, other):
         if (isinstance(other, QNumericTableWidgetItem)):
             selfDataValue  = float(re.sub(r'[ $]', '', str(self.text())))
@@ -27,7 +27,7 @@ class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
             return selfDataValue > otherDataValue
         else:
             return QtWidgets.QTableWidgetItem.__lt__(self, other)
-            
+
 class UiAddons():
     main_form = None
     main_app = None
@@ -35,7 +35,7 @@ class UiAddons():
     tbl_selected_scans_sort_order = 0
     tbl_scan_summary_sort_col = 0
     tbl_scan_summary_sort_order = 0
-    
+
     def __init__(self,main_app, main_form):
         self.main_form = main_form
         self.main_app = main_app
@@ -43,7 +43,7 @@ class UiAddons():
         self.main_form.tbl_scan_summary.horizontalHeader().setSortIndicatorShown(True)
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
         logging.basicConfig(filename='{self.main_app.applcation_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
-        
+
 
     def btn_select_scan_files_on_click(self):
         logging.info('Select Scan Files Clicked')
@@ -55,38 +55,38 @@ class UiAddons():
                 cell_widget = self.main_form.tbl_selected_scans.item(row, 1)
                 if cell_widget:
                     filepaths.append(cell_widget.data(QtCore.Qt.UserRole))
-            
+
             for file in files:
                 filepath = str(file)
                 extension = os.path.splitext(filepath)[1].lower()
-                
+
                 if filepath not in filepaths:
                     if extension in ['.ckl', '.xml', '.nessus']:
                         logging.info('Adding file to queue: %s', filepath)
                         self.main_form.tbl_selected_scans.insertRow(0)
-                        
+
                         item = QtWidgets.QTableWidgetItem( os.path.basename( filepath ))
                         item.setData(QtCore.Qt.UserRole, filepath)
                         self.main_form.tbl_selected_scans.setItem(0, 1, item)
-                        
+
                         self.main_form.tbl_selected_scans.setItem(0, 2, QtWidgets.QTableWidgetItem( time.strftime( '%Y-%m-%d %H:%M:%S', time.gmtime( os.path.getmtime( filepath ))) ) )
                         self.main_form.tbl_selected_scans.setItem(0, 3, QNumericTableWidgetItem( QtWidgets.QTableWidgetItem( str( os.path.getsize( filepath ))) ) )
                         self.main_form.tbl_selected_scans.setItem(0, 4, QtWidgets.QTableWidgetItem( extension ))
-                        
+
                         self.main_form.tbl_selected_scans.resizeColumnsToContents()
                         self.main_form.tbl_selected_scans.horizontalHeader().setStretchLastSection(True)
-                        
+
     def btn_parse_scan_files_on_click(self):
-        self.main_app.poam_conf = { 
-            'skip_info' : self.main_form.chkSkipInfo.isChecked(), 
-            'scd' : self.main_form.chk_prefill_scd.isChecked(), 
+        self.main_app.poam_conf = {
+            'skip_info' : self.main_form.chkSkipInfo.isChecked(),
+            'scd' : self.main_form.chk_prefill_scd.isChecked(),
             'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
             'exclude_plugins' : self.main_form.spnExcludeDays.value()
         }
-        
+
         logging.info('Parse Scan Files Clicked')
         self.main_form.tbl_scan_summary.setRowCount(0)
-        
+
         filepaths = []
         for row in range(self.main_form.tbl_selected_scans.rowCount()):
             cell_widget = self.main_form.tbl_selected_scans.item(row, 1)
@@ -95,7 +95,7 @@ class UiAddons():
         self.main_app.scan_files = filepaths
         self.main_app.scan_results = [{} for x in self.main_app.scan_files]
         self.main_app.parse_scan_files()
-        
+
         total_files = len(self.main_app.scan_results)
         self.main_form.tbl_scan_summary.setRowCount(1000)
         currentRow = 0
@@ -108,57 +108,57 @@ class UiAddons():
                         self.main_form.tbl_scan_summary.setItem(currentRow, 1, QtWidgets.QTableWidgetItem( host['hostname'] ))
                         self.main_form.tbl_scan_summary.setItem(currentRow, 2, QtWidgets.QTableWidgetItem( host['ip'] ))
                         self.main_form.tbl_scan_summary.setItem(currentRow, 3, QtWidgets.QTableWidgetItem( host['os'] ))
-                        
+
                         self.main_form.tbl_scan_summary.setItem(currentRow, 4, QtWidgets.QTableWidgetItem( os.path.basename( scan_result['fileName'] )))
-                        
+
                         self.main_form.tbl_scan_summary.setItem(currentRow, 5, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catI']).strip() or 0 ) )) ) )
                         self.main_form.tbl_scan_summary.setItem(currentRow, 6, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catII']).strip() or 0 ) )) ) )
                         self.main_form.tbl_scan_summary.setItem(currentRow, 7, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catIII']).strip() or 0 ) )) ) )
                         self.main_form.tbl_scan_summary.setItem(currentRow, 8, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catIV']).strip() or 0 ) )) ) )
-                        
+
                         self.main_form.tbl_scan_summary.setItem(currentRow, 9, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(host['total'] ))) )
                         self.main_form.tbl_scan_summary.setItem(currentRow, 10, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(host['score'] ))) )
                         self.main_form.tbl_scan_summary.setItem(currentRow, 11, QtWidgets.QTableWidgetItem( str(host['credentialed'] )))
-                    
+
                         currentRow += 1
                         if currentRow >= self.main_form.tbl_scan_summary.rowCount():
-                            self.main_form.tbl_scan_summary.setRowCount(self.main_form.tbl_scan_summary.rowCount() + 1000)                        
-                else:                
+                            self.main_form.tbl_scan_summary.setRowCount(self.main_form.tbl_scan_summary.rowCount() + 1000)
+                else:
                     self.main_form.tbl_scan_summary.setItem(currentRow, 0, QtWidgets.QTableWidgetItem( scan_result['type'] ))
                     self.main_form.tbl_scan_summary.setItem(currentRow, 1, QtWidgets.QTableWidgetItem( scan_result['hostname'] ))
                     self.main_form.tbl_scan_summary.setItem(currentRow, 2, QtWidgets.QTableWidgetItem( scan_result['ip'] ))
                     self.main_form.tbl_scan_summary.setItem(currentRow, 3, QtWidgets.QTableWidgetItem( scan_result['os'] ))
-                    
+
                     self.main_form.tbl_scan_summary.setItem(currentRow, 4, QtWidgets.QTableWidgetItem( os.path.basename( scan_result['fileName'] )))
-                    
+
                     self.main_form.tbl_scan_summary.setItem(currentRow, 5, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catI']).strip() or 0 ) )) ) )
                     self.main_form.tbl_scan_summary.setItem(currentRow, 6, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catII']).strip() or 0 ) )) ) )
                     self.main_form.tbl_scan_summary.setItem(currentRow, 7, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catIII']).strip() or 0 ) )) ) )
                     self.main_form.tbl_scan_summary.setItem(currentRow, 8, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catIV']).strip() or 0 ) )) ) )
-                    
+
                     self.main_form.tbl_scan_summary.setItem(currentRow, 9, QtWidgets.QTableWidgetItem( str(scan_result['total'] )))
                     self.main_form.tbl_scan_summary.setItem(currentRow, 10, QtWidgets.QTableWidgetItem( str(scan_result['score'] )))
                     self.main_form.tbl_scan_summary.setItem(currentRow, 11, QtWidgets.QTableWidgetItem( str(scan_result['credentialed'] )))
                     currentRow += 1
                     if currentRow >= self.main_form.tbl_scan_summary.rowCount():
                             self.main_form.tbl_scan_summary.setRowCount(self.main_form.tbl_scan_summary.rowCount() + 1000)
-                        
-        
+
+
         self.main_form.tbl_scan_summary.setRowCount(currentRow + 1)
         self.main_form.tbl_scan_summary.resizeColumnsToContents()
         self.main_form.tbl_scan_summary.horizontalHeader().setStretchLastSection(True)
-    
+
     def merge_nessus(self, host_count):
         logging.info('Merge Nessus Clicked')
-        
+
         options = QtWidgets.QFileDialog.Options(  )
         files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"QFileDialog.getOpenFileNames()", "","Nessus Files (*.nessus);;", options=options)
         if files:
             self.main_app.merge_nessus_files(files, host_count)
-                
+
     def split_nessus(self):
         logging.info('Split Nessus Clicked')
-        
+
         options = QtWidgets.QFileDialog.Options()
         files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"QFileDialog.getOpenFileNames()", "","Nessus Files (*.nessus);;", options=options)
         if files:
@@ -167,31 +167,86 @@ class UiAddons():
                 logging.info('Splitting {}'.format(file))
                 print('Splitting {}'.format(file))
                 self.main_app.split_nessus_file(file)
-                
-        
+
+
     def btn_execute_on_click(self):
         logging.info('Execute Clicked')
         self.main_app.contact_info['command'] = self.main_form.txt_command.text()
-        self.main_app.contact_info['name'] = self.main_form.txt_poc.text()
-        self.main_app.contact_info['phone'] = self.main_form.txt_phone.text()
-        self.main_app.contact_info['email'] = self.main_form.txt_email.text()
-        
-        self.main_app.poam_conf = { 
-            'skip_info' : self.main_form.chkSkipInfo.isChecked(), 
-            'scd' : self.main_form.chk_prefill_scd.isChecked(), 
+        self.main_app.contact_info['name']    = self.main_form.txt_poc.text()
+        self.main_app.contact_info['phone']   = self.main_form.txt_phone.text()
+        self.main_app.contact_info['email']   = self.main_form.txt_email.text()
+
+        self.main_app.poam_conf = {
+            'skip_info' : self.main_form.chkSkipInfo.isChecked(),
+            'scd' : self.main_form.chk_prefill_scd.isChecked(),
             'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
             'exclude_plugins' : self.main_form.spnExcludeDays.value()
         }
-        
+
+        if not self.main_form.chk_acas_unique_iavm.isChecked():
+            self.main_app.skip_reports.append('rpt_acas_uniq_iava')
+
+        if not self.main_form.chk_acas_unique_vuln.isChecked():
+            self.main_app.skip_reports.append('rpt_acas_uniq_vuln')
+
+        if not self.main_form.chk_asset_traceabilitiy.isChecked():
+            self.main_app.skip_reports.append('rpt_asset_traceability')
+
+        if not self.main_form.chk_automated_scan_info.isChecked():
+            self.main_app.skip_reports.append('rpt_automated_scan_info')
+
+        if not self.main_form.chk_cci.isChecked():
+            self.main_app.skip_reports.append('rpt_cci')
+
+        if not self.main_form.chk_hardware.isChecked():
+            self.main_app.skip_reports.append('rpt_hardware')
+
+        if not self.main_form.chk_local_users.isChecked():
+            self.main_app.skip_reports.append('rpt_local_users')
+
+        if not self.main_form.chk_missing_patches.isChecked():
+            self.main_app.skip_reports.append('rpt_missing_patches')
+
+        if not self.main_form.chk_operating_systems.isChecked():
+            self.main_app.skip_reports.append('rpt_operating_systems')
+
+        if not self.main_form.chk_poam.isChecked():
+            self.main_app.skip_reports.append('rpt_poam')
+
+        if not self.main_form.chk_ppsm.isChecked():
+            self.main_app.skip_reports.append('rpt_ppsm')
+
+        if not self.main_form.chk_rar.isChecked():
+            self.main_app.skip_reports.append('rpt_rar')
+
+        if not self.main_form.chk_raw_data.isChecked():
+            self.main_app.skip_reports.append('rpt_raw_data')
+
+        if not self.main_form.chk_scap_ckl_issues.isChecked():
+            self.main_app.skip_reports.append('rpt_scap_ckl_issues')
+
+        if not self.main_form.chk_software_linux.isChecked():
+            self.main_app.skip_reports.append('rpt_software_linux')
+
+        if not self.main_form.chk_software_windows.isChecked():
+            self.main_app.skip_reports.append('rpt_software_windows')
+
+        if not self.main_form.chk_summary.isChecked():
+            self.main_app.skip_reports.append('rpt_summary')
+
+        if not self.main_form.chk_test_plan.isChecked():
+            self.main_app.skip_reports.append('rpt_test_plan')
+
+
         self.main_app.generate_reports()
-        
+
     def show_about(self):
         logging.info('About Shown')
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle("About Scans To Reports")
         msg.setText("Scans To Reports - Python Edition\nVersion 1.0\nCopyright (C) 2020 - Robert Weber\nhttps://cyber.trackr.live")
         x = msg.exec_()
-        
+
     def show_help(self):
         logging.info('Help Shown')
         msg = QtWidgets.QMessageBox()
@@ -209,7 +264,7 @@ To utilize the tool, follow the steps below:
 6 - Once all the scans are parsed, click on the red 'Generate Report' button.
 7 - Once complete, your new file will be in the 'results' folder.
 """)
-        x = msg.exec_()        
+        x = msg.exec_()
 
 
     def sort_tbl_selected_scans(self, val):
@@ -222,7 +277,7 @@ To utilize the tool, follow the steps below:
             self.tbl_selected_scans_sort_col = val
             self.tbl_selected_scans_sort_order = 1
         self.main_form.tbl_selected_scans.sortByColumn(self.tbl_selected_scans_sort_col, self.tbl_selected_scans_sort_order)
-        
+
     def sort_tbl_scan_summary(self, val):
         if self.tbl_scan_summary_sort_col == val:
             if self.tbl_scan_summary_sort_order == 0:
@@ -232,10 +287,10 @@ To utilize the tool, follow the steps below:
         else:
             self.tbl_scan_summary_sort_col = val
             self.tbl_scan_summary_sort_order = 1
-        
+
         self.main_form.tbl_scan_summary.sortByColumn(self.tbl_scan_summary_sort_col, self.tbl_scan_summary_sort_order)
-        
-        
+
+
     def connect_events(self):
         logging.info('Connecting Events')
         self.main_form.btn_parse_scan_files.clicked.connect(self.btn_parse_scan_files_on_click)
@@ -252,19 +307,19 @@ To utilize the tool, follow the steps below:
         self.main_form.action25_Hosts.triggered.connect( partial(self.merge_nessus, 25) )
         self.main_form.action50_Hosts.triggered.connect( partial(self.merge_nessus, 50) )
         self.main_form.actionAll_Hosts.triggered.connect( partial(self.merge_nessus, 0) )
-        
-        
-        
+
+
+
         self.main_form.actionSplit_Nessus.triggered.connect( self.split_nessus )
 
         self.main_form.actionAbout.triggered.connect( self.show_about )
         self.main_form.actionHelp.triggered.connect( self.show_help )
-        
+
         self.main_form.actionSelect.triggered.connect( self.btn_select_scan_files_on_click )
         self.main_form.actionParse_Scans.triggered.connect( self.btn_parse_scan_files_on_click )
         self.main_form.actionExecute.triggered.connect( self.btn_execute_on_click )
         self.main_form.actionExit.triggered.connect( QtCore.QCoreApplication.quit)
-        
+
     def update_summary_headers(self):
         logging.info('Updating Summary Headers')
         self.main_form.tbl_scan_summary.setRowCount(1)
@@ -272,8 +327,8 @@ To utilize the tool, follow the steps below:
         self.main_form.tbl_scan_summary.setHorizontalHeaderLabels(['Type', 'Hostname', 'IP','OS', 'Scan File Name', 'CAT I', 'CAT II', 'CAT III', 'CAT IV', 'Total', 'Score',' Credentialed'])
         self.main_form.tbl_scan_summary.resizeColumnsToContents()
         self.main_form.tbl_scan_summary.horizontalHeader().setStretchLastSection(True)
-        
-        
+
+
     def update_scan_headers(self):
         logging.info('Updating Scan Headers')
         self.main_form.tbl_selected_scans.setRowCount(1)
@@ -283,11 +338,11 @@ To utilize the tool, follow the steps below:
         self.main_form.tbl_selected_scans.horizontalHeader().setStretchLastSection(True)
 
 class ScanSelect(QtWidgets.QTableWidget):
-    
+
     def __init__(self, parent):
         super(ScanSelect, self).__init__(parent)
         self.destroy()
-        
+
     def contextMenuEvent(self, event):
         dumper.dump(event)
         contextMenu = QtWidgets.QMenu(self)
@@ -326,7 +381,7 @@ class FileDrop(QtWidgets.QLabel):
             cell_widget = self.main_form.tbl_selected_scans.item(row, 1)
             if cell_widget and filepath == cell_widget.data(QtCore.Qt.UserRole):
                 print(cell_widget.data(QtCore.Qt.UserRole) )
-                
+
     def remove_row(self):
         self.main_form.tbl_selected_scans.removeRow(self.main_form.tbl_selected_scans.currentRow())
 
@@ -361,7 +416,7 @@ class FileDrop(QtWidgets.QLabel):
                 btn.setText('Del')
                 btn.clicked.connect(self.remove_row)
                 self.main_form.tbl_selected_scans.setCellWidget(current_row, 0,  btn )
-                
+
                 item = QtWidgets.QTableWidgetItem( os.path.basename( filepath ))
                 item.setData(QtCore.Qt.UserRole, filepath)
                 self.main_form.tbl_selected_scans.setItem(current_row, 1, item)
@@ -369,6 +424,6 @@ class FileDrop(QtWidgets.QLabel):
                 self.main_form.tbl_selected_scans.setItem(current_row, 3, QNumericTableWidgetItem( QtWidgets.QTableWidgetItem( str( os.path.getsize( filepath ))) ) )
                 self.main_form.tbl_selected_scans.setItem(current_row, 4, QtWidgets.QTableWidgetItem( extension ))
                 current_row += 1
-                            
+
         self.main_form.tbl_selected_scans.resizeColumnsToContents()
         self.main_form.tbl_selected_scans.horizontalHeader().setStretchLastSection(True)

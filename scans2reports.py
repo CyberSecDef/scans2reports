@@ -42,6 +42,7 @@ class Scans2Reports:
     num_theads = 10
     data_mapping = {}
     contact_info = {}
+    skip_reports = []
     poam_conf = {}
     operating_mode = "console"
     ui = None
@@ -77,19 +78,22 @@ class Scans2Reports:
         with open(os.path.join(self.application_path, "data/dataset.json"), "r") as read_file:
             self.data_mapping = json.load(read_file)
         
+        self.skip_reports = []
         self.contact_info = {
             'command' : (args.command if 'command' in args and args.command is not None and str(args.command).strip() != '' else ''),
-            'name' : (args.name if 'name' in args and args.name is not None and str(args.name).strip() != '' else ''),
-            'phone' : (args.phone if 'phone' in args and args.phone is not None and str(args.phone).strip() != '' else ''),
-            'email' : (args.email if 'email' in args and args.email is not None and str(args.email).strip() != '' else '')
+            'name'    : (args.name if 'name' in args and args.name is not None and str(args.name).strip() != '' else ''),
+            'phone'   : (args.phone if 'phone' in args and args.phone is not None and str(args.phone).strip() != '' else ''),
+            'email'   : (args.email if 'email' in args and args.email is not None and str(args.email).strip() != '' else '')
         }
         
         self.poam_conf = { 
-            'skip_info' : args.skip_info,
-            'scd' : args.scd, 
-            'lower_risk' : args.lower_risk, 
+            'skip_info'       : args.skip_info,
+            'scd'             : args.scd, 
+            'lower_risk'      : args.lower_risk, 
             'exclude_plugins' : args.exclude_plugins 
         }
+        
+        
         self.input_folder = args.input_folder
         
     def merge_nessus_files(self, files, host_count):
@@ -463,6 +467,7 @@ class Scans2Reports:
             self.scan_results,
             self.data_mapping,
             self.contact_info,
+            self.skip_reports,
             self.poam_conf,
             S2R.scans_to_reports
         )
