@@ -1574,7 +1574,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
-                    requirements: requirements[]  | [*].{ 
+                    requirements: requirements[]  | [?severity != `0`].{ 
                         plugin_id: pluginId,
                         title: reqTitle,
                         grp_id: grpId,
@@ -1650,7 +1650,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
-                    requirements: requirements[]  | [?iava != ''].{ 
+                    requirements: requirements[]  | [?iava != '' && severity != `0`].{ 
                         plugin_id: pluginId,
                         iava: iava,
                         title: reqTitle,
