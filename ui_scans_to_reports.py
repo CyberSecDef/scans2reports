@@ -641,12 +641,16 @@ class UiScansToReports(object):
         _translate = QtCore.QCoreApplication.translate
         ScansToReports.setWindowTitle(_translate("ScansToReports", "Scans To Reports"))
         self.grp_selected_scans.setTitle(_translate("ScansToReports", "Selected Scan Files"))
+        self.tbl_selected_scans.setToolTip(_translate("ScansToReports", "This table is a summary of all the selected scan files"))
+        self.btn_parse_scan_files.setToolTip(_translate("ScansToReports", "Click this button to parse the selected scan files"))
         self.btn_parse_scan_files.setText(_translate("ScansToReports", "P\n"
 "A\n"
 "R\n"
 "S\n"
 "E"))
         self.grp_scan_summary.setTitle(_translate("ScansToReports", "Scan Summary"))
+        self.tbl_scan_summary.setToolTip(_translate("ScansToReports", "This is a summary of all the parsed scan data"))
+        self.btn_execute.setToolTip(_translate("ScansToReports", "Click this button to generate the reports for the selected scan files."))
         self.btn_execute.setText(_translate("ScansToReports", "R\n"
 "E\n"
 "P\n"
@@ -654,40 +658,68 @@ class UiScansToReports(object):
 "R\n"
 "T"))
         self.grp_file_drop.setTitle(_translate("ScansToReports", "Scan Drop"))
-        self.btn_select_scan_files.setText(_translate("ScansToReports", "S\n"
-"E\n"
-"L\n"
-"E\n"
-"C\n"
+        self.btn_select_scan_files.setToolTip(_translate("ScansToReports", "Click on this button to select scan files to import"))
+        self.btn_select_scan_files.setText(_translate("ScansToReports", "I\n"
+"M\n"
+"P\n"
+"O\n"
+"R\n"
 "T"))
+        self.lbl_file_drop.setToolTip(_translate("ScansToReports", "Drop Scan Files onto the section to automatically parse them"))
         self.lbl_file_drop.setText(_translate("ScansToReports", " Select multiple files with the file dialog or by dragging and dropping scan files into this region "))
         self.grp_data_points.setTitle(_translate("ScansToReports", "Options"))
-        self.chk_prefill_scd.setText(_translate("ScansToReports", "Prefill SCD"))
+        self.txt_command.setToolTip(_translate("ScansToReports", "Enter the Name of the Base or Command the package belongs to."))
+        self.chk_prefill_scd.setToolTip(_translate("ScansToReports", "Prefill a Scheduled Completion Date (SCD) based on the residual risk level for each finding."))
+        self.chk_prefill_scd.setText(_translate("ScansToReports", "Prefill Scheduled Completion Date"))
+        self.chk_lower_risk.setToolTip(_translate("ScansToReports", "Automatically lower the risk one level for all findings.  This assumes a valid mitigation statement will be provided."))
         self.chk_lower_risk.setText(_translate("ScansToReports", "Automatically Lower Risk"))
+        self.txt_phone.setToolTip(_translate("ScansToReports", "Enter the Phone Number for the main Point of Contact for the package"))
         self.lbl_poc.setText(_translate("ScansToReports", "Contact Name"))
         self.lbl_command.setText(_translate("ScansToReports", "Command"))
-        self.label.setText(_translate("ScansToReports", "Exclude ACAS Plugins Published Less Than X Days Ago:"))
+        self.label.setToolTip(_translate("ScansToReports", "Some commands do not require new ACAS plugins to be included in part of a package, normally plugins that have been released within the last 30 days.  Insert the number of days to \'skip\' here, or enter 0 to include all plugins."))
+        self.label.setText(_translate("ScansToReports", "Exclude ACAS Plugins Published Less Than X Days Ago: (enter 0 to disable)"))
         self.lbl_phone.setText(_translate("ScansToReports", "Phone"))
+        self.txt_poc.setToolTip(_translate("ScansToReports", "Enter the Name of the main Point of Contact for the package"))
         self.lbl_email.setText(_translate("ScansToReports", "Email"))
-        self.chkSkipInfo.setText(_translate("ScansToReports", "Skip Informationals"))
+        self.chkSkipInfo.setToolTip(_translate("ScansToReports", "Skip low risk/informational findings from the report outputs"))
+        self.chkSkipInfo.setText(_translate("ScansToReports", "Skip CAT IV (Informational)"))
+        self.txt_email.setToolTip(_translate("ScansToReports", "Enter the Email for the main Point of Contact for the package"))
         self.grpReports.setTitle(_translate("ScansToReports", "Reports To Generate"))
+        self.chk_scap_ckl_issues.setToolTip(_translate("ScansToReports", "This report shows discrepencies between SCAP scans and CKL Executions"))
         self.chk_scap_ckl_issues.setText(_translate("ScansToReports", "SCAP/CKL Issues"))
+        self.chk_test_plan.setToolTip(_translate("ScansToReports", "This is a test plan that can be uploaded to eMASS"))
         self.chk_test_plan.setText(_translate("ScansToReports", "Test Plan"))
+        self.chk_poam.setToolTip(_translate("ScansToReports", "This is the POAM that can be generated for import into eMASS"))
         self.chk_poam.setText(_translate("ScansToReports", "POAM"))
+        self.chk_rar.setToolTip(_translate("ScansToReports", "This is a Risk Assessment Report for uploading as an artifact to eMASS"))
         self.chk_rar.setText(_translate("ScansToReports", "RAR"))
+        self.chk_automated_scan_info.setToolTip(_translate("ScansToReports", "This report is a summary of all Auomated Scans executed"))
         self.chk_automated_scan_info.setText(_translate("ScansToReports", "Automated Scan Info"))
+        self.chk_software_linux.setToolTip(_translate("ScansToReports", "This is a dump of all the \'linux\' or \'unix\' software utilized within the package, based off the parsed ACAS Scans."))
         self.chk_software_linux.setText(_translate("ScansToReports", "Software - Linux"))
+        self.chk_software_windows.setToolTip(_translate("ScansToReports", "This is a dump of all the windows software utilized within the package, based off the parsed ACAS Scans."))
         self.chk_software_windows.setText(_translate("ScansToReports", "Software - Windows"))
+        self.chk_asset_traceabilitiy.setToolTip(_translate("ScansToReports", "This report helps determine what specific scans were executed against each specific host.  Use this report to find out if certain hosts require additional scans."))
         self.chk_asset_traceabilitiy.setText(_translate("ScansToReports", "Asset Traceability"))
+        self.chk_hardware.setToolTip(_translate("ScansToReports", "This report shows device information for all hosts scanned."))
         self.chk_hardware.setText(_translate("ScansToReports", "Hardware"))
+        self.chk_ppsm.setToolTip(_translate("ScansToReports", "This is a PPSM report based on the ACAS Scans parsed by the generator"))
         self.chk_ppsm.setText(_translate("ScansToReports", "PPSM"))
+        self.chk_cci.setToolTip(_translate("ScansToReports", "This report shows all CCI items in an easy to search and filter format."))
         self.chk_cci.setText(_translate("ScansToReports", "CCI"))
+        self.chk_acas_unique_vuln.setToolTip(_translate("ScansToReports", "This report will display all the Unique findings that were founder from all submitted ACAS scans."))
         self.chk_acas_unique_vuln.setText(_translate("ScansToReports", "ACAS Unique Vuln"))
+        self.chk_acas_unique_iavm.setToolTip(_translate("ScansToReports", "This report will display all the Unique IAVM findings that were founder from all submitted ACAS scans."))
         self.chk_acas_unique_iavm.setText(_translate("ScansToReports", "ACAS Unique IAVM"))
+        self.chk_missing_patches.setToolTip(_translate("ScansToReports", "This report shows all patches that should be installed on specific hosts."))
         self.chk_missing_patches.setText(_translate("ScansToReports", "Missing Patches"))
+        self.chk_summary.setToolTip(_translate("ScansToReports", "This is a summary, complete with scores and finding counts, for all scans executed."))
         self.chk_summary.setText(_translate("ScansToReports", "Summary"))
+        self.chk_raw_data.setToolTip(_translate("ScansToReports", "This is a Raw dump of all the scan information parsed by the generator"))
         self.chk_raw_data.setText(_translate("ScansToReports", "Raw Data"))
+        self.chk_operating_systems.setToolTip(_translate("ScansToReports", "This report shows the count of each operating system, based on the ACAS scans parsed by the generator."))
         self.chk_operating_systems.setText(_translate("ScansToReports", "Operating Systems"))
+        self.chk_local_users.setToolTip(_translate("ScansToReports", "This report shows all the local users found for each host."))
         self.chk_local_users.setText(_translate("ScansToReports", "Local Users"))
         self.mnu_file.setTitle(_translate("ScansToReports", "&File"))
         self.mnu_help.setTitle(_translate("ScansToReports", "&Help"))

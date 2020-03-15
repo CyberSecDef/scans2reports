@@ -57,6 +57,9 @@ border:1px solid #000000;
            <property name="contextMenuPolicy">
             <enum>Qt::ActionsContextMenu</enum>
            </property>
+           <property name="toolTip">
+            <string>This table is a summary of all the selected scan files</string>
+           </property>
            <property name="styleSheet">
             <string notr="true">QTableWidget{
 background:#ffffff;
@@ -106,6 +109,9 @@ QTableCornerButton::section{
              <family>Arial</family>
              <pointsize>14</pointsize>
             </font>
+           </property>
+           <property name="toolTip">
+            <string>Click this button to parse the selected scan files</string>
            </property>
            <property name="styleSheet">
             <string notr="true">background-color: rgb(30, 126, 52);
@@ -159,6 +165,9 @@ border:1px solid #000000;
            <property name="focusPolicy">
             <enum>Qt::ClickFocus</enum>
            </property>
+           <property name="toolTip">
+            <string>This is a summary of all the parsed scan data</string>
+           </property>
            <property name="styleSheet">
             <string notr="true">QTableWidget{
 background: #ffffff;
@@ -210,6 +219,9 @@ QTableCornerButton::section{
              <weight>50</weight>
              <bold>false</bold>
             </font>
+           </property>
+           <property name="toolTip">
+            <string>Click this button to generate the reports for the selected scan files.</string>
            </property>
            <property name="styleSheet">
             <string notr="true">background-color: rgb(200, 35, 51);
@@ -740,6 +752,9 @@ border-radius:15px;
                 <height>150</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>Click on this button to select scan files to import</string>
+              </property>
               <property name="styleSheet">
                <string notr="true">background-color: rgb(0, 98, 204);
 color: #ffffff;
@@ -747,11 +762,11 @@ border-radius: 15px;
 font-size:14pt;</string>
               </property>
               <property name="text">
-               <string>S
-E
-L
-E
-C
+               <string>I
+M
+P
+O
+R
 T</string>
               </property>
              </widget>
@@ -766,6 +781,9 @@ T</string>
               </property>
               <property name="acceptDrops">
                <bool>true</bool>
+              </property>
+              <property name="toolTip">
+               <string>Drop Scan Files onto the section to automatically parse them</string>
               </property>
               <property name="styleSheet">
                <string notr="true">QLabel#lbl_file_drop{
@@ -845,6 +863,9 @@ border-radius: 15px;
              <height>25</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Enter the Name of the Base or Command the package belongs to.</string>
+           </property>
            <property name="placeholderText">
             <string/>
            </property>
@@ -864,11 +885,14 @@ border-radius: 15px;
              <height>25</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Prefill a Scheduled Completion Date (SCD) based on the residual risk level for each finding.</string>
+           </property>
            <property name="styleSheet">
             <string notr="true">background: #fbecd8;</string>
            </property>
            <property name="text">
-            <string>Prefill SCD</string>
+            <string>Prefill Scheduled Completion Date</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -888,6 +912,9 @@ border-radius: 15px;
              <width>16777215</width>
              <height>25</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Automatically lower the risk one level for all findings.  This assumes a valid mitigation statement will be provided.</string>
            </property>
            <property name="styleSheet">
             <string notr="true">background: #fbecd8;</string>
@@ -942,6 +969,9 @@ border-radius: 15px;
              <height>25</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Enter the Phone Number for the main Point of Contact for the package</string>
+           </property>
           </widget>
          </item>
          <item row="1" column="0">
@@ -979,12 +1009,15 @@ border-radius: 15px;
          </item>
          <item row="7" column="1">
           <widget class="QLabel" name="label">
+           <property name="toolTip">
+            <string>Some commands do not require new ACAS plugins to be included in part of a package, normally plugins that have been released within the last 30 days.  Insert the number of days to 'skip' here, or enter 0 to include all plugins.</string>
+           </property>
            <property name="styleSheet">
             <string notr="true">background: #fbecd8;
 </string>
            </property>
            <property name="text">
-            <string>Exclude ACAS Plugins Published Less Than X Days Ago:</string>
+            <string>Exclude ACAS Plugins Published Less Than X Days Ago: (enter 0 to disable)</string>
            </property>
            <property name="textFormat">
             <enum>Qt::PlainText</enum>
@@ -1030,6 +1063,9 @@ border-radius: 15px;
              <height>25</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Enter the Name of the main Point of Contact for the package</string>
+           </property>
           </widget>
          </item>
          <item row="3" column="0">
@@ -1047,11 +1083,14 @@ border-radius: 15px;
          </item>
          <item row="4" column="1">
           <widget class="QCheckBox" name="chkSkipInfo">
+           <property name="toolTip">
+            <string>Skip low risk/informational findings from the report outputs</string>
+           </property>
            <property name="styleSheet">
             <string notr="true">background: #fbecd8;</string>
            </property>
            <property name="text">
-            <string>Skip Informationals</string>
+            <string>Skip CAT IV (Informational)</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -1077,6 +1116,9 @@ border-radius: 15px;
              <width>200</width>
              <height>25</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Enter the Email for the main Point of Contact for the package</string>
            </property>
           </widget>
          </item>
@@ -1125,6 +1167,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This report shows discrepencies between SCAP scans and CKL Executions</string>
+         </property>
          <property name="text">
           <string>SCAP/CKL Issues</string>
          </property>
@@ -1140,6 +1185,9 @@ QCheckBox{
            <width>70</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>This is a test plan that can be uploaded to eMASS</string>
          </property>
          <property name="text">
           <string>Test Plan</string>
@@ -1157,6 +1205,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This is the POAM that can be generated for import into eMASS</string>
+         </property>
          <property name="text">
           <string>POAM</string>
          </property>
@@ -1172,6 +1223,9 @@ QCheckBox{
            <width>70</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>This is a Risk Assessment Report for uploading as an artifact to eMASS</string>
          </property>
          <property name="text">
           <string>RAR</string>
@@ -1189,6 +1243,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This report is a summary of all Auomated Scans executed</string>
+         </property>
          <property name="text">
           <string>Automated Scan Info</string>
          </property>
@@ -1204,6 +1261,9 @@ QCheckBox{
            <width>161</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>This is a dump of all the 'linux' or 'unix' software utilized within the package, based off the parsed ACAS Scans.</string>
          </property>
          <property name="text">
           <string>Software - Linux</string>
@@ -1221,6 +1281,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This is a dump of all the windows software utilized within the package, based off the parsed ACAS Scans.</string>
+         </property>
          <property name="text">
           <string>Software - Windows</string>
          </property>
@@ -1236,6 +1299,9 @@ QCheckBox{
            <width>141</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>This report helps determine what specific scans were executed against each specific host.  Use this report to find out if certain hosts require additional scans.</string>
          </property>
          <property name="text">
           <string>Asset Traceability</string>
@@ -1253,6 +1319,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This report shows device information for all hosts scanned.</string>
+         </property>
          <property name="text">
           <string>Hardware</string>
          </property>
@@ -1268,6 +1337,9 @@ QCheckBox{
            <width>70</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>This is a PPSM report based on the ACAS Scans parsed by the generator</string>
          </property>
          <property name="text">
           <string>PPSM</string>
@@ -1285,6 +1357,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This report shows all CCI items in an easy to search and filter format.</string>
+         </property>
          <property name="text">
           <string>CCI</string>
          </property>
@@ -1301,6 +1376,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This report will display all the Unique findings that were founder from all submitted ACAS scans.</string>
+         </property>
          <property name="text">
           <string>ACAS Unique Vuln</string>
          </property>
@@ -1316,6 +1394,9 @@ QCheckBox{
            <width>121</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>This report will display all the Unique IAVM findings that were founder from all submitted ACAS scans.</string>
          </property>
          <property name="autoFillBackground">
           <bool>false</bool>
@@ -1336,6 +1417,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This report shows all patches that should be installed on specific hosts.</string>
+         </property>
          <property name="text">
           <string>Missing Patches</string>
          </property>
@@ -1351,6 +1435,9 @@ QCheckBox{
            <width>70</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>This is a summary, complete with scores and finding counts, for all scans executed.</string>
          </property>
          <property name="text">
           <string>Summary</string>
@@ -1368,6 +1455,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This is a Raw dump of all the scan information parsed by the generator</string>
+         </property>
          <property name="text">
           <string>Raw Data</string>
          </property>
@@ -1384,6 +1474,9 @@ QCheckBox{
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>This report shows the count of each operating system, based on the ACAS scans parsed by the generator.</string>
+         </property>
          <property name="text">
           <string>Operating Systems</string>
          </property>
@@ -1399,6 +1492,9 @@ QCheckBox{
            <width>111</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>This report shows all the local users found for each host.</string>
          </property>
          <property name="text">
           <string>Local Users</string>
