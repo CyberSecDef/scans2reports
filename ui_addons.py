@@ -5,6 +5,7 @@ import time
 import pprint
 import dumper
 import logging
+import psutil
 from functools import partial
 
 class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
@@ -84,6 +85,23 @@ class UiAddons():
             'exclude_plugins' : self.main_form.spnExcludeDays.value()
         }
 
+        self.main_app.num_threads = 1
+        if self.main_form.comboBox.currentText() == 'Light Load':
+            self.main_app.num_threads = int(psutil.cpu_count() // 2) + 1
+            if self.main_app.num_threads <= 0:
+                self.main_app.num_threads = 1
+        elif self.main_form.comboBox.currentText() == 'Normal Load':
+            self.main_app.num_threads = int(psutil.cpu_count()) - 2 + 1
+            if self.main_app.num_threads <= 0:
+                self.main_app.num_threads = 1
+        else:
+            self.main_app.num_threads = int(psutil.cpu_count() * 2) - 1
+            if self.main_app.num_threads <= 0:
+                self.main_app.num_threads = 1
+                    
+                    
+                    
+        
         logging.info('Parse Scan Files Clicked')
         self.main_form.tbl_scan_summary.setRowCount(0)
 

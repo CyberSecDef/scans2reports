@@ -442,8 +442,8 @@ class Reports:
             q.put((status, 'acas'))
             q.put((status, 'disa'))
 
-        num_theads = int(psutil.cpu_count()) * 2
-        for i in range(num_theads):
+        num_threads = int(psutil.cpu_count()) * 2
+        for i in range(num_threads):
             worker = Thread(target=get_scan, args=(q, poam_results, self.scan_results))
             worker.setDaemon(True)
             worker.start()
@@ -662,8 +662,8 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
             q.put((status, 'acas'))
             q.put((status, 'disa'))
 
-        num_theads = int(psutil.cpu_count()) * 2
-        for i in range(num_theads):
+        num_threads = int(psutil.cpu_count()) * 2
+        for i in range(num_threads):
             worker = Thread(target=get_scan, args=(q, poam_results, self.scan_results))
             worker.setDaemon(True)
             worker.start()

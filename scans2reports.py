@@ -39,7 +39,7 @@ class Scans2Reports:
     scan_files = []
     scan_results = []
     q = Queue(maxsize=0)
-    num_theads = 10
+    num_threads = 10
     data_mapping = {}
     contact_info = {}
     skip_reports = []
@@ -70,10 +70,26 @@ class Scans2Reports:
         
         
         logging.info('Application Path: %s', self.application_path)
+
+        if args.threads is None:
+            self.num_threads = int(psutil.cpu_count()) - 2 + 1
+            if self.num_threads <= 0:
+                self.num_threads = 1
+        else:
+            if args.threads == 1:
+                self.num_threads = int(psutil.cpu_count() // 2) + 1
+                if self.num_threads <= 0:
+                    self.num_threads = 1
+            elif args.threads == 2:
+                self.num_threads = int(psutil.cpu_count()) - 2 + 1
+                if self.num_threads <= 0:
+                    self.num_threads = 1
+            else:
+                self.num_threads = int(psutil.cpu_count() * 2) - 1
+                if self.num_threads <= 0:
+                    self.num_threads = 1
         
-        self.num_theads = int(psutil.cpu_count()) * 2
-        
-        logging.info('Threads: %s', self.num_theads)
+        logging.info('Threads: %s', self.num_threads)
         
         with open(os.path.join(self.application_path, "data/dataset.json"), "r") as read_file:
             self.data_mapping = json.load(read_file)
@@ -361,7 +377,7 @@ class Scans2Reports:
             self.q.put((i, self.scan_files[i]))
 
         #start parse threads
-        for i in range(self.num_theads):
+        for i in range(self.num_threads):
             worker = Thread(target=self.start_parse_thread, args=(self.q, self.scan_results))
             worker.setDaemon(True)
             worker.start()
@@ -414,8 +430,8 @@ class Scans2Reports:
 
         while not queue.empty():
             work = queue.get()
-            print(f"Max Threads: {self.num_theads:<3} | Starting thread {work[0]:<14}: {work[1]}")
-            logging.info(f"Max Threads: {self.num_theads:<3} | Starting thread {work[0]:<14}: {work[1]}")
+            print(f"Max Threads: {self.num_threads:<3} | Starting thread {work[0]:<14}: {work[1]}")
+            logging.info(f"Max Threads: {self.num_threads:<3} | Starting thread {work[0]:<14}: {work[1]}")
             start_time = time.time()
             try:
                 file = None
@@ -510,6 +526,9 @@ optional.add_argument('-s', '--scd', help='Prefill Estimated SCD to POAM', actio
 optional.add_argument('-i', '--skip-info', help='Skip Informational Findings', action='store_true')
 optional.add_argument('-x', '--exclude-plugins', help='Exclude plugins newer than this number of days', type=int, default=30)
 optional.add_argument('-l', '--lower-risk', help='Automatically Lower Risk on POAM', action='store_true')
+
+optional.add_argument('-t', '--threads', help='How intensive should the generator run (1-3)', type=int, default=2)
+
 
 optional.add_argument('-h', '--help', action='help', default=SUPPRESS, help='show this help message and exit')
 optional.add_argument('input_folder', nargs='?')
