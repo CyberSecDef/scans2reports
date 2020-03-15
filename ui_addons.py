@@ -216,7 +216,7 @@ class UiAddons():
         logging.info('Merge Nessus Clicked')
 
         options = QtWidgets.QFileDialog.Options(  )
-        files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"QFileDialog.getOpenFileNames()", "","Nessus Files (*.nessus);;", options=options)
+        files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"Select Multiple Nessus Files to Merge", "","Nessus Files (*.nessus);;", options=options)
         if files:
             self.main_app.merge_nessus_files(files, host_count)
 
@@ -224,7 +224,7 @@ class UiAddons():
         logging.info('Split Nessus Clicked')
 
         options = QtWidgets.QFileDialog.Options()
-        files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"QFileDialog.getOpenFileNames()", "","Nessus Files (*.nessus);;", options=options)
+        files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"Select Nessus Files to Split", "","Nessus Files (*.nessus);;", options=options)
         if files:
             filepaths = []
             for file in files:
@@ -232,7 +232,23 @@ class UiAddons():
                 print('Splitting {}'.format(file))
                 self.main_app.split_nessus_file(file)
 
+    def update_ckl(self):
+        logging.info('Update CKL Clicked')
 
+        options = QtWidgets.QFileDialog.Options()
+        files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"Select Source .CKL File", "","STIG Checklist (*.ckl);;", options=options)
+        if files:
+            source = files[0]
+            
+        options = QtWidgets.QFileDialog.Options()
+        files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"Select Destination .CKL File", "","STIG Checklist (*.ckl);;", options=options)
+        if files:
+            destination = files[0]
+            
+        if source is not None and destination is not None:
+            self.main_app.update_ckl(source, destination)
+                
+                
     def btn_execute_on_click(self):
         logging.info('Execute Clicked')
         self.main_app.contact_info['command'] = self.main_form.txt_command.text()
@@ -375,6 +391,9 @@ To utilize the tool, follow the steps below:
 
 
         self.main_form.actionSplit_Nessus.triggered.connect( self.split_nessus )
+        
+        self.main_form.actionUpdate_CKL.triggered.connect( self.update_ckl )
+        
 
         self.main_form.actionAbout.triggered.connect( self.show_about )
         self.main_form.actionHelp.triggered.connect( self.show_help )

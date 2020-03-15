@@ -18,6 +18,8 @@ import secrets
 import pprint
 import dumper
 import jmespath
+import re
+
 from lxml import etree
 from pathlib import Path
 from threading import Thread
@@ -278,7 +280,112 @@ class Scans2Reports:
         status = "Merged Nessus File is in results folder"
         Utils.update_status(self.application_path, S2R, status, 0 )
             
+    def update_ckl(self, source, destination):
+        
+        status = f"Updating {source} to {destination}"
+        logging.info(status)
+        print(status)
+        if S2R.scans_to_reports:
+            S2R.scans_to_reports.statusBar().showMessage(status)
+            S2R.scans_to_reports.progressBar.setValue(0)
+            QtGui.QGuiApplication.processEvents() 
+                
+                
+        with open(source, 'r', errors='replace', encoding='utf-8') as content_file:
+            content = content_file.readlines()
+        start = 0
+        if '?' in content[start]:
+            start += 1
+        if '!' in content[start]:
+            start += 1
+        content = content[start:]
+        content = ''.join(content)
+        content = ''.join([i if ord(i) < 128 else ' ' for i in content])
+        source_tree = etree.fromstring( str(content ) )
+        
+        with open(destination, 'r', errors='replace', encoding='utf-8') as content_file:
+            content = content_file.readlines()
+        start = 0
+        if '?' in content[start]:
+            start += 1
+        if '!' in content[start]:
+            start += 1
+        content = content[start:]
+        content = ''.join(content)
+        content = ''.join([i if ord(i) < 128 else ' ' for i in content])
+        destination_tree = etree.fromstring( str(content ) )
+        
+        stig_id = str(next(iter(destination_tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='stigid']/SID_DATA/text()")), ''))
             
+        version = str(next(iter(destination_tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='version']/SID_DATA/text()")), ''))
+        if '.' in version:
+            version = version.split('.')[0]
+            
+        if version.isdigit():
+            version = str(int(version))
+
+        release = re.search('Release: ([0-9\*.]+) Benchmark', str( next(iter(destination_tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='releaseinfo']/SID_DATA/text()")), '')  ))
+        release = release.group(1) if release is not None else '0'
+        if '.' in release:
+            release = release.split('.')[1]
+        
+        if release.isdigit():
+            release = str(int(release))
+
+        source_vulns = source_tree.xpath("//VULN")
+        index = 0
+        total_vulns = len(source_vulns)
+            
+        for source_vuln in source_vulns:
+            index += 1
+            source_vuln_id = next(iter(source_vuln.xpath("*[./VULN_ATTRIBUTE='Vuln_Num']/ATTRIBUTE_DATA/text()")), '')
+            
+            status = f"Copying {source_vuln_id} details"
+            logging.info(status)
+            print(status)
+            if S2R.scans_to_reports:
+                S2R.scans_to_reports.statusBar().showMessage(status)
+                S2R.scans_to_reports.progressBar.setValue( int( index / total_vulns * 100 ) )
+                QtGui.QGuiApplication.processEvents() 
+            
+            if source_vuln_id.strip() != '':
+                source_vuln_status = source_vuln.find('STATUS').text
+                source_vuln_comments = source_vuln.find('COMMENTS').text
+                source_vuln_finding_details = source_vuln.find('FINDING_DETAILS').text
+                
+                destination_vuln = destination_tree.xpath( "//VULN[./STIG_DATA/ATTRIBUTE_DATA='{}']".format( source_vuln_id.strip() ) )
+                if isinstance(destination_vuln, list): 
+                    destination_vuln_node = next(iter(destination_vuln), '')
+                    
+                    if isinstance(destination_vuln_node, etree._Element): 
+                        destination_vuln_node.find('STATUS').text = source_vuln_status
+                        destination_vuln_node.find('COMMENTS').text = source_vuln_comments
+                        destination_vuln_node.find('FINDING_DETAILS').text = source_vuln_finding_details
+
+        
+        ckl_name = "{}/results/{}_V{}R{}_{}.ckl".format(
+            os.path.dirname(os.path.realpath(__file__)),
+            stig_id,
+            version,
+            release,
+            (datetime.datetime.now()).strftime('%Y%m%d_%H%M%S')
+        )
+            
+        destination_string = etree.tostring(destination_tree)
+        myfile = open(ckl_name, "wb")
+        myfile.write(destination_string)
+
+        print(f"Updated CKL saved to {ckl_name}")
+        status = f"Finished Updating CKL"
+        logging.info(status)
+        print(status)
+        if S2R.scans_to_reports:
+            S2R.scans_to_reports.statusBar().showMessage(status)
+            S2R.scans_to_reports.progressBar.setValue( 0 )
+            QtGui.QGuiApplication.processEvents() 
+                
+        
+    
     def split_nessus_file(self, file):
         with open(file, 'r', errors='replace', encoding='utf-8') as content_file:
             content = content_file.readlines()
@@ -410,6 +517,9 @@ class Scans2Reports:
 
         self.scan_results = [ i for i in self.scan_results if type(i) == ScanFile ]
             
+        print(type(self.scan_results))
+        # pprint.pprint(self.scan_results)
+        
         #show completed parse jobs
         status = "{} - Finished Parsing Scan Files".format(datetime.datetime.now() - start_time )
         logging.info(status)
@@ -469,6 +579,7 @@ class Scans2Reports:
             queue.task_done()
             if S2R.scans_to_reports:
                 QtGui.QGuiApplication.processEvents()
+            
         return True
 
     def generate_reports(self):

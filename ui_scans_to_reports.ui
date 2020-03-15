@@ -1627,9 +1627,9 @@ QCheckBox{
         <colorrole role="Button">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
@@ -1654,18 +1654,18 @@ QCheckBox{
         <colorrole role="Base">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
         <colorrole role="Window">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
@@ -1683,9 +1683,9 @@ QCheckBox{
         <colorrole role="Button">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
@@ -1710,18 +1710,18 @@ QCheckBox{
         <colorrole role="Base">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
         <colorrole role="Window">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
@@ -1739,9 +1739,9 @@ QCheckBox{
         <colorrole role="Button">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
@@ -1766,18 +1766,18 @@ QCheckBox{
         <colorrole role="Base">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
         <colorrole role="Window">
          <brush brushstyle="SolidPattern">
           <color alpha="255">
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
@@ -1805,6 +1805,8 @@ QCheckBox{
     </widget>
     <addaction name="menuMerge_Nessus"/>
     <addaction name="actionSplit_Nessus"/>
+    <addaction name="separator"/>
+    <addaction name="actionUpdate_CKL"/>
    </widget>
    <addaction name="mnu_file"/>
    <addaction name="menuScans"/>
@@ -1884,6 +1886,11 @@ QCheckBox{
   <action name="action15_Hosts">
    <property name="text">
     <string>15 Hosts</string>
+   </property>
+  </action>
+  <action name="actionUpdate_CKL">
+   <property name="text">
+    <string>Update CKL</string>
    </property>
   </action>
  </widget>
