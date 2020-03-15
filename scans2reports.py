@@ -297,7 +297,7 @@ class Scans2Reports:
         
             host_nessus = copy.deepcopy(tree)
             for host in host_nessus.xpath("/NessusClientData_v2/Report/ReportHost"):
-                fqdn_val = Utils.fqdn(host)
+                host_fqdn_val = Utils.fqdn(host)
                 
                 if host_fqdn_val != fqdn_val:
                     host.getparent().remove(host)
