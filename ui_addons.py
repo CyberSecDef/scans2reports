@@ -6,6 +6,7 @@ import pprint
 import dumper
 import logging
 import psutil
+import jmespath
 from functools import partial
 
 class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
@@ -24,7 +25,6 @@ class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
         if (isinstance(other, QNumericTableWidgetItem)):
             selfDataValue  = float(re.sub(r'[ $]', '', str(self.text())))
             otherDataValue = float(re.sub(r'[ $]', '', str(other.text())))
-            print(selfDataValue, otherDataValue)
             return selfDataValue > otherDataValue
         else:
             return QtWidgets.QTableWidgetItem.__lt__(self, other)
@@ -99,9 +99,6 @@ class UiAddons():
             if self.main_app.num_threads <= 0:
                 self.main_app.num_threads = 1
                     
-                    
-                    
-        
         logging.info('Parse Scan Files Clicked')
         self.main_form.tbl_scan_summary.setRowCount(0)
 
@@ -117,49 +114,98 @@ class UiAddons():
         total_files = len(self.main_app.scan_results)
         self.main_form.tbl_scan_summary.setRowCount(1000)
         currentRow = 0
-        for scan_result in self.main_app.scan_results:
-            if 'fileName' in scan_result and 'type' in scan_result:
-                logging.info('Adding file to Processed List: %s', scan_result['fileName'])
-                if scan_result['type'] == 'ACAS':
-                    for host in scan_result['hosts']:
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 0, QtWidgets.QTableWidgetItem( scan_result['type'] ))
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 1, QtWidgets.QTableWidgetItem( host['hostname'] ))
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 2, QtWidgets.QTableWidgetItem( host['ip'] ))
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 3, QtWidgets.QTableWidgetItem( host['os'] ))
+        
+        acas_scans = jmespath.search(
+            """results[?type=='ACAS'].{
+                type: type,
+                filename: filename,
+                scan_date: scan_date,
+                version: version,
+                feed: feed,
+                hosts: hosts[] | [*].{
+                    hostname: hostname,
+                    ip: ip,
+                    os: os,
+                    credentialed: credentialed,
 
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 4, QtWidgets.QTableWidgetItem( os.path.basename( scan_result['fileName'] )))
+                    cati:   requirements[] | [?status != 'C' && severity > `2`].{ plugin_id: plugin_id, severity: severity, status: status},
+                    catii:  requirements[] | [?status != 'C' && severity == `2`].{ plugin_id: plugin_id, severity: severity, status: status},
+                    catiii: requirements[] | [?status != 'C' && severity == `1`].{ plugin_id: plugin_id, severity: severity, status: status},
+                    cativ:  requirements[] | [?status != 'C' && severity == `0`].{ plugin_id: plugin_id, severity: severity, status: status},
 
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 5, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catI']).strip() or 0 ) )) ) )
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 6, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catII']).strip() or 0 ) )) ) )
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 7, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catIII']).strip() or 0 ) )) ) )
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 8, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(host['catIV']).strip() or 0 ) )) ) )
+                    blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].{ plugin_id: plugin_id, severity: severity, status: status}
+                }
+            }""",
+            { 'results' : self.main_app.scan_results}
+        )
+        
+        for scan in acas_scans:
+            logging.info('Adding file to Processed List: %s', scan['filename'])
+            for host in scan['hosts']:
+                
+                self.main_form.tbl_scan_summary.setItem(currentRow, 0, QtWidgets.QTableWidgetItem( scan['type'] ))
+                self.main_form.tbl_scan_summary.setItem(currentRow, 1, QtWidgets.QTableWidgetItem( host['hostname'] ))
+                self.main_form.tbl_scan_summary.setItem(currentRow, 2, QtWidgets.QTableWidgetItem( host['ip'] ))
+                self.main_form.tbl_scan_summary.setItem(currentRow, 3, QtWidgets.QTableWidgetItem( host['os'] ))
 
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 9, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(host['total'] ))) )
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 10, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(host['score'] ))) )
-                        self.main_form.tbl_scan_summary.setItem(currentRow, 11, QtWidgets.QTableWidgetItem( str(host['credentialed'] )))
+                self.main_form.tbl_scan_summary.setItem(currentRow, 4, QtWidgets.QTableWidgetItem( os.path.basename( scan['filename'] )))
 
-                        currentRow += 1
-                        if currentRow >= self.main_form.tbl_scan_summary.rowCount():
-                            self.main_form.tbl_scan_summary.setRowCount(self.main_form.tbl_scan_summary.rowCount() + 1000)
-                else:
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 0, QtWidgets.QTableWidgetItem( scan_result['type'] ))
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 1, QtWidgets.QTableWidgetItem( scan_result['hostname'] ))
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 2, QtWidgets.QTableWidgetItem( scan_result['ip'] ))
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 3, QtWidgets.QTableWidgetItem( scan_result['os'] ))
+                self.main_form.tbl_scan_summary.setItem(currentRow, 5, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(host['cati'])) ) ) )
+                self.main_form.tbl_scan_summary.setItem(currentRow, 6, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(host['catii'])) ) ) )
+                self.main_form.tbl_scan_summary.setItem(currentRow, 7, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(host['catiii'])) ) ) )
+                self.main_form.tbl_scan_summary.setItem(currentRow, 8, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(host['cativ'])) ) ) )
 
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 4, QtWidgets.QTableWidgetItem( os.path.basename( scan_result['fileName'] )))
+                self.main_form.tbl_scan_summary.setItem(currentRow, 9, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(int( len(host['cati']) + len(host['catii']) + len(host['catiii']) + len(host['cativ']) )) ) ) )
+                self.main_form.tbl_scan_summary.setItem(currentRow, 10, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(int( 10*len(host['cati']) + 3*len(host['catii']) + len(host['catiii']) )) ) ) )
+                self.main_form.tbl_scan_summary.setItem(currentRow, 11, QtWidgets.QTableWidgetItem( str(host['credentialed'] )))
 
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 5, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catI']).strip() or 0 ) )) ) )
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 6, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catII']).strip() or 0 ) )) ) )
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 7, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catIII']).strip() or 0 ) )) ) )
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 8, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str( int( str(scan_result['catIV']).strip() or 0 ) )) ) )
+                currentRow += 1
+                if currentRow >= self.main_form.tbl_scan_summary.rowCount():
+                    self.main_form.tbl_scan_summary.setRowCount(self.main_form.tbl_scan_summary.rowCount() + 1000)
 
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 9, QtWidgets.QTableWidgetItem( str(scan_result['total'] )))
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 10, QtWidgets.QTableWidgetItem( str(scan_result['score'] )))
-                    self.main_form.tbl_scan_summary.setItem(currentRow, 11, QtWidgets.QTableWidgetItem( str(scan_result['credentialed'] )))
-                    currentRow += 1
-                    if currentRow >= self.main_form.tbl_scan_summary.rowCount():
-                            self.main_form.tbl_scan_summary.setRowCount(self.main_form.tbl_scan_summary.rowCount() + 1000)
+        disa_scans = jmespath.search(
+            """results[?type=='CKL' || type=='SCAP'].{
+                type: type,
+                hostname: hostname,
+                ip: ip,
+                os: os,
+                filename: filename,
+                credentialed: credentialed
+                scan_date: scan_date,
+                version: version,
+                release: release,
+                
+                cati: requirements[]   | [?status != 'C' && severity > `2`].[comments, severity, status],
+                catii: requirements[]  | [?status != 'C' && severity == `2`].[comments, severity, status],
+                catiii: requirements[] | [?status != 'C' && severity == `1`].[comments, severity, status],
+                cativ: requirements[]  | [?status != 'C' && severity == `0`].[comments, severity, status],
+                
+                blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].[comments, severity, status]
+            }""",
+            { 'results' : self.main_app.scan_results}
+        )
+
+        for scan in disa_scans:
+            logging.info('Adding file to Processed List: %s', scan['filename'])
+
+            self.main_form.tbl_scan_summary.setItem(currentRow, 0, QtWidgets.QTableWidgetItem( scan['type'] ))
+            self.main_form.tbl_scan_summary.setItem(currentRow, 1, QtWidgets.QTableWidgetItem( scan['hostname'] ))
+            self.main_form.tbl_scan_summary.setItem(currentRow, 2, QtWidgets.QTableWidgetItem( scan['ip'] ))
+            self.main_form.tbl_scan_summary.setItem(currentRow, 3, QtWidgets.QTableWidgetItem( scan['os'] ))
+
+            self.main_form.tbl_scan_summary.setItem(currentRow, 4, QtWidgets.QTableWidgetItem( os.path.basename( scan['filename'] )))
+
+            self.main_form.tbl_scan_summary.setItem(currentRow, 5, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(scan['cati'])) ) ) )
+            self.main_form.tbl_scan_summary.setItem(currentRow, 6, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(scan['catii']))) ) )
+            self.main_form.tbl_scan_summary.setItem(currentRow, 7, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(scan['catiii']))) ) )
+            self.main_form.tbl_scan_summary.setItem(currentRow, 8, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(scan['cativ']))) ) )
+
+            self.main_form.tbl_scan_summary.setItem(currentRow, 9, QtWidgets.QTableWidgetItem(  str(int( len(host['cati']) + len(host['catii']) + len(host['catiii']) + len(host['cativ']) ) ) ) ) 
+            self.main_form.tbl_scan_summary.setItem(currentRow, 10, QtWidgets.QTableWidgetItem( str(int( 10*len(host['cati']) + 3*len(host['catii']) + len(host['catiii']) ) ) ) )
+            self.main_form.tbl_scan_summary.setItem(currentRow, 11, QtWidgets.QTableWidgetItem( str(scan['credentialed'] )))
+            currentRow += 1
+            if currentRow >= self.main_form.tbl_scan_summary.rowCount():
+                    self.main_form.tbl_scan_summary.setRowCount(self.main_form.tbl_scan_summary.rowCount() + 1000)
 
 
         self.main_form.tbl_scan_summary.setRowCount(currentRow + 1)
@@ -394,11 +440,8 @@ class FileDrop(QtWidgets.QLabel):
             event.acceptProposedAction()
 
     def del_act(self, filepath):
-        print(filepath)
         for row in range(self.main_form.tbl_selected_scans.rowCount()):
             cell_widget = self.main_form.tbl_selected_scans.item(row, 1)
-            if cell_widget and filepath == cell_widget.data(QtCore.Qt.UserRole):
-                print(cell_widget.data(QtCore.Qt.UserRole) )
 
     def remove_row(self):
         self.main_form.tbl_selected_scans.removeRow(self.main_form.tbl_selected_scans.currentRow())

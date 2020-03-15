@@ -293,12 +293,12 @@ class Scans2Reports:
             index += 1
             fqdn_val = Utils.fqdn(host)
             
-            scanDate = datetime.datetime.strptime(
+            scan_date = datetime.datetime.strptime(
                 str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), ''))
                 , '%a %b %d %H:%M:%S %Y'
             ).strftime("%Y%m%d_%H%M%S")
         
-            status = f"Processing host: {fqdn_val}, scan date: {scanDate}"
+            status = f"Processing host: {fqdn_val}, scan date: {scan_date}"
             logging.info(status)
             if S2R.scans_to_reports:
                 S2R.scans_to_reports.statusBar().showMessage(status)
@@ -308,7 +308,7 @@ class Scans2Reports:
             report_name = "{}/results/{}_{}.nessus".format(
                 os.path.dirname(os.path.realpath(__file__)),
                 fqdn_val,
-                scanDate
+                scan_date
             )
         
             host_nessus = copy.deepcopy(tree)
@@ -409,9 +409,6 @@ class Scans2Reports:
         self.q.join()
 
         self.scan_results = [ i for i in self.scan_results if type(i) == ScanFile ]
-
-        # print(type(self.scan_results))
-        # pprint.pprint( jmespath.search("results[?type=='ACAS'].fileName", { 'results' : self.scan_results} ), width=200 )
             
         #show completed parse jobs
         status = "{} - Finished Parsing Scan Files".format(datetime.datetime.now() - start_time )

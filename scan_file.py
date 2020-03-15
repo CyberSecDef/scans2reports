@@ -4,7 +4,7 @@ class ScanFile(dict):
     duration = ""
     title = ""
     policy = ""
-    scannerEdition = ""
+    scanner_edition = ""
     uuid = ""
     stigid = ""
     description = ""
@@ -13,23 +13,14 @@ class ScanFile(dict):
     ip = ""
     mac = ""
     os = ""
-    fileName = ""
+    filename = ""
     total = ""
     score = ""
-    scanUser = ""
-    scanDate = ""
+    scan_user = ""
+    scan_date = ""
     version = ""
     release = ""
-    open = 0
-    closed = 0
-    notApplicable = 0
-    notReviewed = 0
-    error = 0
-    catI = 0
-    catII = 0
-    catIII = 0
-    catIV = 0
-    missing_cf = 0
+    
     credentialed = False
     requirements = []
     hosts = []

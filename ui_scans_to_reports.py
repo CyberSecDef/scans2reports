@@ -540,7 +540,7 @@ class UiScansToReports(object):
         self.spnExcludeDays.setGeometry(QtCore.QRect(10, 60, 281, 18))
         self.spnExcludeDays.setMinimumSize(QtCore.QSize(0, 0))
         self.spnExcludeDays.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.spnExcludeDays.setMaximum(365)
+        self.spnExcludeDays.setMaximum(9999)
         self.spnExcludeDays.setProperty("value", 30)
         self.spnExcludeDays.setObjectName("spnExcludeDays")
         self.grid_data_points.addWidget(self.grpReports, 0, 2, 1, 1)

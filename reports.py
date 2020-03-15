@@ -80,11 +80,11 @@ class Reports:
         start_time = datetime.datetime.now()
         print( "        {} - Compiling SCAP and CKL results".format(datetime.datetime.now() - start_time ) )
         scaps = jmespath.search(
-            "results[?type=='SCAP'].{ scan_title: title, version: version, release: release, filename: fileName, requirements: requirements[] | [*].{ req_title: reqTitle, grpId: grpId, vulnId: vulnId, ruleId: ruleId, pluginId: pluginId, status: status, finding_details: findingDetails, comments: comments } }",
+            "results[?type=='SCAP'].{ scan_title: title, version: version, release: release, filename: filename, requirements: requirements[] | [*].{ req_title: req_title, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, comments: comments } }",
             { 'results' : self.scan_results}
         )
         ckls = jmespath.search(
-            "results[?type=='CKL'].{ scan_title: title, version: version, release: release, filename: fileName, requirements: requirements[] | [*].{ req_title: reqTitle, grpId: grpId, vulnId: vulnId, ruleId: ruleId, pluginId: pluginId, status: status, finding_details: findingDetails, comments: comments } }",
+            "results[?type=='CKL'].{ scan_title: title, version: version, release: release, filename: filename, requirements: requirements[] | [*].{ req_title: req_title, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, comments: comments } }",
             { 'results' : self.scan_results}
         )
         print( "        {} - Finished compiling SCAP and CKL results".format(datetime.datetime.now() - start_time ) )
@@ -92,12 +92,12 @@ class Reports:
         mismatch = []
 
         print("        {} - Finding Non-Executed CKL requirements".format( datetime.datetime.now() - start_time ))
-        executed_ckls = list(set(jmespath.search("results[].requirements[].vulnId[]", { 'results' : ckls} )))
+        executed_ckls = list(set(jmespath.search("results[].requirements[].vuln_id[]", { 'results' : ckls} )))
 
         for scap in scaps:
             start_time2 = datetime.datetime.now()
             for req in scap['requirements']:
-                if req['vulnId'] not in executed_ckls:
+                if req['vuln_id'] not in executed_ckls:
                     c = {
                         'Scan Title'          : scap['scan_title'].replace(self.strings['STIG'], 'STIG'),
                         'Req Title'           : req['req_title'],
@@ -105,12 +105,12 @@ class Reports:
                         'SCAP Release'        : int(str(scap['release'])),
                         'CKL Version'         : '',
                         'CKL Release'         : '',
-                        'SCAP GrpId'          : req['grpId'],
-                        'CKL GrpId'           : '',
-                        'SCAP RuleId'         : req['ruleId'],
-                        'CKL RuleId'          : '',
-                        'SCAP VulnId'         : req['vulnId'],
-                        'CKL VulnId'          : '',
+                        'SCAP Grp_Id'          : req['grp_id'],
+                        'CKL Grp_Id'           : '',
+                        'SCAP Rule_Id'         : req['rule_id'],
+                        'CKL Rule_Id'          : '',
+                        'SCAP Vuln_Id'         : req['vuln_id'],
+                        'CKL Vuln_Id'          : '',
                         'SCAP Status'         : Utils.status(req['status'], 'HUMAN'),
                         'CKL Status'          : 'Not Executed',
                         'SCAP Filename'       : os.path.basename(scap['filename']),
@@ -126,17 +126,17 @@ class Reports:
             """results[?type == 'CKL' || type == 'SCAP'].{
                 type: type,
                 scan_title: title,
-                filename: fileName, 
+                filename: filename, 
                 version: version, 
                 release: release, 
                 requirements: requirements[*].{
-                    req_title: reqTitle,
-                    grp_id: grpId,
-                    rule_id: ruleId,
-                    vuln_id: vulnId,
+                    req_title: req_title,
+                    grp_id: grp_id,
+                    rule_id: rule_id,
+                    vuln_id: vuln_id,
                     status: status,
                     comments: comments,
-                    finding_details: findingDetails
+                    finding_details: finding_details
                 }
             }""",
             { 'results' : self.scan_results}
@@ -183,12 +183,12 @@ class Reports:
                         'SCAP Release'        : int(str(scap['release'])),
                         'CKL Version'         : int(str(ckl['version'])),
                         'CKL Release'         : int(str(ckl['release'])),
-                        'SCAP GrpId'          : scap['grp_id'],
-                        'CKL GrpId'           : ckl['grp_id'],
-                        'SCAP RuleId'         : scap['rule_id'],
-                        'CKL RuleId'          : ckl['rule_id'],
-                        'SCAP VulnId'         : scap['vuln_id'],
-                        'CKL VulnId'          : ckl['vuln_id'],
+                        'SCAP Grp_Id'         : scap['grp_id'],
+                        'CKL Grp_Id'          : ckl['grp_id'],
+                        'SCAP Rule_Id'         : scap['rule_id'],
+                        'CKL Rule_Id'          : ckl['rule_id'],
+                        'SCAP Vuln_Id'         : scap['vuln_id'],
+                        'CKL Vuln_Id'          : ckl['vuln_id'],
                         'SCAP Status'         : Utils.status(scap['status'], 'HUMAN'),
                         'CKL Status'          : Utils.status(ckl['status'], 'HUMAN'),
                         'SCAP Filename'       : os.path.basename(scap['filename']),
@@ -203,8 +203,8 @@ class Reports:
         report = sorted(mismatch, key=lambda s: (str(
             s['Scan Title']).lower().strip(),
             str(s['SCAP Status']).lower().strip(),
-            str(s['SCAP VulnId']).lower().strip(),
-            str(s['SCAP RuleId']).lower().strip(),
+            str(s['SCAP Vuln_Id']).lower().strip(),
+            str(s['SCAP Rule_Id']).lower().strip(),
             str(s['Req Title']).lower().strip(),
         ))
         row = 0
@@ -249,8 +249,8 @@ class Reports:
                 type: type,
                 version: version,
                 feed: feed,
-                filename: fileName,
-                scan_date: scanDate,
+                filename: filename,
+                scan_date: scan_date,
                 hosts: hosts[] | [*].[hostname][]
             }""",
             { 'results' : self.scan_results}
@@ -273,8 +273,8 @@ class Reports:
                 type: type,
                 version: version,
                 release: release,
-                filename: fileName,
-                scan_date: scanDate,
+                filename: filename,
+                scan_date: scan_date,
                 hostname: hostname
             }""",
             { 'results' : self.scan_results}
@@ -297,8 +297,8 @@ class Reports:
                 type: type,
                 version: version,
                 release: release,
-                filename: fileName,
-                scan_date: scanDate,
+                filename: filename,
+                scan_date: scan_date,
                 hostname: hostname
             }""",
             { 'results' : self.scan_results}
@@ -366,18 +366,18 @@ class Reports:
                 type = work[1]
                 if type == 'disa':
                     disa_scans = jmespath.search(
-                        "results[?type=='SCAP' || type=='CKL'].{ scan_title: title, policy: policy, scannerEdition: scannerEdition, scan_description: description, type: type, version: version, release: release, hostname: hostname, filename: fileName, requirements: requirements[] | [?status=='" + status + "'].{ req_title: reqTitle, cci: cci, grpId: grpId, vulnId: vulnId, ruleId: ruleId, pluginId: pluginId, status: status, finding_details: findingDetails, resources: resources, severity: severity, solution: solution, comments: comments, description: description } }",
+                        "results[?type=='SCAP' || type=='CKL'].{ scan_title: title, policy: policy, scanner_edition: scanner_edition, scan_description: description, type: type, version: version, release: release, hostname: hostname, filename: filename, requirements: requirements[] | [?status=='" + status + "'].{ req_title: req_title, cci: cci, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, description: description } }",
                         { 'results' : scan_results}
                     )
                     for scan in disa_scans:
                         for req in scan['requirements']:
-                            if str(req['ruleId']) not in poam_results[status]:
-                                poam_results[status][str(req['ruleId'])] = {
+                            if str(req['rule_id']) not in poam_results[status]:
+                                poam_results[status][str(req['rule_id'])] = {
                                     'scan_title'      : scan['scan_title'],
-                                    'grp_id'          : req['grpId'],
-                                    'vuln_id'         : req['vulnId'],
-                                    'rule_id'         : req['ruleId'],
-                                    'plugin_id'       : req['pluginId'],
+                                    'grp_id'          : req['grp_id'],
+                                    'vuln_id'         : req['vuln_id'],
+                                    'rule_id'         : req['rule_id'],
+                                    'plugin_id'       : req['plugin_id'],
                                     'cci'             : req['cci'],
                                     'req_title'       : req['req_title'],
                                     'description'     : req['description'],
@@ -388,13 +388,13 @@ class Reports:
                                     'results'         : [],
                                 }
 
-                            poam_results[status][ str(req['ruleId']) ]['results'].append({
+                            poam_results[status][ str(req['rule_id']) ]['results'].append({
                                 'scan_file'       : os.path.basename( scan['filename'] ),
                                 'type'            : scan['type'],
                                 'finding_details' : req['finding_details'],
                                 'comments'        : req['comments'],
                                 'policy'          : scan['policy'],
-                                'scanner_edition' : scan['scannerEdition'],
+                                'scanner_edition' : scan['scanner_edition'],
                                 'hostname'        : scan['hostname'],
                                 'version'         : scan['version'],
                                 'release'         : scan['release'],
@@ -402,20 +402,20 @@ class Reports:
 
                 elif type == 'acas':
                     acas_scans = jmespath.search(
-                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scannerEdition: '', scan_description: '', type: type, version: version, release: feed, filename: fileName, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [*].{ cci: cci, req_title: reqTitle, description: description, grpId: grpId, vulnId: vulnId, ruleId: ruleId, pluginId: pluginId, status: status, finding_details: findingDetails, resources: resources, severity: severity, solution: solution, comments: comments } } }",
+                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scanner_edition: '', scan_description: '', type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [*].{ cci: cci, req_title: req_title, description: description, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, publication_date: publication_date, modification_date: modification_date } } }",
                         { 'results' : scan_results}
                     )
 
                     for scan in acas_scans:
                         for host in scan['hosts']:
                             for req in host['requirements']:
-                                if str(req['pluginId']) not in poam_results[status]:
-                                    poam_results[status][str(req['pluginId'])] = {
+                                if str(req['plugin_id']) not in poam_results[status]:
+                                    poam_results[status][str(req['plugin_id'])] = {
                                         'scan_title'      : scan['scan_title'],
-                                        'grp_id'          : req['grpId'],
-                                        'vuln_id'         : req['vulnId'],
-                                        'rule_id'         : req['ruleId'],
-                                        'plugin_id'       : req['pluginId'],
+                                        'grp_id'          : req['grp_id'],
+                                        'vuln_id'         : req['vuln_id'],
+                                        'rule_id'         : req['rule_id'],
+                                        'plugin_id'       : req['plugin_id'],
                                         'cci'             : req['cci'],
                                         'req_title'       : req['req_title'],
                                         'description'     : req['description'],
@@ -423,15 +423,17 @@ class Reports:
                                         'severity'        : req['severity'],
                                         'solution'        : req['solution'],
                                         'status'          : req['status'],
+                                        'publication_date'  : req['publication_date'],
+                                        'modification_date' : req['modification_date'],
                                         'results'         : [],
                                     }
-                                poam_results[status][ str(req['pluginId']) ]['results'].append({
+                                poam_results[status][ str(req['plugin_id']) ]['results'].append({
                                     'scan_file'       : os.path.basename( scan['filename'] ),
                                     'type'            : scan['type'],
                                     'finding_details' : req['finding_details'],
                                     'comments'        : req['comments'],
                                     'policy'          : scan['policy'],
-                                    'scanner_edition' : scan['scannerEdition'],
+                                    'scanner_edition' : scan['scanner_edition'],
                                     'hostname'        : host['hostname'],
                                     'version'         : scan['version'],
                                     'release'         : scan['release'],
@@ -458,10 +460,10 @@ class Reports:
         for stat in ['O', 'NA', 'NR', 'E', 'C']:
             for finding in poam_results[stat]:
                 req = poam_results[stat][finding]
-
-                rmfControls = self.data_mapping['acas_control'][req['grp_id']] if req['grp_id'] in self.data_mapping['acas_control'] else ''
-                if rmfControls == '':
-                    rmfControls = self.data_mapping['ap_mapping'][req['cci']] if req['cci'] in self.data_mapping['ap_mapping'] else ''
+                
+                rmf_controls = self.data_mapping['acas_control'][req['grp_id']] if req['grp_id'] in self.data_mapping['acas_control'] else ''
+                if rmf_controls == '':
+                    rmf_controls = self.data_mapping['ap_mapping'][req['cci']] if req['cci'] in self.data_mapping['ap_mapping'] else ''
 
 
                 hosts = []
@@ -491,7 +493,7 @@ class Reports:
                     req_data = {
                         'A'                                                 : '',
                         'Control Vulnerability Description'                 : f"Title: {req['req_title']}\n\nFamily: {req['grp_id']}\n\nDescription:\n{req['description']}",
-                        'Security Control Number (NC/NA controls only)'     : rmfControls,
+                        'Security Control Number (NC/NA controls only)'     : rmf_controls,
                         'Office/Org'                                        : f"{self.contact_info['command']}\n{self.contact_info['name']}\n{self.contact_info['phone']}\n{self.contact_info['email']}\n".strip(),
                         'Security Checks'                                   : f"{req['plugin_id']}{req['rule_id']}",
                         'Resources Required'                                : f"{req['resources']}",
@@ -518,7 +520,18 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                         'Recommendations'                                   : req['solution'],
                         'Resulting Residual Risk after Proposed Mitigations': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.poam_conf['lower_risk'] else Utils.risk_val(req['severity'], 'POAM'),
                     }
-                    report.append(req_data)
+
+                    if 'publication_date' not in req:
+                        report.append(req_data)
+                    elif req['publication_date'] is None:
+                        report.append(req_data)
+                    elif( str(req['publication_date']).strip() == '' ):
+                        report.append(req_data)
+                    elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] ) ):
+                        report.append(req_data)
+
+                            
+                    
                     # pylint: enable=C0330
 
         start_time = datetime.datetime.now()
@@ -586,18 +599,18 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 type = work[1]
                 if type == 'disa':
                     disa_scans = jmespath.search(
-                        "results[?type=='SCAP' || type=='CKL'].{ scan_title: title, policy: policy, scannerEdition: scannerEdition, scan_description: description, type: type, version: version, release: release, hostname: hostname, filename: fileName, requirements: requirements[] | [?status=='" + status + "'].{ req_title: reqTitle, cci: cci, grpId: grpId, vulnId: vulnId, ruleId: ruleId, pluginId: pluginId, status: status, finding_details: findingDetails, resources: resources, severity: severity, solution: solution, comments: comments, description: description } }",
+                        "results[?type=='SCAP' || type=='CKL'].{ scan_title: title, policy: policy, scanner_edition: scanner_edition, scan_description: description, type: type, version: version, release: release, hostname: hostname, filename: filename, requirements: requirements[] | [?status=='" + status + "'].{ req_title: req_title, cci: cci, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, description: description } }",
                         { 'results' : scan_results}
                     )
                     for scan in disa_scans:
                         for req in scan['requirements']:
-                            if str(req['ruleId']) not in poam_results[status]:
-                                poam_results[status][str(req['ruleId'])] = {
+                            if str(req['rule_id']) not in poam_results[status]:
+                                poam_results[status][str(req['rule_id'])] = {
                                     'scan_title'      : scan['scan_title'],
-                                    'grp_id'          : req['grpId'],
-                                    'vuln_id'         : req['vulnId'],
-                                    'rule_id'         : req['ruleId'],
-                                    'plugin_id'       : req['pluginId'],
+                                    'grp_id'          : req['grp_id'],
+                                    'vuln_id'         : req['vuln_id'],
+                                    'rule_id'         : req['rule_id'],
+                                    'plugin_id'       : req['plugin_id'],
                                     'cci'             : req['cci'],
                                     'req_title'       : req['req_title'],
                                     'description'     : req['description'],
@@ -608,13 +621,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                     'results'         : [],
                                 }
 
-                            poam_results[status][ str(req['ruleId']) ]['results'].append({
+                            poam_results[status][ str(req['rule_id']) ]['results'].append({
                                 'scan_file'       : os.path.basename( scan['filename'] ),
                                 'type'            : scan['type'],
                                 'finding_details' : req['finding_details'],
                                 'comments'        : req['comments'],
                                 'policy'          : scan['policy'],
-                                'scanner_edition' : scan['scannerEdition'],
+                                'scanner_edition' : scan['scanner_edition'],
                                 'hostname'        : scan['hostname'],
                                 'version'         : scan['version'],
                                 'release'         : scan['release'],
@@ -622,20 +635,20 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
                 elif type == 'acas':
                     acas_scans = jmespath.search(
-                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scannerEdition: '', scan_description: '', type: type, version: version, release: feed, filename: fileName, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [*].{ cci: cci, req_title: reqTitle, description: description, grpId: grpId, vulnId: vulnId, ruleId: ruleId, pluginId: pluginId, status: status, finding_details: findingDetails, resources: resources, severity: severity, solution: solution, comments: comments } } }",
+                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scanner_edition: '', scan_description: '', type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [*].{ cci: cci, req_title: req_title, description: description, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, publication_date: publication_date, modification_date: modification_date } } }",
                         { 'results' : scan_results}
                     )
 
                     for scan in acas_scans:
                         for host in scan['hosts']:
                             for req in host['requirements']:
-                                if str(req['pluginId']) not in poam_results[status]:
-                                    poam_results[status][str(req['pluginId'])] = {
+                                if str(req['plugin_id']) not in poam_results[status]:
+                                    poam_results[status][str(req['plugin_id'])] = {
                                         'scan_title'      : scan['scan_title'],
-                                        'grp_id'          : req['grpId'],
-                                        'vuln_id'         : req['vulnId'],
-                                        'rule_id'         : req['ruleId'],
-                                        'plugin_id'       : req['pluginId'],
+                                        'grp_id'          : req['grp_id'],
+                                        'vuln_id'         : req['vuln_id'],
+                                        'rule_id'         : req['rule_id'],
+                                        'plugin_id'       : req['plugin_id'],
                                         'cci'             : req['cci'],
                                         'req_title'       : req['req_title'],
                                         'description'     : req['description'],
@@ -643,15 +656,17 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                         'severity'        : req['severity'],
                                         'solution'        : req['solution'],
                                         'status'          : req['status'],
+                                        'publication_date'  : req['publication_date'],
+                                        'modification_date' : req['modification_date'],
                                         'results'         : [],
                                     }
-                                poam_results[status][ str(req['pluginId']) ]['results'].append({
+                                poam_results[status][ str(req['plugin_id']) ]['results'].append({
                                     'scan_file'       : os.path.basename( scan['filename'] ),
                                     'type'            : scan['type'],
                                     'finding_details' : req['finding_details'],
                                     'comments'        : req['comments'],
                                     'policy'          : scan['policy'],
-                                    'scanner_edition' : scan['scannerEdition'],
+                                    'scanner_edition' : scan['scanner_edition'],
                                     'hostname'        : host['hostname'],
                                     'version'         : scan['version'],
                                     'release'         : scan['release'],
@@ -695,13 +710,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 comments = "\n\n".join( list(set([c for c in comments if c])) )
                 finding_details = "\n\n".join( list(set([f for f in finding_details if f])) )
 
-                rmfControls = self.data_mapping['acas_control'][req['grp_id']] if req['grp_id'] in self.data_mapping['acas_control'] else ''
-                if rmfControls == '':
-                    rmfControls = self.data_mapping['ap_mapping'][req['cci']] if req['cci'] in self.data_mapping['ap_mapping'] else ''
+                rmf_controls = self.data_mapping['acas_control'][req['grp_id']] if req['grp_id'] in self.data_mapping['acas_control'] else ''
+                if rmf_controls == '':
+                    rmf_controls = self.data_mapping['ap_mapping'][req['cci']] if req['cci'] in self.data_mapping['ap_mapping'] else ''
 
                 objectives = []
                 for rmf_cia in self.data_mapping['rmf_cia']:
-                    if rmfControls.strip() != '' and rmf_cia['Ctl'] == rmfControls:
+                    if rmf_controls.strip() != '' and rmf_cia['Ctl'] == rmf_controls:
                         if rmf_cia['CL'] == 'X' or rmf_cia['CM'] == 'X' or rmf_cia['CH'] == 'X':
                             objectives.append('C')
                         if rmf_cia['IL'] == 'X' or rmf_cia['IM'] == 'X' or rmf_cia['IH'] == 'X':
@@ -714,7 +729,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
                 # pylint: disable=C0330
                 req_data = {
-                    'Non-Compliant Security Controls (16a)': rmfControls,
+                    'Non-Compliant Security Controls (16a)': rmf_controls,
                     'Affected CCI (16a.1)': req['cci'] if isinstance(req['cci'], str) else '',
                     'Source of Discovery(16a.2)': f"Title: {req['scan_title']}",
                     'Vulnerability ID(16a.3)': f"{req['plugin_id']}{req['rule_id']}",
@@ -736,7 +751,15 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Recommendations (16l)': req['solution'],
                     'Comments': f"Group ID: {req['grp_id']}\nVuln ID: {req['vuln_id']}\nRule ID: {req['rule_id']}\nPlugin ID: {req['plugin_id']}\n\n{comments}"
                 }
-                report.append(req_data)
+                
+                if 'publication_date' not in req:
+                    report.append(req_data)
+                elif req['publication_date'] is None:
+                    report.append(req_data)
+                elif( str(req['publication_date']).strip() == '' ):
+                    report.append(req_data)
+                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] ) ):
+                    report.append(req_data)
 
         row = 0
         bold = self.workbook.add_format({'bold': True})
@@ -786,7 +809,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         report = []
 
         scap_scans = jmespath.search(
-            "results[?type=='SCAP'].{policy: policy, scannerEdition: scannerEdition, scan_date: scanDate, duration: duration, credentialed: credentialed, scan_user: scanUser, type: type, version: version, release: release, hostname: hostname, filename: fileName }",
+            "results[?type=='SCAP'].{policy: policy, scanner_edition: scanner_edition, scan_date: scan_date, duration: duration, credentialed: credentialed, scan_user: scan_user, type: type, version: version, release: release, hostname: hostname, filename: filename }",
             { 'results' : self.scan_results}
         )
         for scan_file in scap_scans:
@@ -796,7 +819,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 'Scan File Type': scan_file['type'],
                 'Scan File': os.path.basename(scan_file['filename']),
                 'Plugin feed version': 'V' + str(int(str(scan_file['version']))) + 'R' + str(int(str(scan_file['release']))),
-                'Scanner edition used': scan_file['scannerEdition'],
+                'Scanner edition used': scan_file['scanner_edition'],
                 'Scan Type': 'Normal',
                 'Scan policy used': scan_file['policy'],
                 'Port Range' : '',
@@ -809,7 +832,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
             } )
 
         acas_scans = jmespath.search(
-            "results[?type=='ACAS'].{ policy: policy, type: type, version: version, release: feed, filename: fileName, hosts: hosts[] | [*].{ hostname: hostname, credentialed: credentialed, scan_user: scanUser, host_date: host_date, requirements: requirements[?pluginId == `19506`] | [*].{pluginId: pluginId, resources: resources,  comments: comments } } }",
+            "results[?type=='ACAS'].{ policy: policy, type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, credentialed: credentialed, scan_user: scan_user, host_date: host_date, requirements: requirements[?plugin_id == `19506`] | [*].{plugin_id: plugin_id, resources: resources,  comments: comments } } }",
             { 'results' : self.scan_results}
         )
 
@@ -819,7 +842,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 if self.scans_to_reports:
                     QtGui.QGuiApplication.processEvents()
                 for req in host['requirements']:
-                    if int(req['pluginId']) == 19506:
+                    if int(req['plugin_id']) == 19506:
                         scan_data = {}
                         for line in req['comments'].split("\n"):
                             if line.strip() != '':
@@ -901,8 +924,8 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 hosts: hosts[] | [*].{
                     hostname: hostname,
                     ip: ip,
-                    requirements: requirements[?pluginId == `22869`]  | [*].{ 
-                        plugin_id: pluginId,
+                    requirements: requirements[?plugin_id == `22869`]  | [*].{ 
+                        plugin_id: plugin_id,
                         comments: comments
                     }
                 }
@@ -1017,8 +1040,8 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 hosts: hosts[] | [*].{
                     hostname: hostname,
                     ip: ip,
-                    requirements: requirements[?pluginId == `20811`]  | [*].{ 
-                        plugin_id: pluginId,
+                    requirements: requirements[?plugin_id == `20811`]  | [*].{ 
+                        plugin_id: plugin_id,
                         comments: comments
                     }
                 }
@@ -1123,20 +1146,20 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
-                filename: fileName,
+                filename: filename,
                 version: version,
                 feed: feed,
                 policy: policy,
-                scan_date: scanDate,
+                scan_date: scan_date,
                 
                 hosts: hosts[] | [*].{
                     hostname: hostname,
                     ip: ip,
                     os:os,
                     port_range: port_range,
-                    scan_user: scanUser,
+                    scan_user: scan_user,
                     credentialed: credentialed,
-                    scan_details: requirements[?pluginId == `19506`] | [0].comments
+                    scan_details: requirements[?plugin_id == `19506`] | [0].comments
                 }
             }""",
             { 'results' : self.scan_results}
@@ -1205,16 +1228,16 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         scap_scans = jmespath.search(
             """results[?type=='SCAP'].{
-                filename: fileName,
+                filename: filename,
                 version: version,
                 release: release,
                 policy: policy,
-                scan_date: scanDate,
-                scanner_edition: scannerEdition,
+                scan_date: scan_date,
+                scanner_edition: scanner_edition,
                 hostname: hostname,
                 ip: ip,
                 os:os,
-                scan_user: scanUser,
+                scan_user: scan_user,
                 credentialed: credentialed,
                 error: requirements[]  | [?status == 'E'].[comments, severity, status]
             }""",
@@ -1263,16 +1286,16 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         ckl_scans = jmespath.search(
             """results[?type=='CKL'].{
-                filename: fileName,
+                filename: filename,
                 version: version,
                 release: release,
                 policy: policy,
-                scan_date: scanDate,
-                scanner_edition: scannerEdition,
+                scan_date: scan_date,
+                scanner_edition: scanner_edition,
                 hostname: hostname,
                 ip: ip,
                 os:os,
-                scan_user: scanUser,
+                scan_user: scan_user,
                 credentialed: credentialed,
                 not_reviewed: requirements[]  | [?status == 'NR'].[comments, severity, status]
             }""",
@@ -1463,7 +1486,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'PPSM' Tab")
 
-        widths = [25, 25, 25, 25, 25]
+        widths = [25, 25, 25, 25, 25, 25]
         ascii = string.ascii_uppercase
         for index, w in enumerate(widths):
             worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
@@ -1474,8 +1497,8 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
-                    requirements: requirements[?pluginId == `11219` || pluginId == `14272`]  | [*].{ 
-                        plugin_id: pluginId,
+                    requirements: requirements[?plugin_id == `11219` || plugin_id == `14272`]  | [*].{ 
+                        plugin_id: plugin_id,
                         port: port,
                         protocol: protocol,
                         service: service,
@@ -1595,9 +1618,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
                     requirements: requirements[]  | [?severity != `0`].{ 
-                        plugin_id: pluginId,
-                        title: reqTitle,
-                        grp_id: grpId,
+                        plugin_id: plugin_id,
+                        title: req_title,
+                        grp_id: grp_id,
                         severity: severity
                     }
                 }
@@ -1671,10 +1694,10 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
                     requirements: requirements[]  | [?iava != '' && severity != `0`].{ 
-                        plugin_id: pluginId,
+                        plugin_id: plugin_id,
                         iava: iava,
-                        title: reqTitle,
-                        grp_id: grpId,
+                        title: req_title,
+                        grp_id: grp_id,
                         severity: severity
                     }
                 }
@@ -1750,7 +1773,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     ip: ip,
                     os: os,
 
-                    requirements: requirements[]  | [?pluginId == `66334`].{ comments: comments}
+                    requirements: requirements[]  | [?plugin_id == `66334`].{ comments: comments}
                 }
             }""",
             { 'results' : self.scan_results}
@@ -1823,16 +1846,19 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 hostname: hostname,
                 ip: ip,
                 os: os,
-                filename: fileName,
+                filename: filename,
                 credentialed: credentialed
-                scan_date: scanDate,
+                scan_date: scan_date,
                 version: version,
                 release: release,
+                
                 cati: requirements[]   | [?status != 'C' && severity > `2`].[comments, severity, status],
                 catii: requirements[]  | [?status != 'C' && severity == `2`].[comments, severity, status],
                 catiii: requirements[] | [?status != 'C' && severity == `1`].[comments, severity, status],
                 cativ: requirements[]  | [?status != 'C' && severity == `0`].[comments, severity, status],
-                blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && findingDetails == '')].[comments, severity, status]
+
+                blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].[comments, severity, status]
+                
             }""",
             { 'results' : self.scan_results}
         )
@@ -1858,6 +1884,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 'CAT IV': len(scan['cativ']),
                 'Total': len(scan['cati']) + len(scan['catii']) + len(scan['catiii']) + len(scan['cativ']),
                 'Score': 10*len(scan['cati']) + 3*len(scan['catii']) + len(scan['catiii']),
+                
                 'Credentialed': scan['credentialed'],
                 'Blank Comments' : len(scan['blank_comments'])
             })
@@ -1865,8 +1892,8 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 type: type,
-                filename: fileName,
-                scan_date: scanDate,
+                filename: filename,
+                scan_date: scan_date,
                 version: version,
                 feed: feed,
                 hosts: hosts[] | [*].{
@@ -1875,12 +1902,12 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     os: os,
                     credentialed: credentialed,
 
-                    cati:   requirements[] | [?status != 'C' && severity > `2`].{ plugin_id: pluginId, severity: severity, status: status},
-                    catii:  requirements[] | [?status != 'C' && severity == `2`].{ plugin_id: pluginId, severity: severity, status: status},
-                    catiii: requirements[] | [?status != 'C' && severity == `1`].{ plugin_id: pluginId, severity: severity, status: status},
-                    cativ:  requirements[] | [?status != 'C' && severity == `0`].{ plugin_id: pluginId, severity: severity, status: status},
+                    cati:   requirements[] | [?status != 'C' && severity > `2`].{ plugin_id: plugin_id, severity: severity, status: status},
+                    catii:  requirements[] | [?status != 'C' && severity == `2`].{ plugin_id: plugin_id, severity: severity, status: status},
+                    catiii: requirements[] | [?status != 'C' && severity == `1`].{ plugin_id: plugin_id, severity: severity, status: status},
+                    cativ:  requirements[] | [?status != 'C' && severity == `0`].{ plugin_id: plugin_id, severity: severity, status: status},
 
-                    blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && findingDetails == '')].{ plugin_id: pluginId, severity: severity, status: status}
+                    blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].{ plugin_id: plugin_id, severity: severity, status: status}
                 }
             }""",
             { 'results' : self.scan_results}
@@ -1977,7 +2004,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         raw_results = []
         acas_scans = jmespath.search(
-            "results[?type=='ACAS'].{ type: type, title: title, filename: fileName, scan_date: scanDate, version: version, feed: feed, hosts: hosts[] | [*].{ hostname: hostname, ip : ip, credentialed: credentialed, requirements: requirements[] | [*].{ publication_date: publicationDate, modification_date : modificationDate, comments: comments, grp_id: grpId, plugin_id: pluginId, req_title: reqTitle, severity: severity, status: status, finding_details: findingDetails, description: description, solution: solution, fix_id: fixId, references: references, resources: resources } } }",
+            "results[?type=='ACAS'].{ type: type, title: title, filename: filename, scan_date: scan_date, version: version, feed: feed, hosts: hosts[] | [*].{ hostname: hostname, ip : ip, credentialed: credentialed, requirements: requirements[] | [*].{ publication_date: publication_date, modification_date : modification_date, comments: comments, grp_id: grp_id, plugin_id: plugin_id, req_title: req_title, severity: severity, status: status, finding_details: finding_details, description: description, solution: solution, fix_id: fix_id, references: references, resources: resources } } }",
             { 'results' : self.scan_results}
         )
 
@@ -1999,10 +2026,10 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                             'Modification Date' : req['modification_date'],
                             'Credentialed'      : host['credentialed'],
                             'Hostname'          : host['hostname'] if host['hostname'].strip() != '' else host['ip'],
-                            'grpId'             : req['grp_id'],
-                            'vulnId'            : '',
-                            'ruleId'            : '',
-                            'pluginId'          : req['plugin_id'],
+                            'grp_id'             : req['grp_id'],
+                            'vuln_id'            : '',
+                            'rule_id'            : '',
+                            'plugin_id'          : req['plugin_id'],
                             'IA Controls'       : '',
                             'RMF Controls'      : '',
                             'Assessments'       : '',
@@ -2013,14 +2040,14 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                             'Finding Details'   : req['finding_details'][0:32760],
                             'Description'       : req['description'][0:32760],
                             'Solution'          : req['solution'][0:32760],
-                            'fixId'             : req['fix_id'],
+                            'fix_id'             : req['fix_id'],
                             'References'        : req['references'][0:32760],
                             'Resources'         : req['resources'],
                             'Comments'          : '',
                         })
 
         disa_scans = jmespath.search(
-            "results[?type=='CKL' || type=='SCAP'].{ type: type, title: title, filename: fileName, scan_date: scanDate, version: version, release: release, hostname: hostname, ip : ip, credentialed: credentialed, requirements: requirements[] | [*].{ comments: comments, grp_id: grpId, plugin_id: pluginId, req_title: reqTitle, severity: severity, status: status, finding_details: findingDetails, description: description, solution: solution, fix_id: fixId, references: references, resources: resources, cci: cci, assessments: assessments, rmf_controls: rmfControls, ia_controls: iaControls, rule_id: ruleId, vuln_id: vulnId } }",
+            "results[?type=='CKL' || type=='SCAP'].{ type: type, title: title, filename: filename, scan_date: scan_date, version: version, release: release, hostname: hostname, ip : ip, credentialed: credentialed, requirements: requirements[] | [*].{ comments: comments, grp_id: grp_id, plugin_id: plugin_id, req_title: req_title, severity: severity, status: status, finding_details: finding_details, description: description, solution: solution, fix_id: fix_id, references: references, resources: resources, cci: cci, assessments: assessments, rmf_controls: rmf_controls, ia_controls: ia_controls, rule_id: rule_id, vuln_id: vuln_id } }",
             { 'results' : self.scan_results}
         )
 
@@ -2039,10 +2066,10 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                         'Modification Date' : '',
                         'Credentialed'      : scan['credentialed'],
                         'Hostname'          : scan['hostname'] if scan['hostname'].strip() != '' else scan['ip'],
-                        'grpId'             : req['grp_id'],
-                        'vulnId'            : req['vuln_id'],
-                        'ruleId'            : req['rule_id'],
-                        'pluginId'          : req['plugin_id'],
+                        'grp_id'             : req['grp_id'],
+                        'vuln_id'            : req['vuln_id'],
+                        'rule_id'            : req['rule_id'],
+                        'plugin_id'          : req['plugin_id'],
                         'IA Controls'       : req['ia_controls'],
                         'RMF Controls'      : req['rmf_controls'],
                         'Assessments'       : req['assessments'],
@@ -2053,7 +2080,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                         'Finding Details'   : req['finding_details'][0:32760],
                         'Description'       : req['description'][0:32760],
                         'Solution'          : req['solution'][0:32760],
-                        'fixId'             : req['fix_id'],
+                        'fix_id'             : req['fix_id'],
                         'References'        : req['references'][0:32760],
                         'Resources'         : req['resources'],
                         'Comments'          : req['comments'][0:32760],
@@ -2148,7 +2175,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         users = []
         acas_scans = jmespath.search(
-            "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ hostname: hostname, os: os, requirements: requirements[?pluginId == `10860`] | [*].comments } }",
+            "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ hostname: hostname, os: os, requirements: requirements[?plugin_id == `10860`] | [*].comments } }",
             { 'results' : self.scan_results}
         )
 
@@ -2165,7 +2192,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                         })
 
         acas_scans = jmespath.search(
-            "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ hostname: hostname, os: os, requirements: requirements[?pluginId == `95928`] | [*].comments } }",
+            "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ hostname: hostname, os: os, requirements: requirements[?plugin_id == `95928`] | [*].comments } }",
             { 'results' : self.scan_results}
         )
 

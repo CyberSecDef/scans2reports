@@ -48,8 +48,8 @@ class ScanParser:
             
             sf = ScanFile({
                 'type'         :'ACAS',
-                'fileName'     : str(filename),
-                'scanDate'     : str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), '')),
+                'filename'     : str(filename),
+                'scan_date'     : str(next(iter(tree.xpath("/NessusClientData_v2/Report/ReportHost[1]/HostProperties/tag[@name='HOST_START']/text()")), '')),
                 'title'        : "Assured Compliance Assessment Solution (ACAS) Nessus Scanner\nVersion: {}\nFeed: {}".format(version, feed),
                 'uuid'         : str(uuid.uuid4()),
                 'version'      : version,
@@ -62,7 +62,7 @@ class ScanParser:
             })
             
             for host in tree.xpath("/NessusClientData_v2/Report/ReportHost"):
-                scanUser = ""
+                scan_user = ""
                 port_range = ""
                 scan_info = str( host.xpath("./ReportItem[@pluginID=19506]/plugin_output/text()") ).split("\\n")
                 for line in scan_info:
@@ -70,13 +70,13 @@ class ScanParser:
                         k,v = line.split(':', 1)
                         try:
                             if str(v).strip() == 'no':
-                                scanUser = 'NONE'
+                                scan_user = 'NONE'
                             elif len( v.split(' as ') ) > 0:
-                                scanUser = str(v.split(' as ')[1]).strip().replace('\\\\','\\')
+                                scan_user = str(v.split(' as ')[1]).strip().replace('\\\\','\\')
                             else:
-                                scanUser = str(v)
+                                scan_user = str(v)
                         except:
-                            scanUser = 'UNKNOWN'
+                            scan_user = 'UNKNOWN'
                             
                     if 'Port range' in line:
                         k,v = line.split(':', 1)
@@ -128,62 +128,48 @@ class ScanParser:
                     
                     'host_date'     : str(next(iter(host.xpath("./HostProperties/tag[@name='HOST_START']/text()")), '')),
                     'credentialed'  : Utils.parse_bool(str(next(iter( host.xpath("./HostProperties/tag[@name='Credentialed_Scan']/text()"))))),
-                    'scanUser'      : scanUser,
+                    'scan_user'      : scan_user,
                     'port_range'     : port_range,
-                    
-                    'catI'          : len(host.xpath("./ReportItem[@severity>=3]") ),
-                    'catII'         : len(host.xpath("./ReportItem[@severity=2]") ),
-                    'catIII'        : len(host.xpath("./ReportItem[@severity=1]") ),
-                    'catIV'         : len(host.xpath("./ReportItem[@severity=0]") ) if not self.skip_info else 0,
-                    'missing_cf'    : 0,
-                    'open'          : len(host.xpath("./ReportItem[@severity>0]") ),
-                    'closed'        : 0,
-                    'error'         : 0,
-                    'notReviewed'   : 0,
-                    'notApplicable' : 0,
-                    'requirements'  : [],
+
+                    'requirements'  : []
                 }
 
-                host_data['total'] = host_data['catI'] + host_data['catII'] + host_data['catIII']
-                host_data['score'] = 10*host_data['catI'] + 3*host_data['catII'] + host_data['catIII']
-                
                 for req in host.xpath("./ReportItem"):
                     if self.S2R.scans_to_reports:
                         QtGui.QGuiApplication.processEvents()
                     
                     severity = int(next(iter(req.xpath("./@severity")),''))
-                    pluginId = int(next(iter(req.xpath("./@pluginID")),''))
+                    plugin_id = int(next(iter(req.xpath("./@pluginID")),''))
                     
-                    if not self.skip_info or ( severity != 0 or pluginId in self.data_mapping['acas_required_info'] ):
+                    if not self.skip_info or ( severity != 0 or plugin_id in self.data_mapping['acas_required_info'] ):
                         req = {
                             'cci'              : [],
                             'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),
                             'description'      : next(iter(req.xpath("./synopsis/text()")),'') + "\n\n" + next(iter(req.xpath("./description/text()")),''),
-                            'findingDetails'   : '',
-                            'fixId'            : '',
+                            'finding_details'   : '',
+                            'fix_id'            : '',
                             'mitigation'       : '',
                             'port'             : int(next(iter(req.xpath("./@port")),'')),
                             'protocol'         : next(iter(req.xpath("./@protocol")),''),
                             'service'          : next(iter(req.xpath("./@svc_name")),''),
-                            'grpId'            : next(iter(req.xpath("./@pluginFamily")),''),
+                            'grp_id'            : next(iter(req.xpath("./@pluginFamily")),''),
                             'iava'             : next(iter(req.xpath("./iava/text()")),''),
-                            'pluginId'         : pluginId,
+                            'plugin_id'         : plugin_id,
                             'resources'        : '',
-                            'ruleId'           : '',
+                            'rule_id'           : '',
                             'solution'         : next(iter(req.xpath("./solution/text()")),''),
                             'references'       : '',
                             'severity'         : severity,
-                            'reqTitle'         : next(iter(req.xpath("./@pluginName")),''),
-                            'vulnId'           : '',
-                            'iaControls'       : [],
+                            'req_title'         : next(iter(req.xpath("./@pluginName")),''),
+                            'vuln_id'           : '',
+                            'ia_controls'       : [],
                             'status'           : 'O',
-                            'publicationDate'  : next(iter(req.xpath("./plugin_publication_date/text()")),''),
-                            'modificationDate' : next(iter(req.xpath("./plugin_modification_date/text()")),''),
+                            'publication_date'  : next(iter(req.xpath("./plugin_publication_date/text()")),''),
+                            'modification_date' : next(iter(req.xpath("./plugin_modification_date/text()")),''),
                         }
 
                         host_data['requirements'].append(req)
                 sf['hosts'].append( host_data )
-
 
         except Exception as e:
             sf = None
@@ -193,8 +179,6 @@ class ScanParser:
             print(str(e))
 
         return sf
-        
-        
         
     def parseScap(self, filename):
         logging.info('Parsing scap file %s', filename)
@@ -229,7 +213,6 @@ class ScanParser:
 
             if release.isdigit():
                 release = str(int(release))
-            
 
             fqdn_val = ""
             if next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:fqdn']/text()", namespaces = ns)), ''):
@@ -243,8 +226,8 @@ class ScanParser:
             
             sf = ScanFile({
                 'type'         :'SCAP',
-                'fileName'     : str(filename),
-                'scanDate'     : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/@start-time", namespaces = ns )), ''),
+                'filename'     : str(filename),
+                'scan_date'     : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/@start-time", namespaces = ns )), ''),
                 'duration'     :
                     datetime.strptime(
                         str(next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/@end-time", namespaces = ns )), '')),
@@ -254,10 +237,9 @@ class ScanParser:
                         str(next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/@start-time", namespaces = ns )), '')),
                         '%Y-%m-%dT%H:%M:%S'
                     )
-
                 ,
                 'policy'       : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:profile/@idref", namespaces = ns)), ''),
-                'scannerEdition' : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/@test-system", namespaces = ns)), ''),
+                'scanner_edition' : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/@test-system", namespaces = ns)), ''),
                 'title'        : next(iter(tree.xpath("/cdf:Benchmark/cdf:title/text()", namespaces = ns)), ''),
                 'uuid'         : str(uuid.uuid4()),
                 'version'      : version,
@@ -273,21 +255,9 @@ class ScanParser:
                 'serial'       : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:ein']/text()", namespaces = ns)), ''),  
                 'os'           : next(iter(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:target-facts/cdf:fact[@name='urn:scap:fact:asset:identifier:os_version']/text()", namespaces = ns)), ''),
                 'credentialed' : Utils.parse_bool(str( next(iter(tree.xpath(" /cdf:Benchmark/cdf:TestResult/cdf:identity/@privileged", namespaces = ns)), '') )),
-                'scanUser'     : next(iter(tree.xpath(" /cdf:Benchmark/cdf:TestResult/cdf:identity/text()", namespaces = ns)), ''),
-                'catI'         : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@severity='high' and ./cdf:result != 'pass']", namespaces = ns) ),
-                'catII'        : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@severity='medium' and ./cdf:result != 'pass']", namespaces = ns) ),
-                'catIII'       : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@severity='low' and ./cdf:result != 'pass']", namespaces = ns) ),
-                'catIV'        : 0,
-                'missing_cf'   : 0,
-                'open'         : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[./cdf:result = 'fail']", namespaces = ns) ),
-                'closed'       : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[./cdf:result = 'pass']", namespaces = ns) ),
-                'error'        : len(tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result[./cdf:result = 'error']", namespaces = ns) ),
-                'notReviewed'  : 0,
-                'notApplicable': 0,
+                'scan_user'     : next(iter(tree.xpath(" /cdf:Benchmark/cdf:TestResult/cdf:identity/text()", namespaces = ns)), ''),
+
             })
-            
-            sf['total'] = sf['catI'] + sf['catII'] + sf['catIII']
-            sf['score'] = 10*sf['catI'] + 3*sf['catII'] + sf['catIII']
 
             for vuln in tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result", namespaces = ns):
                 if self.S2R.scans_to_reports:
@@ -310,7 +280,6 @@ class ScanParser:
                         for resource in descriptionTree.xpath('/root/Responsibility/text()'):
                             resources.append(str(resource))
                         resources = ",".join(resources)
-
 
                     except:
                         description = ""
@@ -354,42 +323,39 @@ class ScanParser:
                     if cci in self.data_mapping['ap_mapping']:
                         ap = self.data_mapping['ap_mapping'][cci]
                         
-                ruleId = next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/@id", namespaces = ns)), '').replace('xccdf_mil.disa.stig_rule_','')
+                rule_id = next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/@id", namespaces = ns)), '').replace('xccdf_mil.disa.stig_rule_','')
                 status = Utils.status(
                     str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@idref='{idref}']/cdf:result/text()", namespaces = ns)), '')) ,
                     'ABBREV'
                 )
-                
-                
-                
                             
                 sf.add_requirement(
                     ScanRequirement({
-                        'vulnId'        : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/@id", namespaces = ns)), '').replace('xccdf_mil.disa.stig_group_',''),
-                        'ruleId'        : ruleId,
-                        'grpId'         : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:title/text()", namespaces = ns)), '') ,
-                        'pluginId'      : '',
-                        'ruleVer'       : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:version/text()", namespaces = ns)), '') ,
+                        'vuln_id'        : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/@id", namespaces = ns)), '').replace('xccdf_mil.disa.stig_group_',''),
+                        'rule_id'        : rule_id,
+                        'grp_id'         : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:title/text()", namespaces = ns)), '') ,
+                        'plugin_id'      : '',
+                        'rule_ver'       : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:version/text()", namespaces = ns)), '') ,
                         'cci'           : cci,
-                        'checkId'       : '',
-                        'checkText'     : '',
-                        'fixId'         : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:fix/@id", namespaces = ns)), '') ,
+                        'check_id'       : '',
+                        'check_text'     : '',
+                        'fix_id'         : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:fix/@id", namespaces = ns)), '') ,
                         'solution'      : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:fixtext/text()", namespaces = ns)), '') ,
                         'mitigation'    : mitigations,
                         'impact'        : impact,
-                        'reqTitle'      : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:title/text()", namespaces = ns)), '') ,
+                        'req_title'      : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:title/text()", namespaces = ns)), '') ,
                         'severity'      : Utils.risk_val(
                             str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/@severity", namespaces = ns)), '')) ,
                             'NUM'
                         ),
                         'status'        : status,
-                        'findingDetails': "SCAP scan found this requirement result was '{}'".format(
+                        'finding_details': "SCAP scan found this requirement result was '{}'".format(
                             str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:TestResult/cdf:rule-result[@idref='{idref}']/cdf:result/text()", namespaces = ns)), ''))
                         ),
                         'comments'      : '',
                         'description'   : description,
-                        'iaControls'    : '',
-                        'rmfControls'   : rmf,
+                        'ia_controls'    : '',
+                        'rmf_controls'   : rmf,
                         'assessments'   : ap,
                         'references'    : next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:reference/dc:publisher/text()", namespaces = ns)), '') ,
                         'resources'     : resources,
@@ -452,10 +418,10 @@ class ScanParser:
             sf = ScanFile({
                 'type'         :'CKL',
 
-                'fileName'     : str(filename),
-                'scanDate'     : time.strftime( '%Y-%m-%dT%H:%M:%S', time.gmtime( os.path.getmtime( filename ))),
+                'filename'     : str(filename),
+                'scan_date'     : time.strftime( '%Y-%m-%dT%H:%M:%S', time.gmtime( os.path.getmtime( filename ))),
 
-                'scannerEdition' : '',
+                'scanner_edition' : '',
                 'title'        : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='title']/SID_DATA/text()")), ''),
                 'uuid'         : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='uuid']/SID_DATA/text()")), ''),
                 'version'      : version,
@@ -472,23 +438,8 @@ class ScanParser:
                 'model'        : '',
                 'serial'       : '',
                 
-                'credentialed' : True,
-
-                'catI'         : len(tree.xpath("//VULN[(./STATUS!='NotAFinding' and ./STATUS!='Not_Applicable' ) and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='high']]") ),
-                'catII'        : len(tree.xpath("//VULN[(./STATUS!='NotAFinding' and ./STATUS!='Not_Applicable' ) and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='medium']]") ),
-                'catIII'       : len(tree.xpath("//VULN[(./STATUS!='NotAFinding' and ./STATUS!='Not_Applicable' ) and ./STIG_DATA[./VULN_ATTRIBUTE='Severity' and ./ATTRIBUTE_DATA='low']]") ),
-                'catIV'        : '',
-                
-                'missing_cf'   : len(tree.xpath("//VULN[normalize-space(./FINDING_DETAILS)='' or  normalize-space(./COMMENTS)='']") ),
-                
-                'open'         : len(tree.xpath("//VULN[./STATUS='Open']") ),
-                'closed'       : len(tree.xpath("//VULN[./STATUS='NotAFinding']") ),
-                'error'        : len(tree.xpath("//VULN[./STATUS='Error']") ),
-                'notReviewed'  : len(tree.xpath("//VULN[./STATUS='Not_Reviewed']") ),
-                'notApplicable': len(tree.xpath("//VULN[./STATUS='Not_Applicable']") ),
+                'credentialed' : True
             })
-            sf['total'] = sf['catI'] + sf['catII'] + sf['catIII']
-            sf['score'] = 10*sf['catI'] + 3*sf['catII'] + sf['catIII']
 
             for vuln in tree.xpath("//VULN"):
                 if self.S2R.scans_to_reports:
@@ -505,38 +456,35 @@ class ScanParser:
                     if cci in self.data_mapping['ap_mapping']:
                         ap = self.data_mapping['ap_mapping'][cci]
                 
-                ruleId = next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_ID']/ATTRIBUTE_DATA/text()")), '')
+                rule_id = next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_ID']/ATTRIBUTE_DATA/text()")), '')
                 status = Utils.status( next(iter(vuln.xpath("./STATUS/text()")), ''), 'ABBREV')
-                
-                
                 
                 sf.add_requirement(
                     ScanRequirement({
-                        'vulnId'        : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Vuln_Num']/ATTRIBUTE_DATA/text()")), ''),
-                        'ruleId'        : ruleId,
-                        'grpId'         : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Group_Title']/ATTRIBUTE_DATA/text()")), ''),
-                        'pluginId'      : '',
-                        'ruleVer'       : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_Ver']/ATTRIBUTE_DATA/text()")), ''),
-                        'ruleVer'       : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_Ver']/ATTRIBUTE_DATA/text()")), ''),
+                        'vuln_id'        : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Vuln_Num']/ATTRIBUTE_DATA/text()")), ''),
+                        'rule_id'        : rule_id,
+                        'grp_id'         : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Group_Title']/ATTRIBUTE_DATA/text()")), ''),
+                        'plugin_id'      : '',
+                        'rule_ver'       : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_Ver']/ATTRIBUTE_DATA/text()")), ''),
                         'cci'           : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='CCI_REF']/ATTRIBUTE_DATA/text()")), ''),
-                        'checkId'       : '',
-                        'fixId'         : '',
+                        'check_id'       : '',
+                        'fix_id'         : '',
 
-                        'reqTitle'      : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_Title']/ATTRIBUTE_DATA/text()")), ''),
+                        'req_title'      : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_Title']/ATTRIBUTE_DATA/text()")), ''),
                         'severity'      : Utils.risk_val(
                             str(next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Severity']/ATTRIBUTE_DATA/text()")), '')),
                             'NUM'
                         ),
                         'status'        : status,
-                        'findingDetails': next(iter(vuln.xpath("./FINDING_DETAILS/text()")), ''),
+                        'finding_details': next(iter(vuln.xpath("./FINDING_DETAILS/text()")), ''),
                         'comments'      : next(iter(vuln.xpath("./COMMENTS/text()")), ''),
                         'mitigation'    : '',
 
                         'description'   : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Vuln_Discuss']/ATTRIBUTE_DATA/text()")), ''),
-                        'iaControls'    : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='IA_Controls']/ATTRIBUTE_DATA/text()")), ''),
-                        'rmfControls'   : rmf,
+                        'ia_controls'    : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='IA_Controls']/ATTRIBUTE_DATA/text()")), ''),
+                        'rmf_controls'   : rmf,
                         'assessments'   : ap,
-                        'checkText'     : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Check_Content']/ATTRIBUTE_DATA/text()")), ''),
+                        'check_text'     : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Check_Content']/ATTRIBUTE_DATA/text()")), ''),
                         'solution'      : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Fix_Text']/ATTRIBUTE_DATA/text()")), ''),
                         'references'    : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='STIGRef']/ATTRIBUTE_DATA/text()")), ''),
                         'resources'     : next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Responsibility']/ATTRIBUTE_DATA/text()")), ''),
