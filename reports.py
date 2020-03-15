@@ -533,8 +533,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                             
                     
                     # pylint: enable=C0330
-
-        start_time = datetime.datetime.now()
         print( "        {} - Generating POAM".format(datetime.datetime.now() - start_time) )
         row = 0
         bold = self.workbook.add_format({'bold': True})
@@ -563,9 +561,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     col += 1
                 row += 1
         print( "        {} - Finished generating POAM".format(datetime.datetime.now() - start_time) )
-
-
-
 
     def rpt_rar(self):
         """ Generates RAR """
