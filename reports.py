@@ -1135,7 +1135,8 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     os:os,
                     port_range: port_range,
                     scan_user: scanUser,
-                    credentialed: credentialed
+                    credentialed: credentialed,
+                    scan_details: requirements[?pluginId == `19506`] | [0].comments
                 }
             }""",
             { 'results' : self.scan_results}
@@ -1151,6 +1152,26 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     fqdn_val = (str(host['hostname']).split('.')[0])
                 else:
                     fqdn_val = (str(host['hostname']))
+                    
+                scan_date = datetime.datetime.strptime(scan['scan_date'], '%a %b %d %H:%M:%S %Y')
+                feed = datetime.datetime.strptime(scan['feed'], '%Y%m%d%H%M')
+                
+                for line in host['scan_details'].split('\n'):
+                    if 'Plugin feed version' in line:
+                        k,v = line.split(':', 1)
+                        try:
+                            feed = datetime.datetime.strptime(str(v).strip(), '%Y%m%d%H%M')
+                        except:
+                            pass
+                            
+                    if 'Scan Start Date' in line:
+                        k,v = line.split(':', 1)
+                        try:
+                            scan_date = datetime.datetime.strptime( str(v).strip() , '%Y/%m/%d %H:%M %Z')
+                        except:
+                            pass
+                    
+                # print(scan_date, feed)
 
                 hardware.append({
                     'Machine Name (Required)'                : fqdn_val,
@@ -1163,12 +1184,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'ACAS Port Range 0-65535'                : 'True' if str(host['port_range']).strip() == '0-65535' or str(host['port_range']).strip() == 'all ports' else 'False',
                     'ACAS Scan Users'                        : host['scan_user'],
                     'ACAS Credentialed Checks'               : host['credentialed'],
-                    'ACAS Feed Version'                      : scan['feed'],
-                    'ACAS Scan Start Date'                   : scan['scan_date'],
-                    'ACAS Days Between Plugin Feed And Scan' : (
-                        datetime.datetime.strptime(scan['scan_date'], '%a %b %d %H:%M:%S %Y') -
-                        datetime.datetime.strptime(scan['feed'], '%Y%m%d%H%M')
-                    ).days,
+                    
+                    'ACAS Feed Version'                      : feed.strftime('%Y%m%d%H%M'),
+                    'ACAS Scan Start Date'                   : scan_date.strftime('%Y/%m/%d %H:%M %Z'),
+                    'ACAS Days Between Plugin Feed And Scan' : (scan_date - feed).days,
+                    
                     'STIG CKL File'                      : '',
                     'STIG CKL Version/Release'               : '',
                     'STIG CKL Credentialed Checks'           : '',
