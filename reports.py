@@ -24,6 +24,7 @@ class Reports:
     """ reports class of scans to reports """
     workbook = None
     scan_results = []
+    test_results = {}
     data_mapping = {}
     contact_info = {}
     poam_conf = {}
@@ -34,7 +35,7 @@ class Reports:
     }
     application_path = ""
 
-    def __init__(self, application_path, scan_results, data_mapping, contact_info, skip_reports, poam_conf, scans_to_reports=None):
+    def __init__(self, application_path, scan_results, test_results, data_mapping, contact_info, skip_reports, poam_conf, scans_to_reports=None):
         """ constructor """
         self.application_path = application_path
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
@@ -47,6 +48,7 @@ class Reports:
             datetime.datetime.now().strftime("scans2reports-%Y%m%d_%H%M%S.xlsx")
         )
 
+        self.test_results = test_results
         self.workbook = xlsxwriter.Workbook(report_name)
         self.data_mapping = data_mapping
         self.contact_info = contact_info
@@ -489,50 +491,135 @@ class Reports:
                         scd = datetime.date.today() + datetime.timedelta( ([1095, 365, 90, 30])[Utils.clamp( (int(Utils.risk_val(req['severity'], 'NUM')) - 1), 1, 3 )] )
                     else:
                         scd = datetime.date.today() + datetime.timedelta( ([1095, 365, 90, 30])[Utils.clamp( (int(Utils.risk_val(req['severity'], 'NUM'))), 1, 3 )] )
+                else:
+                    scd = ''
+                
+                if self.test_results is not None:
+                    #test results parsed
+                    
+                    if req['cci'].strip() != '':
+                        #cci is present
+                        
+                        if self.poam_conf['test_results'] == 'add':
+                            #add option selected, proceed as normal
+                            rmf_controls = rmf_controls
+                            comments = f"{ req['cci']}\n\n{comments}"
+                            status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                            
+                        elif self.poam_conf['test_results'] == 'close':
+                            #close option selected, inheritted or CCI's not in package will be closed.
+                            #non-inheritted controls that are present will proceed as normal
+                            
+                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.test_results.keys():
+                                #the current cci is not in the implementation plan, map to close
+                                comments = f"{ req['cci']}\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being marked as 'Completed' by default. \n\n{comments}"
+                                rmf_controls = rmf_controls
+                                status = f"{ Utils.status('C', 'HUMAN') }"
+                            else:
+                                #the current cci is part of the implementation plan
+                            
+                                if(
+                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                ):
+                                    #the current cci is marked as inheritted.  Close the requirement
+                                    comments = f"{ req['cci']}\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being marked as completed by default. \n\n{comments}"
+                                    rmf_controls = rmf_controls
+                                    status = f"{ Utils.status('C', 'HUMAN') }"
+                                else:
+                                    #the current cci is not marked as inherited.  Process as usual.
+                                    rmf_controls = rmf_controls
+                                    comments = f"{ req['cci']}\n\n{comments}"
+                                    status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                        elif self.poam_conf['test_results'] == 'convert':
+                            #convert option selected, inheritted or CCI's not in package will be converted to CM-6.5
+                            #non-inheritted controls that are present will proceed as normal
+                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.test_results.keys():
+                                #the current cci is not in the implementation plan, map to CM-6.5
+                                comments = f"CCI-000366\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being mapped to CCI-000366 CM-6.5.\n\n{comments}"
+                                req['cci'] = 'CCI-000366'
+                                rmf_controls = "CM-6.5"
+                                status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                            else:
+                                #the current cci is part of the implementation plan
+                            
+                                if(
+                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                ):
+                                    #the current cci is marked as inheritted.  Close the requirement
+                                    comments = f"CCI-000366\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being mapped to CCI-000366 CM-6.5. \n\n{comments}"
+                                    req['cci'] = 'CCI-000366'
+                                    rmf_controls = "CM-6.5"
+                                    status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                                else:
+                                    #the current cci is not marked as inherited.  Process as usual.
+                                    rmf_controls = rmf_controls
+                                    comments = f"{ req['cci']}\n\n{comments}"
+                                    status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                        else:
+                            #fallthrough catch.  This should never be reached
+                            print(f"{req['cci']} - fallthrough")
+                            rmf_controls = rmf_controls
+                            comments = f"{ req['cci']}\n\n{comments}"
+                            status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                    else:
+                        #no cci present, convert to CM-6.5
+                        rmf_controls = 'CM-6.5'
+                        req['cci'] = 'CCI-000366'
+                        comments = f"{req['cci']}\n\nThe control mapping for this requirement is unavailable so it is being mapped to CCI-000366 CM-6.5 by default. \n\n{comments}"
+                        status = f"{ Utils.status(req['status'], 'HUMAN') }"
 
-                    req_data = {
-                        'A'                                                 : '',
-                        'Control Vulnerability Description'                 : f"Title: {req['req_title']}\n\nFamily: {req['grp_id']}\n\nDescription:\n{req['description']}",
-                        'Security Control Number (NC/NA controls only)'     : rmf_controls,
-                        'Office/Org'                                        : f"{self.contact_info['command']}\n{self.contact_info['name']}\n{self.contact_info['phone']}\n{self.contact_info['email']}\n".strip(),
-                        'Security Checks'                                   : f"{req['plugin_id']}{req['rule_id']}",
-                        'Resources Required'                                : f"{req['resources']}",
-                        'Scheduled Completion Date'                         : scd,
-                        'Milestone with Completion Dates'                   : "{m} {s[0]} updates {s[1]}/{s[2]}/{s[0]}".format(
+                else:
+                    #test results not submitted, process as usual
+                    rmf_controls = rmf_controls
+                    comments = f"{ req['cci']}\n\n{comments}"
+                    status = f"{ Utils.status(req['status'], 'HUMAN') }"
+
+                    
+                req_data = {
+                    'A'                                                 : '',
+                    'Control Vulnerability Description'                 : f"Title: {req['req_title']}\n\nFamily: {req['grp_id']}\n\nDescription:\n{req['description']}",
+                    'Security Control Number (NC/NA controls only)'     : rmf_controls,
+                    'Office/Org'                                        : f"{self.contact_info['command']}\n{self.contact_info['name']}\n{self.contact_info['phone']}\n{self.contact_info['email']}\n".strip(),
+                    'Security Checks'                                   : f"{req['plugin_id']}{req['rule_id']}",
+                    'Resources Required'                                : f"{req['resources']}",
+                    'Scheduled Completion Date'                         : scd,
+                    'Milestone with Completion Dates'                   : "{m} {s[0]} updates {s[1]}/{s[2]}/{s[0]}".format(
 s=str(scd).split('-'),
 m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 ) if self.poam_conf['scd'] else '',
-                        'Milestone Changes'                                 : '',
-                        'Source Identifying Control Vulnerability'          : f"{prefix} {req['scan_title']}",
-                        'Status'                                            : f"{ Utils.status(req['status'], 'HUMAN') }",
-                        'Comments'                                          : f"{ req['cci']}\n\n{comments}",
-                        'Raw Severity'                                      : Utils.risk_val(req['severity'], 'MIN'),
-                        'Devices Affected'                                  : hosts,
-                        'Mitigations'                                       : '',
-                        'Predisposing Conditions'                           : finding_details,
-                        'Severity'                                          : Utils.risk_val(req['severity'], 'POAM'),
-                        'Relevance of Threat'                               : 'High',
-                        'Threat Description'                                : req['description'],
-                        'Likelihood'                                        : Utils.risk_val(req['severity'], 'POAM'),
-                        'Impact'                                            : Utils.risk_val(req['severity'], 'POAM'),
-                        'Impact Description'                                : '',
-                        'Residual Risk Level'                               : Utils.risk_val(req['severity'], 'POAM'),
-                        'Recommendations'                                   : req['solution'],
-                        'Resulting Residual Risk after Proposed Mitigations': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.poam_conf['lower_risk'] else Utils.risk_val(req['severity'], 'POAM'),
-                    }
+                    'Milestone Changes'                                 : '',
+                    'Source Identifying Control Vulnerability'          : f"{prefix} {req['scan_title']}",
+                    'Status'                                            : status,
+                    'Comments'                                          : comments,
+                    'Raw Severity'                                      : Utils.risk_val(req['severity'], 'MIN'),
+                    'Devices Affected'                                  : hosts,
+                    'Mitigations'                                       : '',
+                    'Predisposing Conditions'                           : finding_details,
+                    'Severity'                                          : Utils.risk_val(req['severity'], 'POAM'),
+                    'Relevance of Threat'                               : 'High',
+                    'Threat Description'                                : req['description'],
+                    'Likelihood'                                        : Utils.risk_val(req['severity'], 'POAM'),
+                    'Impact'                                            : Utils.risk_val(req['severity'], 'POAM'),
+                    'Impact Description'                                : '',
+                    'Residual Risk Level'                               : Utils.risk_val(req['severity'], 'POAM'),
+                    'Recommendations'                                   : req['solution'],
+                    'Resulting Residual Risk after Proposed Mitigations': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.poam_conf['lower_risk'] else Utils.risk_val(req['severity'], 'POAM'),
+                }
 
-                    if 'publication_date' not in req:
-                        report.append(req_data)
-                    elif req['publication_date'] is None:
-                        report.append(req_data)
-                    elif( str(req['publication_date']).strip() == '' ):
-                        report.append(req_data)
-                    elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] ) ):
-                        report.append(req_data)
+                if 'publication_date' not in req:
+                    report.append(req_data)
+                elif req['publication_date'] is None:
+                    report.append(req_data)
+                elif( str(req['publication_date']).strip() == '' ):
+                    report.append(req_data)
+                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] ) ):
+                    report.append(req_data)
 
                             
                     
-                    # pylint: enable=C0330
+                # pylint: enable=C0330
         print( "        {} - Generating POAM".format(datetime.datetime.now() - start_time) )
         row = 0
         bold = self.workbook.add_format({'bold': True})
@@ -722,6 +809,117 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 objectives = list(set(objectives))
                 objectives = ", ".join( objectives )
 
+
+
+
+                if self.test_results is not None:
+                    #test results parsed
+                    
+                    if req['cci'].strip() != '':
+                        #cci is present
+                        
+                        if self.poam_conf['test_results'] == 'add':
+                            #add option selected, proceed as normal
+                            rmf_controls = rmf_controls
+                            comments = f"{ req['cci']}\n\n{comments}"
+                            status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                            
+                        elif self.poam_conf['test_results'] == 'close':
+                            #close option selected, inheritted or CCI's not in package will be closed.
+                            #non-inheritted controls that are present will proceed as normal
+                            
+                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.test_results.keys():
+                                #the current cci is not in the implementation plan, map to close
+                                comments = f"{ req['cci']}\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being marked as 'Completed' by default. \n\n{comments}"
+                                rmf_controls = rmf_controls
+                                status = f"{ Utils.status('C', 'HUMAN') }"
+                            else:
+                                #the current cci is part of the implementation plan
+                            
+                                if(
+                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                ):
+                                    #the current cci is marked as inheritted.  Close the requirement
+                                    comments = f"{ req['cci']}\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being marked as completed by default. \n\n{comments}"
+                                    rmf_controls = rmf_controls
+                                    status = f"{ Utils.status('C', 'HUMAN') }"
+                                else:
+                                    #the current cci is not marked as inherited.  Process as usual.
+                                    rmf_controls = rmf_controls
+                                    comments = f"{ req['cci']}\n\n{comments}"
+                                    status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                        elif self.poam_conf['test_results'] == 'convert':
+                            #convert option selected, inheritted or CCI's not in package will be converted to CM-6.5
+                            #non-inheritted controls that are present will proceed as normal
+                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.test_results.keys():
+                                #the current cci is not in the implementation plan, map to CM-6.5
+                                comments = f"CCI-000366\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being mapped to CCI-000366 CM-6.5.\n\n{comments}"
+                                req['cci'] = 'CCI-000366'
+                                rmf_controls = "CM-6.5"
+                                status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                            else:
+                                #the current cci is part of the implementation plan
+                            
+                                if(
+                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                ):
+                                    #the current cci is marked as inheritted.  Close the requirement
+                                    comments = f"CCI-000366\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being mapped to CCI-000366 CM-6.5. \n\n{comments}"
+                                    req['cci'] = 'CCI-000366'
+                                    rmf_controls = "CM-6.5"
+                                    status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                                else:
+                                    #the current cci is not marked as inherited.  Process as usual.
+                                    rmf_controls = rmf_controls
+                                    comments = f"{ req['cci']}\n\n{comments}"
+                                    status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                        else:
+                            #fallthrough catch.  This should never be reached
+                            print(f"{req['cci']} - fallthrough")
+                            rmf_controls = rmf_controls
+                            comments = f"{ req['cci']}\n\n{comments}"
+                            status = f"{ Utils.status(req['status'], 'HUMAN') }"
+                    else:
+                        #no cci present, convert to CM-6.5
+                        rmf_controls = 'CM-6.5'
+                        req['cci'] = 'CCI-000366'
+                        comments = f"{req['cci']}\n\nThe control mapping for this requirement is unavailable so it is being mapped to CCI-000366 CM-6.5 by default. \n\n{comments}"
+                        status = f"{ Utils.status(req['status'], 'HUMAN') }"
+
+                else:
+                    #test results not submitted, process as usual
+                    rmf_controls = rmf_controls
+                    comments = f"{ req['cci']}\n\n{comments}"
+                    status = f"{ Utils.status(req['status'], 'HUMAN') }"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 # pylint: disable=C0330
                 req_data = {
                     'Non-Compliant Security Controls (16a)': rmf_controls,
@@ -744,7 +942,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Proposed Mitigations (From POA&M) (16j)': '',
                     'Residual Risk (After Proposed Mitigations) (16k)': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.poam_conf['lower_risk'] else Utils.risk_val(req['severity'], 'VL-VH'),
                     'Recommendations (16l)': req['solution'],
-                    'Comments': f"Group ID: {req['grp_id']}\nVuln ID: {req['vuln_id']}\nRule ID: {req['rule_id']}\nPlugin ID: {req['plugin_id']}\n\n{comments}"
+                    'Comments': f"Status: { status }\n\nGroup ID: {req['grp_id']}\nVuln ID: {req['vuln_id']}\nRule ID: {req['rule_id']}\nPlugin ID: {req['plugin_id']}\n\n{comments}"
                 }
                 
                 if 'publication_date' not in req:

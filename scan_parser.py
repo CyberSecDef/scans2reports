@@ -4,6 +4,10 @@ import time
 import uuid
 import pprint
 import logging
+import numpy as np
+import pandas as pd
+import xlrd
+
 from lxml import etree
 from scan_file import ScanFile
 from scan_requirement import ScanRequirement
@@ -24,6 +28,30 @@ class ScanParser:
         self.skip_info = skip_info
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
         logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
+    
+    def parseXlsx(self, filename):
+        
+        tr_rows = pd.read_excel(filename, 'Test Result Import', header=5, index_col=None, na_values=['NA'], mangle_dupe_cols=True)
+        
+        test_results = {}
+        test_results['type'] = 'Test Results'
+        for tr in tr_rows.index:
+            # print( str( tr_rows['CCI'][tr]).zfill(6) )
+            
+            test_results[ str( tr_rows['CCI'][tr]).strip().replace('CCI-','').zfill(6) ] = {
+                'control'           : tr_rows['Control Acronym'][tr],
+                'implementation'    : tr_rows['Control Implementation Status'][tr],
+                'ap'                : tr_rows['AP Acronym'][tr],
+                'cci'               : tr_rows['CCI'][tr],
+                'inherited'        : tr_rows['Inherited'][tr],
+                
+                'compliance_status' : tr_rows['Compliance Status.1'][tr],
+                'date_tested'       : tr_rows['Date Tested.1'][tr],
+                'tested_by'         : tr_rows['Tested By.1'][tr],
+                'test_results'      : tr_rows['Test Results.1'][tr]
+            }
+            
+        return test_results
     
     def parseNessus(self, filename):
         logging.info('Parsing ACAS File %s', filename)
@@ -143,7 +171,7 @@ class ScanParser:
                     
                     if not self.skip_info or ( severity != 0 or plugin_id in self.data_mapping['acas_required_info'] ):
                         req = {
-                            'cci'              : [],
+                            'cci'              : '',
                             'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),
                             'description'      : next(iter(req.xpath("./synopsis/text()")),'') + "\n\n" + next(iter(req.xpath("./description/text()")),''),
                             'finding_details'   : '',

@@ -19,6 +19,7 @@ import pprint
 import dumper
 import jmespath
 import re
+from enum import Enum
 
 from lxml import etree
 from pathlib import Path
@@ -35,11 +36,20 @@ from utils import Utils
 from scan_file import ScanFile
 
 
+class TestResultOptions(Enum):
+    add = 'add'
+    convert = 'convert'
+    close = 'close'
+    
+    def __str__(self):
+        return self.value
+
 class Scans2Reports:
     """ Scans2Reports python suite, main file """
     input_folder = ""
     scan_files = []
     scan_results = []
+    test_result_import = {}
     q = Queue(maxsize=0)
     num_threads = 10
     data_mapping = {}
@@ -108,7 +118,8 @@ class Scans2Reports:
             'skip_info'       : args.skip_info,
             'scd'             : args.scd, 
             'lower_risk'      : args.lower_risk, 
-            'exclude_plugins' : args.exclude_plugins 
+            'exclude_plugins' : args.exclude_plugins,
+            'test_results'    : args.test_results
         }
         
         
@@ -515,10 +526,14 @@ class Scans2Reports:
         #wait for threads to all complete
         self.q.join()
 
+
+        #gather test results from parsed files
+        self.test_result_import = next(iter([ i for i in self.scan_results if type(i) == dict and 'type' in i and i['type'] == 'Test Results' ]),'')
+        
+        #gather scan results from parsed files
         self.scan_results = [ i for i in self.scan_results if type(i) == ScanFile ]
+        
             
-        print(type(self.scan_results))
-        # pprint.pprint(self.scan_results)
         
         #show completed parse jobs
         status = "{} - Finished Parsing Scan Files".format(datetime.datetime.now() - start_time )
@@ -555,6 +570,8 @@ class Scans2Reports:
                         data = scan_parser.parseCkl(file)
                     elif extension == '.nessus':
                         data = scan_parser.parseNessus(file)
+                    elif extension == '.xlsx':
+                        data = scan_parser.parseXlsx(file)
                     else:
                         data = None
                         logging.warning(f'Skipping scan file: {str(file)}');
@@ -589,6 +606,7 @@ class Scans2Reports:
         reports = Reports(
             self.application_path,
             self.scan_results,
+            self.test_result_import,
             self.data_mapping,
             self.contact_info,
             self.skip_reports,
@@ -637,6 +655,7 @@ optional.add_argument('-l', '--lower-risk', help='Automatically Lower Risk on PO
 
 optional.add_argument('-t', '--threads', help='How intensive should the generator run (1-3)', type=int, default=2)
 
+optional.add_argument('--test-results', help='Add, Close or Convert CCI Mismatches',  type=TestResultOptions, choices=list(TestResultOptions))
 
 optional.add_argument('-h', '--help', action='help', default=SUPPRESS, help='show this help message and exit')
 optional.add_argument('input_folder', nargs='?')

@@ -82,15 +82,20 @@ class UiAddons():
             'skip_info' : self.main_form.chkSkipInfo.isChecked(),
             'scd' : self.main_form.chk_prefill_scd.isChecked(),
             'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
-            'exclude_plugins' : self.main_form.spnExcludeDays.value()
+            'exclude_plugins' : self.main_form.spnExcludeDays.value(),
+            'test_results' : {
+                'Add All Findings' : 'add',
+                'Mark as Closed' : 'close',
+                'Convert to CM-6.5' : 'convert'
+            }[self.main_form.cboTestResultFunc.currentText()]
         }
 
         self.main_app.num_threads = 1
-        if self.main_form.comboBox.currentText() == 'Light Load':
+        if self.main_form.cboProcIntensity.currentText() == 'Light Load':
             self.main_app.num_threads = int(psutil.cpu_count() // 2) + 1
             if self.main_app.num_threads <= 0:
                 self.main_app.num_threads = 1
-        elif self.main_form.comboBox.currentText() == 'Normal Load':
+        elif self.main_form.cboProcIntensity.currentText() == 'Normal Load':
             self.main_app.num_threads = int(psutil.cpu_count()) - 2 + 1
             if self.main_app.num_threads <= 0:
                 self.main_app.num_threads = 1
@@ -260,7 +265,12 @@ class UiAddons():
             'skip_info' : self.main_form.chkSkipInfo.isChecked(),
             'scd' : self.main_form.chk_prefill_scd.isChecked(),
             'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
-            'exclude_plugins' : self.main_form.spnExcludeDays.value()
+            'exclude_plugins' : self.main_form.spnExcludeDays.value(),
+            'test_results' : {
+                'Add All Findings' : 'add',
+                'Mark as Closed' : 'close',
+                'Convert to CM-6.5' : 'convert'
+            }[self.main_form.cboTestResultFunc.currentText()]
         }
 
         if not self.main_form.chk_acas_unique_iavm.isChecked():
@@ -491,7 +501,7 @@ class FileDrop(QtWidgets.QLabel):
         current_row = 0
         for filepath in filepaths:
             extension = os.path.splitext(filepath)[1].lower()
-            if extension in ['.ckl', '.xml', '.nessus']:
+            if extension in ['.ckl', '.xml', '.nessus', '.xlsx']:
                 btn = QtWidgets.QPushButton(self.main_form.tbl_selected_scans)
                 btn.setText('Del')
                 btn.clicked.connect(self.remove_row)
