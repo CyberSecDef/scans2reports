@@ -79,6 +79,8 @@ class UiAddons():
 
     def btn_parse_scan_files_on_click(self):
         self.main_app.poam_conf = {
+            'predisposing_conditions': self.main_form.txtPredisposingCondition.toPlainText(),
+            'include_finding_details' : self.main_form.chkIncludeFindingDetails.isChecked(),
             'skip_info' : self.main_form.chkSkipInfo.isChecked(),
             'scd' : self.main_form.chk_prefill_scd.isChecked(),
             'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
@@ -301,6 +303,8 @@ class UiAddons():
         self.main_app.contact_info['email']   = self.main_form.txt_email.text()
 
         self.main_app.poam_conf = {
+            'predisposing_conditions': self.main_form.txtPredisposingCondition.toPlainText(),
+            'include_finding_details' : self.main_form.chkIncludeFindingDetails.isChecked(),
             'skip_info' : self.main_form.chkSkipInfo.isChecked(),
             'scd' : self.main_form.chk_prefill_scd.isChecked(),
             'lower_risk' : self.main_form.chk_lower_risk.isChecked(),

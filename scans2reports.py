@@ -112,7 +112,8 @@ class Scans2Reports:
             'command' : (args.command if 'command' in args and args.command is not None and str(args.command).strip() != '' else ''),
             'name'    : (args.name if 'name' in args and args.name is not None and str(args.name).strip() != '' else ''),
             'phone'   : (args.phone if 'phone' in args and args.phone is not None and str(args.phone).strip() != '' else ''),
-            'email'   : (args.email if 'email' in args and args.email is not None and str(args.email).strip() != '' else '')
+            'email'   : (args.email if 'email' in args and args.email is not None and str(args.email).strip() != '' else ''),
+            'predisposing_condition' : (args.predisposing_condition if 'predisposing_condition' in args and args.predisposing_condition is not None and str(args.predisposing_condition).strip() != '' else '')
         }
         
         self.poam_conf = { 
@@ -659,6 +660,8 @@ optional.add_argument('-l', '--lower-risk', help='Automatically Lower Risk on PO
 optional.add_argument('-t', '--threads', help='How intensive should the generator run (1-3)', type=int, default=2)
 
 optional.add_argument('--test-results', help='Add, Close or Convert CCI Mismatches',  type=TestResultOptions, choices=list(TestResultOptions))
+
+optional.add_argument('--predisposing-condition', help='Enter default Predisposing Conditions')
 
 optional.add_argument('-h', '--help', action='help', default=SUPPRESS, help='show this help message and exit')
 optional.add_argument('input_folder', nargs='?')

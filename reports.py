@@ -462,7 +462,7 @@ class Reports:
 
 
         selected_mitigations = {}
-        if self.mitigations is not None:
+        if self.mitigations is not None and len(self.mitigations) >0 and 'mitigations' in self.mitigations.keys():
             for mit in self.mitigations['mitigations']:
                 if mit['plugin_id'] is not None and mit['plugin_id'].strip() != '':
                     selected_mitigations[ str(mit['plugin_id']) ] = mit['mitigation']
@@ -505,6 +505,8 @@ class Reports:
                         scd = datetime.date.today() + datetime.timedelta( ([1095, 365, 90, 30])[Utils.clamp( (int(Utils.risk_val(req['severity'], 'NUM'))), 1, 3 )] )
                 else:
                     scd = ''
+
+                predisposing_conditions = self.poam_conf['predisposing_conditions']
                 
                 mitigation_statement = ''
                 if str(req['plugin_id']) in selected_mitigations.keys():
@@ -595,8 +597,10 @@ class Reports:
                     rmf_controls = rmf_controls
                     comments = f"{ req['cci']}\n\n{comments}"
                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
-
                     
+                if self.poam_conf['include_finding_details']:
+                    comments = f"{comments}\n\nFinding Details:\n{finding_details}"
+                
                 req_data = {
                     'A'                                                 : '',
                     'Control Vulnerability Description'                 : f"Title: {req['req_title']}\n\nFamily: {req['grp_id']}\n\nDescription:\n{req['description']}",
@@ -616,7 +620,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Raw Severity'                                      : Utils.risk_val(req['severity'], 'MIN'),
                     'Devices Affected'                                  : hosts,
                     'Mitigations'                                       : mitigation_statement,
-                    'Predisposing Conditions'                           : finding_details,
+                    'Predisposing Conditions'                           : predisposing_conditions,
                     'Severity'                                          : Utils.risk_val(req['severity'], 'POAM'),
                     'Relevance of Threat'                               : 'High',
                     'Threat Description'                                : req['description'],
@@ -791,6 +795,17 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         q.join()
         print( "        {} - Finished compiling SCAP and CKL results".format(datetime.datetime.now() - start_time ) )
 
+        selected_mitigations = {}
+        if self.mitigations is not None and len(self.mitigations) >0 and 'mitigations' in self.mitigations.keys():
+            for mit in self.mitigations['mitigations']:
+                if mit['plugin_id'] is not None and mit['plugin_id'].strip() != '':
+                    selected_mitigations[ str(mit['plugin_id']) ] = mit['mitigation']
+                if mit['vuln_id'] is not None and mit['vuln_id'].strip() != '':
+                    selected_mitigations[ str(mit['vuln_id']) ] = mit['mitigation']
+                if mit['rule_id'] is not None and mit['rule_id'].strip() != '':
+                    selected_mitigations[ str(mit['rule_id']) ] = mit['mitigation']
+                    
+                    
         report = []
         for stat in ['O', 'NA', 'NR', 'E', 'C']:
             for finding in poam_results[stat]:
@@ -810,7 +825,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 types = list(set(types))
                 prefix = "/".join(types)
                 comments = "\n\n".join( list(set([c for c in comments if c])) )
-                finding_details = "\n\n".join( list(set([f for f in finding_details if f])) )
+                finding_details = "Finding Details:\n" + "\n\n".join( list(set([f for f in finding_details if f])) )
 
                 rmf_controls = self.data_mapping['acas_control'][req['grp_id']] if req['grp_id'] in self.data_mapping['acas_control'] else ''
                 if rmf_controls == '':
@@ -829,7 +844,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 objectives = list(set(objectives))
                 objectives = ", ".join( objectives )
 
-
+                mitigation_statement = ''
+                if str(req['plugin_id']) in selected_mitigations.keys():
+                    mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
+                if str(req['vuln_id']) in selected_mitigations.keys():
+                    mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
+                if str(req['rule_id']) in selected_mitigations.keys():
+                    mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
 
 
                 if self.test_results is not None:
@@ -915,31 +936,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 # pylint: disable=C0330
                 req_data = {
                     'Non-Compliant Security Controls (16a)': rmf_controls,
@@ -950,7 +946,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Devices Affected (16b.1)': hosts,
                     'Security Objectives (C-I-A) (16c)': objectives,
                     'Raw Test Result (16d)': Utils.risk_val(req['severity'], 'CAT'),
-                    'Predisposing Condition(s) (16d.1)': finding_details,
+                    'Predisposing Condition(s) (16d.1)': str( self.poam_conf['predisposing_conditions'] ),
                     'Technical Mitigation(s) (16d.2)': '',
                     'Severity or Pervasiveness (VL-VH) (16d.3)': Utils.risk_val(req['severity'], 'VL-VH'),
                     'Relevance of Threat (VL-VH) (16e)': 'High',
@@ -959,10 +955,10 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Impact (VL-VH) (16g)': Utils.risk_val(req['severity'], 'VL-VH'),
                     'Impact Description (16h)': '',
                     'Risk (Cells 16f & 16g) (VL-VH) (16i)': Utils.risk_val(req['severity'], 'VL-VH'),
-                    'Proposed Mitigations (From POA&M) (16j)': '',
+                    'Proposed Mitigations (From POA&M) (16j)': mitigation_statement,
                     'Residual Risk (After Proposed Mitigations) (16k)': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.poam_conf['lower_risk'] else Utils.risk_val(req['severity'], 'VL-VH'),
                     'Recommendations (16l)': req['solution'],
-                    'Comments': f"Status: { status }\n\nGroup ID: {req['grp_id']}\nVuln ID: {req['vuln_id']}\nRule ID: {req['rule_id']}\nPlugin ID: {req['plugin_id']}\n\n{comments}"
+                    'Comments': f"Status: { status }\n\nGroup ID: {req['grp_id']}\nVuln ID: {req['vuln_id']}\nRule ID: {req['rule_id']}\nPlugin ID: {req['plugin_id']}\n\n{comments}\n\n{finding_details}"
                 }
                 
                 if 'publication_date' not in req:
