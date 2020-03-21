@@ -50,6 +50,7 @@ class Scans2Reports:
     scan_files = []
     scan_results = []
     test_result_import = {}
+    mitigations = {}
     q = Queue(maxsize=0)
     num_threads = 10
     data_mapping = {}
@@ -529,6 +530,7 @@ class Scans2Reports:
 
         #gather test results from parsed files
         self.test_result_import = next(iter([ i for i in self.scan_results if type(i) == dict and 'type' in i and i['type'] == 'Test Results' ]),'')
+        self.mitigations = next(iter([ i for i in self.scan_results if type(i) == dict and 'type' in i and i['type'] == 'Mitigations' ]),'')
         
         #gather scan results from parsed files
         self.scan_results = [ i for i in self.scan_results if type(i) == ScanFile ]
@@ -607,6 +609,7 @@ class Scans2Reports:
             self.application_path,
             self.scan_results,
             self.test_result_import,
+            self.mitigations,
             self.data_mapping,
             self.contact_info,
             self.skip_reports,

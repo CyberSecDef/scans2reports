@@ -25,6 +25,7 @@ class Reports:
     workbook = None
     scan_results = []
     test_results = {}
+    mitigations = {}
     data_mapping = {}
     contact_info = {}
     poam_conf = {}
@@ -35,7 +36,7 @@ class Reports:
     }
     application_path = ""
 
-    def __init__(self, application_path, scan_results, test_results, data_mapping, contact_info, skip_reports, poam_conf, scans_to_reports=None):
+    def __init__(self, application_path, scan_results, test_results, mitigations, data_mapping, contact_info, skip_reports, poam_conf, scans_to_reports=None):
         """ constructor """
         self.application_path = application_path
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
@@ -48,6 +49,7 @@ class Reports:
             datetime.datetime.now().strftime("scans2reports-%Y%m%d_%H%M%S.xlsx")
         )
 
+        self.mitigations = mitigations
         self.test_results = test_results
         self.workbook = xlsxwriter.Workbook(report_name)
         self.data_mapping = data_mapping
@@ -458,6 +460,17 @@ class Reports:
         q.join()
         print( "        {} - Finished compiling SCAP and CKL results".format(datetime.datetime.now() - start_time ) )
 
+
+        selected_mitigations = {}
+        if self.mitigations is not None:
+            for mit in self.mitigations['mitigations']:
+                if mit['plugin_id'] is not None and mit['plugin_id'].strip() != '':
+                    selected_mitigations[ str(mit['plugin_id']) ] = mit['mitigation']
+                if mit['vuln_id'] is not None and mit['vuln_id'].strip() != '':
+                    selected_mitigations[ str(mit['vuln_id']) ] = mit['mitigation']
+                if mit['rule_id'] is not None and mit['rule_id'].strip() != '':
+                    selected_mitigations[ str(mit['rule_id']) ] = mit['mitigation']
+                        
         report = []
         for stat in ['O', 'NA', 'NR', 'E', 'C']:
             for finding in poam_results[stat]:
@@ -466,7 +479,6 @@ class Reports:
                 rmf_controls = self.data_mapping['acas_control'][req['grp_id']] if req['grp_id'] in self.data_mapping['acas_control'] else ''
                 if rmf_controls == '':
                     rmf_controls = self.data_mapping['ap_mapping'][req['cci']] if req['cci'] in self.data_mapping['ap_mapping'] else ''
-
 
                 hosts = []
                 types = []
@@ -493,6 +505,14 @@ class Reports:
                         scd = datetime.date.today() + datetime.timedelta( ([1095, 365, 90, 30])[Utils.clamp( (int(Utils.risk_val(req['severity'], 'NUM'))), 1, 3 )] )
                 else:
                     scd = ''
+                
+                mitigation_statement = ''
+                if str(req['plugin_id']) in selected_mitigations.keys():
+                    mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
+                if str(req['vuln_id']) in selected_mitigations.keys():
+                    mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
+                if str(req['rule_id']) in selected_mitigations.keys():
+                    mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
                 
                 if self.test_results is not None:
                     #test results parsed
@@ -595,7 +615,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Comments'                                          : comments,
                     'Raw Severity'                                      : Utils.risk_val(req['severity'], 'MIN'),
                     'Devices Affected'                                  : hosts,
-                    'Mitigations'                                       : '',
+                    'Mitigations'                                       : mitigation_statement,
                     'Predisposing Conditions'                           : finding_details,
                     'Severity'                                          : Utils.risk_val(req['severity'], 'POAM'),
                     'Relevance of Threat'                               : 'High',
