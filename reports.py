@@ -2295,12 +2295,31 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 QtGui.QGuiApplication.processEvents()
             for host in scan['hosts']:
                 for req in host['requirements']:
-                    for user in re.findall(r'- ([a-zA-Z0-9]+)+', req):
+                    for user in re.findall(r'- ([_a-zA-Z0-9]+)+', req):
                         users.append({
                             'Host': host['hostname'] if host['hostname'].strip() != '' else host['ip'],
                             'OS': host['os'],
                             'User': user
                         })
+
+
+        acas_scans = jmespath.search(
+            "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ hostname: hostname, os: os, requirements: requirements[?plugin_id == `126527`] | [*].comments } }",
+            { 'results' : self.scan_results}
+        )
+
+        for scan in acas_scans:
+            if self.scans_to_reports:
+                QtGui.QGuiApplication.processEvents()
+            for host in scan['hosts']:
+                for req in host['requirements']:
+                    for user in re.findall(r'- ([_a-zA-Z0-9]+)+', req):
+                        users.append({
+                            'Host': host['hostname'] if host['hostname'].strip() != '' else host['ip'],
+                            'OS': host['os'],
+                            'User': user
+                        })
+
 
         acas_scans = jmespath.search(
             "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ hostname: hostname, os: os, requirements: requirements[?plugin_id == `95928`] | [*].comments } }",
