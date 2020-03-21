@@ -1296,7 +1296,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     
                     'STIG CKL File'                      : '',
                     'STIG CKL Version/Release'               : '',
-                    'STIG CKL Credentialed Checks'           : '',
                     'STIG CKL Blank Comments/Findings'       : '',
                     'STIG CKL Total Not Reviewed'            : '',
 
@@ -1355,7 +1354,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
                 'STIG CKL File'                          : '',
                 'STIG CKL Version/Release'               : '',
-                'STIG CKL Credentialed Checks'           : '',
                 'STIG CKL Blank Comments/Findings'       : '',
                 'STIG CKL Total Not Reviewed'            : '',
 
@@ -1415,7 +1413,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
                 'STIG CKL File'                          : os.path.basename(scan['filename']),
                 'STIG CKL Version/Release'               : f"V{scan['version']}R{scan['release']}",
-                'STIG CKL Credentialed Checks'           : 'True',
                 'STIG CKL Blank Comments/Findings'       : len(scan['blank_comments']),
                 'STIG CKL Total Not Reviewed'            : len(scan['not_reviewed']),
 
