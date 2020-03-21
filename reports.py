@@ -582,7 +582,7 @@ class Reports:
                     'Control Vulnerability Description'                 : f"Title: {req['req_title']}\n\nFamily: {req['grp_id']}\n\nDescription:\n{req['description']}",
                     'Security Control Number (NC/NA controls only)'     : rmf_controls,
                     'Office/Org'                                        : f"{self.contact_info['command']}\n{self.contact_info['name']}\n{self.contact_info['phone']}\n{self.contact_info['email']}\n".strip(),
-                    'Security Checks'                                   : f"{req['plugin_id']}{req['rule_id']}",
+                    'Security Checks'                                   : f"{req['plugin_id']}{req['rule_id']}\n{req['vuln_id']}",
                     'Resources Required'                                : f"{req['resources']}",
                     'Scheduled Completion Date'                         : scd,
                     'Milestone with Completion Dates'                   : "{m} {s[0]} updates {s[1]}/{s[2]}/{s[0]}".format(
