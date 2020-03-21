@@ -981,117 +981,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 row += 1
         print( "        {} - Finished generating RAR".format(datetime.datetime.now() - start_time) )
 
-
-    def rpt_automated_scan_info(self):
-        """ Generates Scan Info Tab """
-        if 'rpt_automated_scan_info' in self.skip_reports:
-            return None
-            
-        logging.info('Building Automated Scan Info Tab')
-        worksheet = self.workbook.add_worksheet('Automated Scan Info')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Automated Scan Info' Tab")
-
-        widths = [20,100,25,25,25,50,75,25,25,50,25,25,25]
-        ascii = string.ascii_uppercase
-        for index, w in enumerate(widths):
-            worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
-
-        worksheet.autofilter(0, 0, 0, int(len(widths))-1)
-
-        report = []
-
-        scap_scans = jmespath.search(
-            "results[?type=='SCAP'].{policy: policy, scanner_edition: scanner_edition, scan_date: scan_date, duration: duration, credentialed: credentialed, scan_user: scan_user, type: type, version: version, release: release, hostname: hostname, filename: filename }",
-            { 'results' : self.scan_results}
-        )
-        for scan_file in scap_scans:
-            if self.scans_to_reports:
-                QtGui.QGuiApplication.processEvents()
-            report.append( {
-                'Scan File Type': scan_file['type'],
-                'Scan File': os.path.basename(scan_file['filename']),
-                'Plugin feed version': 'V' + str(int(str(scan_file['version']))) + 'R' + str(int(str(scan_file['release']))),
-                'Scanner edition used': scan_file['scanner_edition'],
-                'Scan Type': 'Normal',
-                'Scan policy used': scan_file['policy'],
-                'Port Range' : '',
-                'Hostname' : scan_file['hostname'],
-                'Credentialed checks': Utils.parse_bool(str(scan_file['credentialed'])),
-                'Scan User': scan_file['scan_user'],
-                'Scan Start Date': scan_file['scan_date'],
-                'Scan duration': str(reduce(lambda x, y: x*60+y, [int(i) for i in (str(scan_file['duration'])).split(':')])) + ' sec',
-                'Scan To Feed Difference' : ''
-            } )
-
-        acas_scans = jmespath.search(
-            "results[?type=='ACAS'].{ policy: policy, type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, credentialed: credentialed, scan_user: scan_user, host_date: host_date, requirements: requirements[?plugin_id == `19506`] | [*].{plugin_id: plugin_id, resources: resources,  comments: comments } } }",
-            { 'results' : self.scan_results}
-        )
-
-        for scan_file in acas_scans:
-            for host in scan_file['hosts']:
-
-                if self.scans_to_reports:
-                    QtGui.QGuiApplication.processEvents()
-                for req in host['requirements']:
-                    if int(req['plugin_id']) == 19506:
-                        scan_data = {}
-                        for line in req['comments'].split("\n"):
-                            if line.strip() != '':
-                                k, value = line.split(':', 1)
-                                scan_data[str(k).strip()] = str(value).strip()
-
-                        info_details = {
-                            'Scan File Type': scan_file['type'],
-                            'Scan File': os.path.basename(scan_file['filename']),
-                            'Plugin feed version': scan_data['Plugin feed version'],
-                            'Scanner edition used': scan_data['Nessus version'],
-                            'Scan Type': scan_data['Scan type'],
-                            'Scan policy used': scan_data['Scan policy used'],
-                            'Port Range' : scan_data['Port range'] if 'Port range' in scan_data else '',
-                            'Hostname' : host['hostname'],
-                            'Credentialed checks': Utils.parse_bool(str(host['credentialed'])),
-                            'Scan User': host['scan_user'],
-                            'Scan Start Date': host['host_date'],
-                            'Scan duration': str(scan_data['Scan duration']),
-                            'Scan To Feed Difference' : (
-                                datetime.datetime.strptime(host['host_date'], '%a %b %d %H:%M:%S %Y') -
-                                datetime.datetime.strptime(scan_data['Plugin feed version'], '%Y%m%d%H%M')
-                            ).days
-                        }
-                        report.append(info_details)
-
-        report = sorted(
-            report,
-            key=lambda s: (str(s['Scan Type']).lower().strip(), str(s['Scan File']).lower().strip())
-        )
-        row = 0
-        bold = self.workbook.add_format({'bold': True})
-        wrap_text = self.workbook.add_format({'font_size':8, 'text_wrap': True})
-        bad_feed = self.workbook.add_format({'font_size':8, 'text_wrap': True, 'bg_color': '#FFC7CE'})
-
-        if report:
-            col = 0
-            for column_header in report[0]:
-                worksheet.write(row, col, column_header, bold)
-                col += 1
-            row += 1
-
-            for result in report:
-                col = 0
-                row_format = wrap_text
-                if(
-                    'Scan To Feed Difference' in result and
-                    str(result['Scan To Feed Difference']).strip() != '' and
-                    int(result['Scan To Feed Difference']) > 5
-                ):
-                    row_format = bad_feed
-                for value in result:
-                    worksheet.write(row, col, result[value], row_format)
-                    col += 1
-                row += 1
-
     def rpt_software_linux(self):
         """ Generates Linux Software Tab """
         if 'rpt_software_linux' in self.skip_reports:
@@ -1327,7 +1216,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
             25, 25, 25, 25, 25,
             25, 25, 25, 25, 25,
             25, 25, 25, 25, 25,
-            25, 25, 25
+            25, 25, 25, 25
             ]
         ascii = string.ascii_uppercase
         for index, w in enumerate(widths):
@@ -1408,6 +1297,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'STIG CKL File'                      : '',
                     'STIG CKL Version/Release'               : '',
                     'STIG CKL Credentialed Checks'           : '',
+                    'STIG CKL Blank Comments/Findings'       : '',
                     'STIG CKL Total Not Reviewed'            : '',
 
                     'SCAP Benchmark File'                    : '',
@@ -1466,6 +1356,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 'STIG CKL File'                          : '',
                 'STIG CKL Version/Release'               : '',
                 'STIG CKL Credentialed Checks'           : '',
+                'STIG CKL Blank Comments/Findings'       : '',
                 'STIG CKL Total Not Reviewed'            : '',
 
                 'SCAP Benchmark File'                    : os.path.basename(scan['filename']),
@@ -1490,6 +1381,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 os:os,
                 scan_user: scan_user,
                 credentialed: credentialed,
+                blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].[comments, severity, status],
                 not_reviewed: requirements[]  | [?status == 'NR'].[comments, severity, status]
             }""",
             { 'results' : self.scan_results}
@@ -1524,6 +1416,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 'STIG CKL File'                          : os.path.basename(scan['filename']),
                 'STIG CKL Version/Release'               : f"V{scan['version']}R{scan['release']}",
                 'STIG CKL Credentialed Checks'           : 'True',
+                'STIG CKL Blank Comments/Findings'       : len(scan['blank_comments']),
                 'STIG CKL Total Not Reviewed'            : len(scan['not_reviewed']),
 
                 'SCAP Benchmark File'                    : '',
@@ -2024,7 +1917,12 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         if self.scans_to_reports:
             self.scans_to_reports.statusBar().showMessage("Generating 'Summary' Tab")
 
-        widths = [10,30,20,50,50,20,20,20,10,10,10,10,10,10,25,20]
+        widths = [
+            10,30,20,50,100,
+            20,20,20,20,20,
+            50,50,20,25,
+            10,10,10,10,10,10
+        ]
         ascii = string.ascii_uppercase
         for index, w in enumerate(widths):
             worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
@@ -2036,22 +1934,27 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         disa_scans = jmespath.search(
             """results[?type=='CKL' || type=='SCAP'].{
                 type: type,
+                
                 hostname: hostname,
                 ip: ip,
                 os: os,
+                
                 filename: filename,
-                credentialed: credentialed
                 scan_date: scan_date,
+                duration: duration,
+                
                 version: version,
                 release: release,
+                policy: policy,
                 
-                cati: requirements[]   | [?status != 'C' && severity > `2`].[comments, severity, status],
-                catii: requirements[]  | [?status != 'C' && severity == `2`].[comments, severity, status],
-                catiii: requirements[] | [?status != 'C' && severity == `1`].[comments, severity, status],
-                cativ: requirements[]  | [?status != 'C' && severity == `0`].[comments, severity, status],
-
-                blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].[comments, severity, status]
                 
+                credentialed: credentialed
+                scan_user: scan_user,
+                
+                cati: requirements[]   | [?status != 'C' && severity > `2`].[severity, status],
+                catii: requirements[]  | [?status != 'C' && severity == `2`].[severity, status],
+                catiii: requirements[] | [?status != 'C' && severity == `1`].[severity, status],
+                cativ: requirements[]  | [?status != 'C' && severity == `0`].[severity, status]
             }""",
             { 'results' : self.scan_results}
         )
@@ -2062,14 +1965,22 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
             summary_results.append({
                 'Type': scan['type'],
+                
                 'Hostname': scan['hostname'],
                 'IP': scan['ip'],
                 'OS': scan['os'],
+                
                 'Scan File Name': os.path.basename(scan['filename']),
-
                 'Scan Date': scan['scan_date'],
+                'Scan Duration': str(reduce(lambda x, y: x*60+y, [int(i) for i in (str(scan['duration'])).split(':')])) + ' sec',
+                'Scan To Feed Difference': '',
                 'Version': scan['version'],
                 'Release': scan['release'],
+                'Scan Policy': scan['policy'],
+                'Port Range': '',
+                
+                'Credentialed': scan['credentialed'],
+                'Scan User': scan['scan_user'],
 
                 'CAT I': len(scan['cati']),
                 'CAT II': len(scan['catii']),
@@ -2077,9 +1988,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 'CAT IV': len(scan['cativ']),
                 'Total': len(scan['cati']) + len(scan['catii']) + len(scan['catiii']) + len(scan['cativ']),
                 'Score': 10*len(scan['cati']) + 3*len(scan['catii']) + len(scan['catiii']),
-                
-                'Credentialed': scan['credentialed'],
-                'Blank Comments' : len(scan['blank_comments'])
             })
 
         acas_scans = jmespath.search(
@@ -2089,18 +1997,20 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 scan_date: scan_date,
                 version: version,
                 feed: feed,
+                policy: policy,
                 hosts: hosts[] | [*].{
                     hostname: hostname,
                     ip: ip,
                     os: os,
                     credentialed: credentialed,
-
+                    scan_user: scan_user,
+                    duration: duration,
+                    port_range: port_range,
+                    
                     cati:   requirements[] | [?status != 'C' && severity > `2`].{ plugin_id: plugin_id, severity: severity, status: status},
                     catii:  requirements[] | [?status != 'C' && severity == `2`].{ plugin_id: plugin_id, severity: severity, status: status},
                     catiii: requirements[] | [?status != 'C' && severity == `1`].{ plugin_id: plugin_id, severity: severity, status: status},
-                    cativ:  requirements[] | [?status != 'C' && severity == `0`].{ plugin_id: plugin_id, severity: severity, status: status},
-
-                    blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].{ plugin_id: plugin_id, severity: severity, status: status}
+                    cativ:  requirements[] | [?status != 'C' && severity == `0`].{ plugin_id: plugin_id, severity: severity, status: status}
                 }
             }""",
             { 'results' : self.scan_results}
@@ -2113,14 +2023,26 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
             for host in scan['hosts']:
                 summary_results.append({
                     'Type': scan['type'],
+                    
                     'Hostname': host['hostname'],
                     'IP': host['ip'],
                     'OS': host['os'],
+                    
                     'Scan File Name': os.path.basename(scan['filename']),
-
                     'Scan Date': scan['scan_date'],
+                    'Scan Duration': host['duration'],
+                    'Scan To Feed Difference': (
+                                datetime.datetime.strptime(scan['scan_date'], '%a %b %d %H:%M:%S %Y') -
+                                datetime.datetime.strptime(scan['feed'], '%Y%m%d%H%M')
+                            ).days,
+                            
                     'Version': scan['version'],
                     'Release': scan['feed'],
+                    'Scan Policy': scan['policy'],
+                    'Port Range': host['port_range'],
+
+                    'Credentialed': host['credentialed'],
+                    'Scan User': host['scan_user'],
 
                     'CAT I': len(host['cati']),
                     'CAT II': len(host['catii']),
@@ -2128,8 +2050,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'CAT IV': len(host['cativ']),
                     'Total': len(host['cati']) + len(host['catii']) + len(host['catiii']) + len(host['cativ']),
                     'Score': 10*len(host['cati']) + 3*len(host['catii']) + len(host['catiii']),
-                    'Credentialed': host['credentialed'],
-                    'Blank Comments' : len(host['blank_comments']),
+                    
                 })
 
         summary_results = sorted(

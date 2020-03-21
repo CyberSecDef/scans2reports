@@ -92,6 +92,7 @@ class ScanParser:
             for host in tree.xpath("/NessusClientData_v2/Report/ReportHost"):
                 scan_user = ""
                 port_range = ""
+                duration = ""
                 scan_info = str( host.xpath("./ReportItem[@pluginID=19506]/plugin_output/text()") ).split("\\n")
                 for line in scan_info:
                     if 'Credentialed checks' in line:
@@ -109,6 +110,10 @@ class ScanParser:
                     if 'Port range' in line:
                         k,v = line.split(':', 1)
                         port_range = str(v).strip()
+                        
+                    if 'Scan Duration' in line:
+                        k,v = line.split(':', 1)
+                        duration = str(v).strip()
                 
                 wmi_info = str( host.xpath("./ReportItem[@pluginID=24270]/plugin_output/text()") ).split("\\n")
                 device_type = ""
@@ -156,9 +161,9 @@ class ScanParser:
                     
                     'host_date'     : str(next(iter(host.xpath("./HostProperties/tag[@name='HOST_START']/text()")), '')),
                     'credentialed'  : Utils.parse_bool(str(next(iter( host.xpath("./HostProperties/tag[@name='Credentialed_Scan']/text()"))))),
-                    'scan_user'      : scan_user,
-                    'port_range'     : port_range,
-
+                    'scan_user'     : scan_user,
+                    'port_range'    : port_range,
+                    'duration'      : duration,
                     'requirements'  : []
                 }
 
@@ -447,7 +452,8 @@ class ScanParser:
                 'type'         :'CKL',
 
                 'filename'     : str(filename),
-                'scan_date'     : time.strftime( '%Y-%m-%dT%H:%M:%S', time.gmtime( os.path.getmtime( filename ))),
+                'scan_date'    : time.strftime( '%Y-%m-%dT%H:%M:%S', time.gmtime( os.path.getmtime( filename ))),
+                'duration'     : 0,
 
                 'scanner_edition' : '',
                 'title'        : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='title']/SID_DATA/text()")), ''),

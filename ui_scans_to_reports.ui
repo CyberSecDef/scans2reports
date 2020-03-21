@@ -818,438 +818,6 @@ border-radius:15px;
       <property name="sizeConstraint">
        <enum>QLayout::SetMinimumSize</enum>
       </property>
-      <item row="0" column="1">
-       <widget class="QGroupBox" name="grp_data_points">
-        <property name="minimumSize">
-         <size>
-          <width>300</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>350</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QGroupBox{
-background: #fbecd8;
-border:1px solid #000000;
-padding-top:10px;
-border-radius: 15px;
-}</string>
-        </property>
-        <property name="title">
-         <string>Report Options</string>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="5" column="2">
-          <widget class="QCheckBox" name="chk_ppsm">
-           <property name="toolTip">
-            <string>This is a PPSM report based on the ACAS Scans parsed by the generator</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>PPSM</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="0">
-          <widget class="QCheckBox" name="chk_missing_patches">
-           <property name="toolTip">
-            <string>This report shows all patches that should be installed on specific hosts.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Missing Patches</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="0">
-          <widget class="QCheckBox" name="chk_local_users">
-           <property name="toolTip">
-            <string>This report shows all the local users found for each host.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Local Users</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="2">
-          <widget class="QCheckBox" name="chk_summary">
-           <property name="toolTip">
-            <string>This is a summary, complete with scores and finding counts, for all scans executed.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Summary</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLineEdit" name="txt_phone">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>150</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>150</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Enter the Phone Number for the main Point of Contact for the package</string>
-           </property>
-           <property name="placeholderText">
-            <string>800-555-1212</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QCheckBox" name="chk_asset_traceabilitiy">
-           <property name="toolTip">
-            <string>This report helps determine what specific scans were executed against each specific host.  Use this report to find out if certain hosts require additional scans.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Asset Traceability</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="chk_acas_unique_iavm">
-           <property name="toolTip">
-            <string>This report will display all the Unique IAVM findings that were founder from all submitted ACAS scans.</string>
-           </property>
-           <property name="autoFillBackground">
-            <bool>false</bool>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>ACAS Unique IAVM</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QLineEdit" name="txt_email">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>150</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>150</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Enter the Email for the main Point of Contact for the package</string>
-           </property>
-           <property name="placeholderText">
-            <string>john.doe@navy.mil</string>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="2">
-          <widget class="QCheckBox" name="chk_test_plan">
-           <property name="toolTip">
-            <string>This is a test plan that can be uploaded to eMASS</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Test Plan</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="0">
-          <widget class="QCheckBox" name="chk_automated_scan_info">
-           <property name="toolTip">
-            <string>This report is a summary of all Auomated Scans executed</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Automated Scan Info</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="0">
-          <widget class="QCheckBox" name="chk_hardware">
-           <property name="toolTip">
-            <string>This report shows device information for all hosts scanned.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Hardware</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="2">
-          <widget class="QCheckBox" name="chk_rar">
-           <property name="toolTip">
-            <string>This is a Risk Assessment Report for uploading as an artifact to eMASS</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>RAR</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLineEdit" name="txt_command">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>150</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>150</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Enter the Name of the Base or Command the package belongs to.</string>
-           </property>
-           <property name="placeholderText">
-            <string>Command (NSWC DD)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="2">
-          <widget class="QCheckBox" name="chk_raw_data">
-           <property name="toolTip">
-            <string>This is a Raw dump of all the scan information parsed by the generator</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Raw Data</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2">
-          <widget class="QCheckBox" name="chk_poam">
-           <property name="toolTip">
-            <string>This is the POAM that can be generated for import into eMASS</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>POAM</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QCheckBox" name="chk_cci">
-           <property name="toolTip">
-            <string>This report shows all CCI items in an easy to search and filter format.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>CCI</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="2">
-          <widget class="QCheckBox" name="chk_scap_ckl_issues">
-           <property name="toolTip">
-            <string>This report shows discrepencies between SCAP scans and CKL Executions</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>SCAP/CKL Issues</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="chk_acas_unique_vuln">
-           <property name="toolTip">
-            <string>This report will display all the Unique findings that were founder from all submitted ACAS scans.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>ACAS Unique Vuln</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="0">
-          <widget class="QCheckBox" name="chk_operating_systems">
-           <property name="toolTip">
-            <string>This report shows the count of each operating system, based on the ACAS scans parsed by the generator.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Operating Systems</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="2">
-          <widget class="QCheckBox" name="chk_software_linux">
-           <property name="toolTip">
-            <string>This is a dump of all the 'linux' or 'unix' software utilized within the package, based off the parsed ACAS Scans.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Software - Linux</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="2">
-          <widget class="QCheckBox" name="chk_software_windows">
-           <property name="toolTip">
-            <string>This is a dump of all the windows software utilized within the package, based off the parsed ACAS Scans.</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background:none;</string>
-           </property>
-           <property name="text">
-            <string>Software - Windows</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QLineEdit" name="txt_poc">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>150</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>150</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Enter the Name of the main Point of Contact for the package</string>
-           </property>
-           <property name="placeholderText">
-            <string>John Doe</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
       <item row="0" column="2">
        <widget class="QGroupBox" name="grpReports">
         <property name="minimumSize">
@@ -1540,6 +1108,422 @@ If the CCI is linked to a control that is inherited or not in the package, chang
           </property>
          </item>
         </widget>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QGroupBox" name="grp_data_points">
+        <property name="minimumSize">
+         <size>
+          <width>300</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>350</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QGroupBox{
+background: #fbecd8;
+border:1px solid #000000;
+padding-top:10px;
+border-radius: 15px;
+}</string>
+        </property>
+        <property name="title">
+         <string>Report Options</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="5" column="2">
+          <widget class="QCheckBox" name="chk_rar">
+           <property name="toolTip">
+            <string>This is a Risk Assessment Report for uploading as an artifact to eMASS</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>RAR</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="0">
+          <widget class="QCheckBox" name="chk_operating_systems">
+           <property name="toolTip">
+            <string>This report shows the count of each operating system, based on the ACAS scans parsed by the generator.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Operating Systems</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <widget class="QCheckBox" name="chk_cci">
+           <property name="toolTip">
+            <string>This report shows all CCI items in an easy to search and filter format.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>CCI</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0">
+          <widget class="QCheckBox" name="chk_local_users">
+           <property name="toolTip">
+            <string>This report shows all the local users found for each host.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Local Users</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLineEdit" name="txt_command">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Enter the Name of the Base or Command the package belongs to.</string>
+           </property>
+           <property name="placeholderText">
+            <string>Command (NSWC DD)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="2">
+          <widget class="QCheckBox" name="chk_software_windows">
+           <property name="toolTip">
+            <string>This is a dump of all the windows software utilized within the package, based off the parsed ACAS Scans.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Software - Windows</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="0">
+          <widget class="QCheckBox" name="chk_poam">
+           <property name="toolTip">
+            <string>This is the POAM that can be generated for import into eMASS</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>POAM</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0">
+          <widget class="QCheckBox" name="chk_missing_patches">
+           <property name="toolTip">
+            <string>This report shows all patches that should be installed on specific hosts.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Missing Patches</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLineEdit" name="txt_poc">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Enter the Name of the main Point of Contact for the package</string>
+           </property>
+           <property name="placeholderText">
+            <string>John Doe</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QCheckBox" name="chk_hardware">
+           <property name="toolTip">
+            <string>This report shows device information for all hosts scanned.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Hardware</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLineEdit" name="txt_phone">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Enter the Phone Number for the main Point of Contact for the package</string>
+           </property>
+           <property name="placeholderText">
+            <string>800-555-1212</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLineEdit" name="txt_email">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Enter the Email for the main Point of Contact for the package</string>
+           </property>
+           <property name="placeholderText">
+            <string>john.doe@navy.mil</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="chk_acas_unique_vuln">
+           <property name="toolTip">
+            <string>This report will display all the Unique findings that were founder from all submitted ACAS scans.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>ACAS Unique Vuln</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QCheckBox" name="chk_acas_unique_iavm">
+           <property name="toolTip">
+            <string>This report will display all the Unique IAVM findings that were founder from all submitted ACAS scans.</string>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>ACAS Unique IAVM</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QCheckBox" name="chk_ppsm">
+           <property name="toolTip">
+            <string>This is a PPSM report based on the ACAS Scans parsed by the generator</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>PPSM</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QCheckBox" name="chk_asset_traceability">
+           <property name="toolTip">
+            <string>This report helps determine what specific scans were executed against each specific host.  Use this report to find out if certain hosts require additional scans.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Asset Traceability</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="2">
+          <widget class="QCheckBox" name="chk_software_linux">
+           <property name="toolTip">
+            <string>This is a dump of all the 'linux' or 'unix' software utilized within the package, based off the parsed ACAS Scans.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Software - Linux</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="2">
+          <widget class="QCheckBox" name="chk_scap_ckl_issues">
+           <property name="toolTip">
+            <string>This report shows discrepencies between SCAP scans and CKL Executions</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>SCAP/CKL Issues</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QCheckBox" name="chk_raw_data">
+           <property name="toolTip">
+            <string>This is a Raw dump of all the scan information parsed by the generator</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Raw Data</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="2">
+          <widget class="QCheckBox" name="chk_summary">
+           <property name="toolTip">
+            <string>This is a summary, complete with scores and finding counts, for all scans executed.</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Summary</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="2">
+          <widget class="QCheckBox" name="chk_test_plan">
+           <property name="toolTip">
+            <string>This is a test plan that can be uploaded to eMASS</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background:none;</string>
+           </property>
+           <property name="text">
+            <string>Test Plan</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -1955,22 +1939,7 @@ If the CCI is linked to a control that is inherited or not in the package, chang
   <tabstop>txt_email</tabstop>
   <tabstop>chk_acas_unique_iavm</tabstop>
   <tabstop>chk_acas_unique_vuln</tabstop>
-  <tabstop>chk_asset_traceabilitiy</tabstop>
-  <tabstop>chk_automated_scan_info</tabstop>
-  <tabstop>chk_cci</tabstop>
-  <tabstop>chk_hardware</tabstop>
-  <tabstop>chk_local_users</tabstop>
-  <tabstop>chk_missing_patches</tabstop>
-  <tabstop>chk_operating_systems</tabstop>
-  <tabstop>chk_poam</tabstop>
-  <tabstop>chk_ppsm</tabstop>
-  <tabstop>chk_rar</tabstop>
-  <tabstop>chk_raw_data</tabstop>
-  <tabstop>chk_scap_ckl_issues</tabstop>
-  <tabstop>chk_software_linux</tabstop>
-  <tabstop>chk_software_windows</tabstop>
-  <tabstop>chk_summary</tabstop>
-  <tabstop>chk_test_plan</tabstop>
+  <tabstop>chk_asset_traceability</tabstop>
   <tabstop>spnExcludeDays</tabstop>
   <tabstop>chkSkipInfo</tabstop>
   <tabstop>chk_lower_risk</tabstop>

@@ -112,6 +112,45 @@ class UiAddons():
             cell_widget = self.main_form.tbl_selected_scans.item(row, 1)
             if cell_widget:
                 filepaths.append(cell_widget.data(QtCore.Qt.UserRole))
+                if 'xccdf' in cell_widget.data(QtCore.Qt.UserRole).lower() and '.xml' in cell_widget.data(QtCore.Qt.UserRole).lower():
+                    self.main_form.chk_rar.setChecked(True)                
+                    self.main_form.chk_operating_systems.setChecked(True)
+                    self.main_form.chk_cci.setChecked(True)
+                    self.main_form.chk_poam.setChecked(True)
+                    self.main_form.chk_hardware.setChecked(True)
+                    self.main_form.chk_asset_traceability.setChecked(True)
+                    self.main_form.chk_raw_data.setChecked(True)
+                    self.main_form.chk_summary.setChecked(True)
+                    self.main_form.chk_test_plan.setChecked(True)
+                
+                if  '.ckl' in cell_widget.data(QtCore.Qt.UserRole).lower():
+                    self.main_form.chk_rar.setChecked(True)                
+                    self.main_form.chk_cci.setChecked(True)
+                    self.main_form.chk_poam.setChecked(True)
+                    self.main_form.chk_hardware.setChecked(True)
+                    self.main_form.chk_asset_traceability.setChecked(True)
+                    self.main_form.chk_raw_data.setChecked(True)
+                    self.main_form.chk_summary.setChecked(True)
+                    self.main_form.chk_test_plan.setChecked(True)
+                    
+                if  '.nessus' in cell_widget.data(QtCore.Qt.UserRole).lower():
+                    self.main_form.chk_rar.setChecked(True)                
+                    self.main_form.chk_operating_systems.setChecked(True)
+                    self.main_form.chk_cci.setChecked(True)
+                    self.main_form.chk_local_users.setChecked(True)
+                    self.main_form.chk_software_windows.setChecked(True)
+                    self.main_form.chk_poam.setChecked(True)
+                    self.main_form.chk_missing_patches.setChecked(True)
+                    self.main_form.chk_hardware.setChecked(True)
+                    self.main_form.chk_acas_unique_vuln.setChecked(True)
+                    self.main_form.chk_acas_unique_iavm.setChecked(True)
+                    self.main_form.chk_ppsm.setChecked(True)
+                    self.main_form.chk_asset_traceability.setChecked(True)
+                    self.main_form.chk_software_linux.setChecked(True)
+                    self.main_form.chk_raw_data.setChecked(True)
+                    self.main_form.chk_summary.setChecked(True)
+                    self.main_form.chk_test_plan.setChecked(True)
+                
         self.main_app.scan_files = filepaths
         self.main_app.scan_results = [{} for x in self.main_app.scan_files]
         self.main_app.parse_scan_files()
@@ -205,8 +244,8 @@ class UiAddons():
             self.main_form.tbl_scan_summary.setItem(currentRow, 7, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(scan['catiii']))) ) )
             self.main_form.tbl_scan_summary.setItem(currentRow, 8, QNumericTableWidgetItem(QtWidgets.QTableWidgetItem( str(len(scan['cativ']))) ) )
 
-            self.main_form.tbl_scan_summary.setItem(currentRow, 9, QtWidgets.QTableWidgetItem(  str(int( len(host['cati']) + len(host['catii']) + len(host['catiii']) + len(host['cativ']) ) ) ) ) 
-            self.main_form.tbl_scan_summary.setItem(currentRow, 10, QtWidgets.QTableWidgetItem( str(int( 10*len(host['cati']) + 3*len(host['catii']) + len(host['catiii']) ) ) ) )
+            self.main_form.tbl_scan_summary.setItem(currentRow, 9, QtWidgets.QTableWidgetItem(  str(int( len(scan['cati']) + len(scan['catii']) + len(scan['catiii']) + len(scan['cativ']) ) ) ) ) 
+            self.main_form.tbl_scan_summary.setItem(currentRow, 10, QtWidgets.QTableWidgetItem( str(int( 10*len(scan['cati']) + 3*len(scan['catii']) + len(scan['catiii']) ) ) ) )
             self.main_form.tbl_scan_summary.setItem(currentRow, 11, QtWidgets.QTableWidgetItem( str(scan['credentialed'] )))
             currentRow += 1
             if currentRow >= self.main_form.tbl_scan_summary.rowCount():
@@ -279,11 +318,8 @@ class UiAddons():
         if not self.main_form.chk_acas_unique_vuln.isChecked():
             self.main_app.skip_reports.append('rpt_acas_uniq_vuln')
 
-        if not self.main_form.chk_asset_traceabilitiy.isChecked():
+        if not self.main_form.chk_asset_traceability.isChecked():
             self.main_app.skip_reports.append('rpt_asset_traceability')
-
-        if not self.main_form.chk_automated_scan_info.isChecked():
-            self.main_app.skip_reports.append('rpt_automated_scan_info')
 
         if not self.main_form.chk_cci.isChecked():
             self.main_app.skip_reports.append('rpt_cci')
