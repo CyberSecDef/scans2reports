@@ -406,7 +406,7 @@ class Reports:
 
                 elif type == 'acas':
                     acas_scans = jmespath.search(
-                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scanner_edition: '', scan_description: '', type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [*].{ cci: cci, req_title: req_title, description: description, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, publication_date: publication_date, modification_date: modification_date } } }",
+                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scanner_edition: '', scan_description: '', type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [?status=='" + status + "'].{ cci: cci, req_title: req_title, description: description, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, publication_date: publication_date, modification_date: modification_date } } }",
                         { 'results' : scan_results}
                     )
 
@@ -741,7 +741,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
                 elif type == 'acas':
                     acas_scans = jmespath.search(
-                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scanner_edition: '', scan_description: '', type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [*].{ cci: cci, req_title: req_title, description: description, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, publication_date: publication_date, modification_date: modification_date } } }",
+                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scanner_edition: '', scan_description: '', type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [?status == '" + status + "'].{ cci: cci, req_title: req_title, description: description, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, publication_date: publication_date, modification_date: modification_date } } }",
                         { 'results' : scan_results}
                     )
 
