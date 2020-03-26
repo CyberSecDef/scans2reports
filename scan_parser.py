@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import time
 import uuid
@@ -7,6 +8,8 @@ import logging
 import numpy as np
 import pandas as pd
 import xlrd
+
+from scar_pickles import SCARPickles
 
 from lxml import etree
 from scan_file import ScanFile
@@ -17,17 +20,20 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 #TODO Make faster
 class ScanParser:
-    data_mapping = {}
-    S2R = None
-    application_path = ""
     
-    def __init__(self, application_path, data_mapping, S2R, skip_info):
-        self.S2R = S2R
-        self.data_mapping = data_mapping
-        self.application_path = application_path
-        self.skip_info = skip_info
+    def __init__(self, main_app):
+        if getattr(sys, 'frozen', False):
+            application_path = sys._MEIPASS
+        else:
+            application_path = os.path.dirname(os.path.abspath(__file__))
+            
+        self.main_app = main_app
+        
+        self.scar_conf = SCARPickles.loader( os.path.join(application_path, "data", "scar_configs.pkl") )
+        self.scar_data = SCARPickles.loader( os.path.join(application_path, "data", "scar_data.pkl") )
+
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
-        logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
+        logging.basicConfig(filename=f"{self.scar_conf.get('application_path')}/scans2reports.log", level=logging.INFO, format=FORMAT)
     
     def parseXlsx(self, filename):
 
@@ -70,10 +76,10 @@ class ScanParser:
         if 'Test Result Import' in df.keys():
             tr_rows = pd.read_excel(filename, 'Test Result Import', header=5, index_col=None, na_values=['NA'], mangle_dupe_cols=True)
             
-            test_results = {}
-            test_results['type'] = 'Test Results'
+            test_results_data = {}
+            test_results_data['type'] = 'Test Results'
             for tr in tr_rows.index:
-                test_results[ str( tr_rows['CCI'][tr]).strip().replace('CCI-','').zfill(6) ] = {
+                test_results_data[ str( tr_rows['CCI'][tr]).strip().replace('CCI-','').zfill(6) ] = {
                     'control'           : tr_rows['Control Acronym'][tr],
                     'implementation'    : tr_rows['Control Implementation Status'][tr],
                     'ap'                : tr_rows['AP Acronym'][tr],
@@ -86,7 +92,7 @@ class ScanParser:
                     'test_results'      : tr_rows['Test Results.1'][tr]
                 }
                 
-            return test_results
+            return test_results_data
     
     def parseNessus(self, filename):
         logging.info('Parsing ACAS File %s', filename)
@@ -203,13 +209,13 @@ class ScanParser:
                 }
 
                 for req in host.xpath("./ReportItem"):
-                    if self.S2R.scans_to_reports:
+                    if self.main_app.main_window:
                         QtGui.QGuiApplication.processEvents()
                     
                     severity = int(next(iter(req.xpath("./@severity")),''))
                     plugin_id = int(next(iter(req.xpath("./@pluginID")),''))
                     
-                    if not self.skip_info or ( severity != 0 or plugin_id in self.data_mapping['acas_required_info'] ):
+                    if not self.scar_data.get('skip_info') or ( severity != 0 or plugin_id in self.scar_data.get('data_mapping')['acas_required_info'] ):
                         req = {
                             'cci'              : '',
                             'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),
@@ -328,7 +334,7 @@ class ScanParser:
             })
 
             for vuln in tree.xpath("/cdf:Benchmark/cdf:TestResult/cdf:rule-result", namespaces = ns):
-                if self.S2R.scans_to_reports:
+                if self.main_app.main_window:
                     QtGui.QGuiApplication.processEvents()
                 
                 idref = next(iter(vuln.xpath("./@idref", namespaces = ns)), '')
@@ -383,13 +389,13 @@ class ScanParser:
                 rmf = ""
                 ap = ""
                 cci = str(next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/cdf:ident[contains(./text(),'CCI')]/text()", namespaces = ns)), ''))
-                if cci != '' and self.data_mapping is not None:
-                    for rmf_cci in self.data_mapping['rmf_cci']:
+                if cci != '' and self.scar_data.get('data_mapping') is not None:
+                    for rmf_cci in self.scar_data.get('data_mapping')['rmf_cci']:
                         if rmf_cci['cci'] == cci:
                             rmf = rmf_cci['control']
                     
-                    if cci in self.data_mapping['ap_mapping']:
-                        ap = self.data_mapping['ap_mapping'][cci]
+                    if cci in self.scar_data.get('data_mapping')['ap_mapping']:
+                        ap = self.scar_data.get('data_mapping')['ap_mapping'][cci]
                         
                 rule_id = next(iter(vuln.xpath(f"/cdf:Benchmark/cdf:Group[./cdf:Rule/@id = '{idref}']/cdf:Rule/@id", namespaces = ns)), '').replace('xccdf_mil.disa.stig_rule_','')
                 status = Utils.status(
@@ -511,19 +517,19 @@ class ScanParser:
             })
 
             for vuln in tree.xpath("//VULN"):
-                if self.S2R.scans_to_reports:
+                if self.main_app.main_window:
                     QtGui.QGuiApplication.processEvents()
                 
                 rmf = ""
                 ap = ""
                 cci = str(next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='CCI_REF']/ATTRIBUTE_DATA/text()")), ''))
-                if cci != '' and self.data_mapping is not None:
-                    for rmf_cci in self.data_mapping['rmf_cci']:
+                if cci != '' and self.scar_data.get('data_mapping') is not None:
+                    for rmf_cci in self.scar_data.get('data_mapping')['rmf_cci']:
                         if rmf_cci['cci'] == cci:
                             rmf = rmf_cci['control']
                     
-                    if cci in self.data_mapping['ap_mapping']:
-                        ap = self.data_mapping['ap_mapping'][cci]
+                    if cci in self.scar_data.get('data_mapping')['ap_mapping']:
+                        ap = self.scar_data.get('data_mapping')['ap_mapping'][cci]
                 
                 rule_id = next(iter(vuln.xpath("*[./VULN_ATTRIBUTE='Rule_ID']/ATTRIBUTE_DATA/text()")), '')
                 status = Utils.status( next(iter(vuln.xpath("./STATUS/text()")), ''), 'ABBREV')

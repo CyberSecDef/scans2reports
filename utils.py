@@ -6,20 +6,18 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Utils(object):
     """Utilities class """
 
-
-
     @staticmethod
-    def update_status(application_path="", S2R=None, status=None, progress=None):
+    def update_status(application_path="", main_app=None, status=None, progress=None):
         if status:
             FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
             logging.basicConfig(filename=f'{application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
             logging.info(status)        
             
-        if S2R and S2R.scans_to_reports:
+        if main_app and main_app.main_window:
             if status:
-                S2R.scans_to_reports.statusBar().showMessage(status)
+                main_app.main_window.statusBar().showMessage(status)
             if progress is not None:
-                S2R.scans_to_reports.progressBar.setValue( progress )
+                main_app.main_window.progressBar.setValue( progress )
             QtGui.QGuiApplication.processEvents() 
                 
     @staticmethod

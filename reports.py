@@ -1,12 +1,17 @@
 """ reports module of scans to poam"""
 # pylint: disable=C0301
 import re
+import sys
 import pprint
 import os.path
 import string
 import datetime
 import logging
 import jmespath
+import pickle
+
+from scar_pickles import SCARPickles
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from functools import reduce
 from dateutil import parser
@@ -24,39 +29,34 @@ class Reports:
     """ reports class of scans to reports """
     workbook = None
     scan_results = []
-    test_results = {}
-    mitigations = {}
-    data_mapping = {}
-    contact_info = {}
-    poam_conf = {}
-    scans_to_reports = None
+    
     strings = {
         'STIG' : 'Security Technical Implementation Guide',
         'IGN_SOFT' : r'/drivers|drv|driver|lib|library|framework|patch|update|runtime|chipset|redistributable|kb[0-9]+'
     }
-    application_path = ""
 
-    def __init__(self, application_path, scan_results, test_results, mitigations, data_mapping, contact_info, skip_reports, poam_conf, scans_to_reports=None):
+    def __init__(self, main_window=None):
         """ constructor """
-        self.application_path = application_path
+        if getattr(sys, 'frozen', False):
+            application_path = sys._MEIPASS
+        else:
+            application_path = os.path.dirname(os.path.abspath(__file__))
+            
+        
+        self.scar_conf = SCARPickles.loader( os.path.join(application_path, "data", "scar_configs.pkl") )
+        self.scar_data = SCARPickles.loader( os.path.join(application_path, "data", "scar_data.pkl") )
+        
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
-        logging.basicConfig(filename=f'{self.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
+        logging.basicConfig(filename=f"{self.scar_conf.get('application_path')}/scans2reports.log", level=logging.INFO, format=FORMAT)
         logging.info('Building Reports Object')
-        self.scan_results = scan_results
-
+        
         report_name = "{}/results/{}".format(
             os.path.dirname(os.path.realpath(__file__)),
             datetime.datetime.now().strftime("scans2reports-%Y%m%d_%H%M%S.xlsx")
         )
 
-        self.mitigations = mitigations
-        self.test_results = test_results
         self.workbook = xlsxwriter.Workbook(report_name)
-        self.data_mapping = data_mapping
-        self.contact_info = contact_info
-        self.skip_reports = skip_reports
-        self.poam_conf = poam_conf
-        self.scans_to_reports = scans_to_reports
+        self.main_window = main_window
 
     def close_workbook(self):
         """ Close the excel file """
@@ -65,13 +65,13 @@ class Reports:
 
     def rpt_scap_ckl_issues(self):
         """ SCAP - CKL Inconsistencies tab """
-        if 'rpt_scap_ckl_issues' in self.skip_reports:
+        if 'rpt_scap_ckl_issues' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building SCAP-CKL Inconsistencies report')
         worksheet = self.workbook.add_worksheet('SCAP-CKL Inconsistencies')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'SCAP-CKL Inconsistencies' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'SCAP-CKL Inconsistencies' Tab")
 
         widths = [40, 40, 15, 15, 15, 15, 35, 35, 25, 25, 25, 25, 20, 20, 75, 75, 75, 150]
         ascii = string.ascii_uppercase
@@ -83,13 +83,17 @@ class Reports:
 
         start_time = datetime.datetime.now()
         print( "        {} - Compiling SCAP and CKL results".format(datetime.datetime.now() - start_time ) )
+        
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+    
         scaps = jmespath.search(
             "results[?type=='SCAP'].{ scan_title: title, version: version, release: release, filename: filename, requirements: requirements[] | [*].{ req_title: req_title, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, comments: comments } }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         ckls = jmespath.search(
             "results[?type=='CKL'].{ scan_title: title, version: version, release: release, filename: filename, requirements: requirements[] | [*].{ req_title: req_title, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, comments: comments } }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         print( "        {} - Finished compiling SCAP and CKL results".format(datetime.datetime.now() - start_time ) )
 
@@ -126,6 +130,10 @@ class Reports:
         print( "        {} - Finished Non-Executed CKL search".format(datetime.datetime.now() - start_time ) )
         
         print( "        {} - Compiling CKL/SCAP status mismatches".format(datetime.datetime.now() - start_time ) )
+        
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         disa_scans = jmespath.search(
             """results[?type == 'CKL' || type == 'SCAP'].{
                 type: type,
@@ -143,7 +151,7 @@ class Reports:
                     finding_details: finding_details
                 }
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         
         findings = []
@@ -231,13 +239,13 @@ class Reports:
 
     def rpt_test_plan(self):
         """ Generates Test Plan """
-        if 'rpt_test_plan' in self.skip_reports:
+        if 'rpt_test_plan' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building Test Plan Report')
         worksheet = self.workbook.add_worksheet('Test Plan')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Test Plan' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Test Plan' Tab")
 
         widths = [75,20,50,50,35]
         ascii = string.ascii_uppercase
@@ -248,6 +256,9 @@ class Reports:
 
         report = []
 
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         acas_files = jmespath.search(
             """results[?type == 'ACAS'].{
                 type: type,
@@ -257,11 +268,11 @@ class Reports:
                 scan_date: scan_date,
                 hosts: hosts[] | [*].[hostname][]
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan_file in acas_files:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             report.append({
                 'Title'          : 'ACAS: Assured Compliance Assessment Solution / Nessus Scanner',
@@ -281,11 +292,11 @@ class Reports:
                 scan_date: scan_date,
                 hostname: hostname
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan_file in scap_files:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             report.append({
                 'Title'          : f"{scan_file['type']}: {scan_file['title']}",
@@ -305,11 +316,11 @@ class Reports:
                 scan_date: scan_date,
                 hostname: hostname
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan_file in ckl_files:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             report.append({
                 'Title'          : f"{scan_file['type']}: {scan_file['title']}",
@@ -340,13 +351,13 @@ class Reports:
 
     def rpt_poam(self):
         """ Generates POAM """
-        if 'rpt_poam' in self.skip_reports:
+        if 'rpt_poam' in self.scar_conf.get('skip_reports'):
             return None
         
         logging.info('Building POAM')
         worksheet = self.workbook.add_worksheet('POAM')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'POAM' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'POAM' Tab")
             QtGui.QGuiApplication.processEvents()
 
         widths = [1,40,15,25,25,25,30,15,30,45,20,30,25,75,40,40,25,25,40,25,25,40,25,40,50]
@@ -444,13 +455,16 @@ class Reports:
                                 })
                 queue.task_done()
 
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         for status in ['O', 'NA', 'NR', 'E', 'C']:
             q.put((status, 'acas'))
             q.put((status, 'disa'))
 
         num_threads = int(psutil.cpu_count()) * 2
         for i in range(num_threads):
-            worker = Thread(target=get_scan, args=(q, poam_results, self.scan_results))
+            worker = Thread(target=get_scan, args=(q, poam_results, scan_results))
             worker.setDaemon(True)
             worker.start()
 
@@ -462,8 +476,8 @@ class Reports:
 
 
         selected_mitigations = {}
-        if self.mitigations is not None and len(self.mitigations) >0 and 'mitigations' in self.mitigations.keys():
-            for mit in self.mitigations['mitigations']:
+        if self.scar_data.get('mitigations') is not None and len(self.scar_data.get('mitigations')) >0 and 'mitigations' in self.scar_data.get('mitigations').keys():
+            for mit in self.scar_data.get('mitigations')['mitigations']:
                 if mit['plugin_id'] is not None and mit['plugin_id'].strip() != '':
                     selected_mitigations[ str(mit['plugin_id']) ] = mit['mitigation']
                 if mit['vuln_id'] is not None and mit['vuln_id'].strip() != '':
@@ -476,9 +490,9 @@ class Reports:
             for finding in poam_results[stat]:
                 req = poam_results[stat][finding]
                 
-                rmf_controls = self.data_mapping['acas_control'][req['grp_id']] if req['grp_id'] in self.data_mapping['acas_control'] else ''
+                rmf_controls = self.scar_data.get('data_mapping')['acas_control'][req['grp_id']] if req['grp_id'] in self.scar_data.get('data_mapping')['acas_control'] else ''
                 if rmf_controls == '':
-                    rmf_controls = self.data_mapping['ap_mapping'][req['cci']] if req['cci'] in self.data_mapping['ap_mapping'] else ''
+                    rmf_controls = self.scar_data.get('data_mapping')['ap_mapping'][req['cci']] if req['cci'] in self.scar_data.get('data_mapping')['ap_mapping'] else ''
 
                 hosts = []
                 types = []
@@ -498,15 +512,15 @@ class Reports:
 
                 # pylint: disable=C0330
                 scd = ""
-                if self.poam_conf['scd']:
-                    if self.poam_conf['lower_risk']:
+                if self.scar_data.get('scd'):
+                    if self.scar_data.get('lower_risk'):
                         scd = datetime.date.today() + datetime.timedelta( ([1095, 365, 90, 30])[Utils.clamp( (int(Utils.risk_val(req['severity'], 'NUM')) - 1), 1, 3 )] )
                     else:
                         scd = datetime.date.today() + datetime.timedelta( ([1095, 365, 90, 30])[Utils.clamp( (int(Utils.risk_val(req['severity'], 'NUM'))), 1, 3 )] )
                 else:
                     scd = ''
 
-                predisposing_conditions = self.poam_conf['predisposing_conditions']
+                predisposing_conditions = self.scar_data.get('predisposing_conditions')
                 
                 mitigation_statement = ''
                 if str(req['plugin_id']) in selected_mitigations.keys():
@@ -516,23 +530,23 @@ class Reports:
                 if str(req['rule_id']) in selected_mitigations.keys():
                     mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
                 
-                if self.test_results is not None:
+                if self.scar_data.get('test_results') is not None:
                     #test results parsed
                     
                     if req['cci'].strip() != '':
                         #cci is present
                         
-                        if self.poam_conf['test_results'] == 'add':
+                        if self.scar_data.get('test_results') == 'add':
                             #add option selected, proceed as normal
                             rmf_controls = rmf_controls
                             comments = f"{ req['cci']}\n\n{comments}"
                             status = f"{ Utils.status(req['status'], 'HUMAN') }"
                             
-                        elif self.poam_conf['test_results'] == 'close':
+                        elif self.scar_data.get('test_results') == 'close':
                             #close option selected, inheritted or CCI's not in package will be closed.
                             #non-inheritted controls that are present will proceed as normal
                             
-                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.test_results.keys():
+                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys():
                                 #the current cci is not in the implementation plan, map to close
                                 comments = f"{ req['cci']}\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being marked as 'Completed' by default. \n\n{comments}"
                                 rmf_controls = rmf_controls
@@ -541,11 +555,11 @@ class Reports:
                                 #the current cci is part of the implementation plan
                             
                                 if(
-                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
-                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
                                 ):
                                     #the current cci is marked as inheritted.  Close the requirement
-                                    comments = f"{ req['cci']}\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being marked as completed by default. \n\n{comments}"
+                                    comments = f"{ req['cci']}\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being marked as completed by default. \n\n{comments}"
                                     rmf_controls = rmf_controls
                                     status = f"{ Utils.status('C', 'HUMAN') }"
                                 else:
@@ -553,10 +567,10 @@ class Reports:
                                     rmf_controls = rmf_controls
                                     comments = f"{ req['cci']}\n\n{comments}"
                                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
-                        elif self.poam_conf['test_results'] == 'convert':
+                        elif self.scar_data.get('test_results') == 'convert':
                             #convert option selected, inheritted or CCI's not in package will be converted to CM-6.5
                             #non-inheritted controls that are present will proceed as normal
-                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.test_results.keys():
+                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys():
                                 #the current cci is not in the implementation plan, map to CM-6.5
                                 comments = f"CCI-000366\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being mapped to CCI-000366 CM-6.5.\n\n{comments}"
                                 req['cci'] = 'CCI-000366'
@@ -566,11 +580,11 @@ class Reports:
                                 #the current cci is part of the implementation plan
                             
                                 if(
-                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
-                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
                                 ):
                                     #the current cci is marked as inheritted.  Close the requirement
-                                    comments = f"CCI-000366\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being mapped to CCI-000366 CM-6.5. \n\n{comments}"
+                                    comments = f"CCI-000366\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being mapped to CCI-000366 CM-6.5. \n\n{comments}"
                                     req['cci'] = 'CCI-000366'
                                     rmf_controls = "CM-6.5"
                                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
@@ -581,7 +595,7 @@ class Reports:
                                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
                         else:
                             #fallthrough catch.  This should never be reached
-                            print(f"{req['cci']} - fallthrough")
+                            
                             rmf_controls = rmf_controls
                             comments = f"{ req['cci']}\n\n{comments}"
                             status = f"{ Utils.status(req['status'], 'HUMAN') }"
@@ -598,21 +612,21 @@ class Reports:
                     comments = f"{ req['cci']}\n\n{comments}"
                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
                     
-                if self.poam_conf['include_finding_details']:
+                if self.scar_data.get('include_finding_details'):
                     comments = f"{comments}\n\nFinding Details:\n{finding_details}"
                 
                 req_data = {
                     'A'                                                 : '',
                     'Control Vulnerability Description'                 : f"Title: {req['req_title']}\n\nFamily: {req['grp_id']}\n\nDescription:\n{req['description']}",
                     'Security Control Number (NC/NA controls only)'     : rmf_controls,
-                    'Office/Org'                                        : f"{self.contact_info['command']}\n{self.contact_info['name']}\n{self.contact_info['phone']}\n{self.contact_info['email']}\n".strip(),
+                    'Office/Org'                                        : f"{self.scar_data.get('command')}\n{self.scar_data.get('name')}\n{self.scar_data.get('phone')}\n{self.scar_data.get('email')}\n".strip(),
                     'Security Checks'                                   : f"{req['plugin_id']}{req['rule_id']}\n{req['vuln_id']}",
                     'Resources Required'                                : f"{req['resources']}",
                     'Scheduled Completion Date'                         : scd,
                     'Milestone with Completion Dates'                   : "{m} {s[0]} updates {s[1]}/{s[2]}/{s[0]}".format(
 s=str(scd).split('-'),
 m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
-) if self.poam_conf['scd'] else '',
+) if self.scar_data.get('scd') else '',
                     'Milestone Changes'                                 : '',
                     'Source Identifying Control Vulnerability'          : f"{prefix} {req['scan_title']}",
                     'Status'                                            : status,
@@ -629,8 +643,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Impact Description'                                : '',
                     'Residual Risk Level'                               : Utils.risk_val(req['severity'], 'POAM'),
                     'Recommendations'                                   : req['solution'],
-                    'Resulting Residual Risk after Proposed Mitigations': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.poam_conf['lower_risk'] else Utils.risk_val(req['severity'], 'POAM'),
+                    'Resulting Residual Risk after Proposed Mitigations': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.scar_data.get('lower_risk') else Utils.risk_val(req['severity'], 'POAM'),
                 }
+
 
                 if 'publication_date' not in req:
                     report.append(req_data)
@@ -638,7 +653,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     report.append(req_data)
                 elif( str(req['publication_date']).strip() == '' ):
                     report.append(req_data)
-                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] ) ):
+                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.scar_data.get('exclude_plugins') ) ):
                     report.append(req_data)
 
                             
@@ -675,13 +690,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_rar(self):
         """ Generates RAR """
-        if 'rpt_rar' in self.skip_reports:
+        if 'rpt_rar' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building RAR')
         worksheet = self.workbook.add_worksheet('RAR')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'RAR' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'RAR' Tab")
             QtGui.QGuiApplication.processEvents()
 
         widths = [15,15,45,30,30,45,20,15,30,30,15,15,30,30,15,15,15,15,30,30,45,30]
@@ -779,13 +794,16 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                 })
                 queue.task_done()
 
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         for status in ['O', 'NA', 'NR', 'E', 'C']:
             q.put((status, 'acas'))
             q.put((status, 'disa'))
 
         num_threads = int(psutil.cpu_count()) * 2
         for i in range(num_threads):
-            worker = Thread(target=get_scan, args=(q, poam_results, self.scan_results))
+            worker = Thread(target=get_scan, args=(q, poam_results, scan_results))
             worker.setDaemon(True)
             worker.start()
 
@@ -796,8 +814,8 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         print( "        {} - Finished compiling SCAP and CKL results".format(datetime.datetime.now() - start_time ) )
 
         selected_mitigations = {}
-        if self.mitigations is not None and len(self.mitigations) >0 and 'mitigations' in self.mitigations.keys():
-            for mit in self.mitigations['mitigations']:
+        if self.scar_data.get('mitigations') is not None and len( self.scar_data.get('mitigations') ) >0 and 'mitigations' in self.scar_data.get('mitigations').keys():
+            for mit in self.scar_data.get('mitigations')['mitigations']:
                 if mit['plugin_id'] is not None and mit['plugin_id'].strip() != '':
                     selected_mitigations[ str(mit['plugin_id']) ] = mit['mitigation']
                 if mit['vuln_id'] is not None and mit['vuln_id'].strip() != '':
@@ -827,12 +845,12 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 comments = "\n\n".join( list(set([c for c in comments if c])) )
                 finding_details = "Finding Details:\n" + "\n\n".join( list(set([f for f in finding_details if f])) )
 
-                rmf_controls = self.data_mapping['acas_control'][req['grp_id']] if req['grp_id'] in self.data_mapping['acas_control'] else ''
+                rmf_controls = self.scar_data.get('data_mapping')['acas_control'][req['grp_id']] if req['grp_id'] in self.scar_data.get('data_mapping')['acas_control'] else ''
                 if rmf_controls == '':
-                    rmf_controls = self.data_mapping['ap_mapping'][req['cci']] if req['cci'] in self.data_mapping['ap_mapping'] else ''
+                    rmf_controls = self.scar_data.get('data_mapping')['ap_mapping'][req['cci']] if req['cci'] in self.scar_data.get('data_mapping')['ap_mapping'] else ''
 
                 objectives = []
-                for rmf_cia in self.data_mapping['rmf_cia']:
+                for rmf_cia in self.scar_data.get('data_mapping')['rmf_cia']:
                     if rmf_controls.strip() != '' and rmf_cia['Ctl'] == rmf_controls:
                         if rmf_cia['CL'] == 'X' or rmf_cia['CM'] == 'X' or rmf_cia['CH'] == 'X':
                             objectives.append('C')
@@ -853,23 +871,23 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
 
 
-                if self.test_results is not None:
+                if self.scar_data.get('test_results') is not None:
                     #test results parsed
                     
                     if req['cci'].strip() != '':
                         #cci is present
                         
-                        if self.poam_conf['test_results'] == 'add':
+                        if self.scar_data.get('test_results') == 'add':
                             #add option selected, proceed as normal
                             rmf_controls = rmf_controls
                             comments = f"{ req['cci']}\n\n{comments}"
                             status = f"{ Utils.status(req['status'], 'HUMAN') }"
                             
-                        elif self.poam_conf['test_results'] == 'close':
+                        elif self.scar_data.get('test_results') == 'close':
                             #close option selected, inheritted or CCI's not in package will be closed.
                             #non-inheritted controls that are present will proceed as normal
                             
-                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.test_results.keys():
+                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys():
                                 #the current cci is not in the implementation plan, map to close
                                 comments = f"{ req['cci']}\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being marked as 'Completed' by default. \n\n{comments}"
                                 rmf_controls = rmf_controls
@@ -878,11 +896,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                 #the current cci is part of the implementation plan
                             
                                 if(
-                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
-                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
                                 ):
                                     #the current cci is marked as inheritted.  Close the requirement
-                                    comments = f"{ req['cci']}\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being marked as completed by default. \n\n{comments}"
+                                    comments = f"{ req['cci']}\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being marked as completed by default. \n\n{comments}"
                                     rmf_controls = rmf_controls
                                     status = f"{ Utils.status('C', 'HUMAN') }"
                                 else:
@@ -890,10 +908,10 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                     rmf_controls = rmf_controls
                                     comments = f"{ req['cci']}\n\n{comments}"
                                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
-                        elif self.poam_conf['test_results'] == 'convert':
+                        elif self.scar_data.get('test_results') == 'convert':
                             #convert option selected, inheritted or CCI's not in package will be converted to CM-6.5
                             #non-inheritted controls that are present will proceed as normal
-                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.test_results.keys():
+                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys():
                                 #the current cci is not in the implementation plan, map to CM-6.5
                                 comments = f"CCI-000366\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being mapped to CCI-000366 CM-6.5.\n\n{comments}"
                                 req['cci'] = 'CCI-000366'
@@ -903,11 +921,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                 #the current cci is part of the implementation plan
                             
                                 if(
-                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
-                                    self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
                                 ):
                                     #the current cci is marked as inheritted.  Close the requirement
-                                    comments = f"CCI-000366\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.test_results[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being mapped to CCI-000366 CM-6.5. \n\n{comments}"
+                                    comments = f"CCI-000366\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being mapped to CCI-000366 CM-6.5. \n\n{comments}"
                                     req['cci'] = 'CCI-000366'
                                     rmf_controls = "CM-6.5"
                                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
@@ -918,7 +936,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
                         else:
                             #fallthrough catch.  This should never be reached
-                            print(f"{req['cci']} - fallthrough")
+                            
                             rmf_controls = rmf_controls
                             comments = f"{ req['cci']}\n\n{comments}"
                             status = f"{ Utils.status(req['status'], 'HUMAN') }"
@@ -946,7 +964,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Devices Affected (16b.1)': hosts,
                     'Security Objectives (C-I-A) (16c)': objectives,
                     'Raw Test Result (16d)': Utils.risk_val(req['severity'], 'CAT'),
-                    'Predisposing Condition(s) (16d.1)': str( self.poam_conf['predisposing_conditions'] ),
+                    'Predisposing Condition(s) (16d.1)': str( self.scar_data.get('predisposing_conditions') ),
                     'Technical Mitigation(s) (16d.2)': '',
                     'Severity or Pervasiveness (VL-VH) (16d.3)': Utils.risk_val(req['severity'], 'VL-VH'),
                     'Relevance of Threat (VL-VH) (16e)': 'High',
@@ -956,7 +974,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Impact Description (16h)': '',
                     'Risk (Cells 16f & 16g) (VL-VH) (16i)': Utils.risk_val(req['severity'], 'VL-VH'),
                     'Proposed Mitigations (From POA&M) (16j)': mitigation_statement,
-                    'Residual Risk (After Proposed Mitigations) (16k)': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.poam_conf['lower_risk'] else Utils.risk_val(req['severity'], 'VL-VH'),
+                    'Residual Risk (After Proposed Mitigations) (16k)': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.scar_data.get('lower_risk') else Utils.risk_val(req['severity'], 'VL-VH'),
                     'Recommendations (16l)': req['solution'],
                     'Comments': f"Status: { status }\n\nGroup ID: {req['grp_id']}\nVuln ID: {req['vuln_id']}\nRule ID: {req['rule_id']}\nPlugin ID: {req['plugin_id']}\n\n{comments}\n\n{finding_details}"
                 }
@@ -967,7 +985,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     report.append(req_data)
                 elif( str(req['publication_date']).strip() == '' ):
                     report.append(req_data)
-                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.poam_conf['exclude_plugins'] ) ):
+                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.scar_data.get('exclude_plugins') ) ):
                     report.append(req_data)
 
         row = 0
@@ -999,14 +1017,14 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_software_linux(self):
         """ Generates Linux Software Tab """
-        if 'rpt_software_linux' in self.skip_reports:
+        if 'rpt_software_linux' in self.scar_conf.get('skip_reports'):
             return None
         
         logging.info('Generating Linux Software Tab')
 
         worksheet = self.workbook.add_worksheet('Software - Linux')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Software - Linux' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Software - Linux' Tab")
 
         widths = [75, 25, 25, 25, 75]
         ascii = string.ascii_uppercase
@@ -1017,6 +1035,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         software = []
         
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
@@ -1028,11 +1049,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     }
                 }
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                     QtGui.QGuiApplication.processEvents()
             for host in scan['hosts']:
                 for req in host['requirements']:
@@ -1116,13 +1137,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_software_windows(self):
         """ Generates Windows Software Tab """
-        if 'rpt_software_windows' in self.skip_reports:
+        if 'rpt_software_windows' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building Windows Software Tab')
         worksheet = self.workbook.add_worksheet('Software - Windows')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Software - Windows' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Software - Windows' Tab")
 
         widths = [75, 25, 75]
         ascii = string.ascii_uppercase
@@ -1133,6 +1154,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         software = []
         
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
@@ -1144,11 +1168,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     }
                 }
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                     QtGui.QGuiApplication.processEvents()
             for host in scan['hosts']:
                 for req in host['requirements']:
@@ -1218,14 +1242,14 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_asset_traceability(self):
         """Generates the Asset Traceability list"""
-        if 'rpt_asset_traceability' in self.skip_reports:
+        if 'rpt_asset_traceability' in self.scar_conf.get('skip_reports'):
             return None
         
         logging.info('Building Asset Traceability Tab')
 
         worksheet = self.workbook.add_worksheet('Asset Traceability')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Asset Traceability' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Asset Traceability' Tab")
 
         widths = [
             25, 25, 25, 25, 25,
@@ -1242,6 +1266,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         hardware = []
         
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 filename: filename,
@@ -1260,11 +1287,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     scan_details: requirements[?plugin_id == `19506`] | [0].comments
                 }
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             for host in scan['hosts']:
                 if Utils.is_ip(str(host['hostname'])):
@@ -1339,11 +1366,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 credentialed: credentialed,
                 error: requirements[]  | [?status == 'E'].[comments, severity, status]
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in scap_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             
             if Utils.is_ip(str(scan['hostname'])):
@@ -1398,11 +1425,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].[comments, severity, status],
                 not_reviewed: requirements[]  | [?status == 'NR'].[comments, severity, status]
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in ckl_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             
             if Utils.is_ip(str(scan['hostname'])):
@@ -1464,14 +1491,14 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_hardware(self):
         """Generates the hardware list"""
-        if 'rpt_hardware' in self.skip_reports:
+        if 'rpt_hardware' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building Hardware Tab')
 
         worksheet = self.workbook.add_worksheet('Hardware')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Hardware' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Hardware' Tab")
 
         widths = [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25]
         ascii = string.ascii_uppercase
@@ -1483,13 +1510,16 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         hardware = []
         hosts = []
         
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         acas_scans = jmespath.search(
             "results[?type=='ACAS'].hosts[] | [*].{ hostname: hostname, ip: ip, device_type: device_type, manufacturer: manufacturer, model: model, serial: serial, os: os  }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         
         for host in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             
             if Utils.is_ip(str(host['hostname'])):
@@ -1519,11 +1549,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         
         scap_scans = jmespath.search(
             "results[?type=='SCAP' || type == 'CKL'].{ hostname: hostname, ip: ip, device_type: device_type, manufacturer: manufacturer, model: model, serial: serial, os: os  }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         
         for scan in scap_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             
             if Utils.is_ip(str(scan['hostname'])):
@@ -1577,19 +1607,22 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_ppsm(self):
         """ Generates PPSM Report """
-        if 'rpt_ppsm' in self.skip_reports:
+        if 'rpt_ppsm' in self.scar_conf.get('skip_reports'):
             return None
         
         logging.info('Building PPSM Tab')
         worksheet = self.workbook.add_worksheet('PPSM')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'PPSM' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'PPSM' Tab")
 
         widths = [25, 25, 25, 25, 25, 25]
         ascii = string.ascii_uppercase
         for index, w in enumerate(widths):
             worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
 
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         ports = []
@@ -1605,12 +1638,12 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     }
                 }
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         
         for scan in acas_scans:
             for host in scan['hosts']:
-                if self.scans_to_reports:
+                if self.main_window:
                     QtGui.QGuiApplication.processEvents()
                 for req in host['requirements']:
                     if not list(filter(lambda x: x['Port'] == req['port'], ports)):
@@ -1643,13 +1676,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_cci(self):
         """ Generates CCI Report """
-        if 'rpt_cci' in self.skip_reports:
+        if 'rpt_cci' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building CCI Tab')
         worksheet = self.workbook.add_worksheet('CCI Data')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'CCI Data' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'CCI Data' Tab")
 
         widths = [25,25,25,25,25, 25,25,125,125]
         ascii = string.ascii_uppercase
@@ -1660,8 +1693,8 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         ccis = []
 
-        for cci in self.data_mapping['rmf_cci']:
-            if self.scans_to_reports:
+        for cci in self.scar_data.get('data_mapping')['rmf_cci']:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             ccis.append({
                 'Control' : cci['control'],
@@ -1694,13 +1727,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_acas_uniq_vuln(self):
         """ Generates ACAS Unique Vuln tab """
-        if 'rpt_acas_uniq_vuln' in self.skip_reports:
+        if 'rpt_acas_uniq_vuln' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building ACAS Unique Vuln Tab')
         worksheet = self.workbook.add_worksheet('ACAS Unique Vuln')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'ACAS Unique Vuln' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'ACAS Unique Vuln' Tab")
 
         widths = [25, 75, 50, 25, 25]
         ascii = string.ascii_uppercase
@@ -1713,6 +1746,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         plugin_count = {}
         plugins_rpt = []
         
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
@@ -1724,12 +1760,12 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     }
                 }
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         
         for scan in acas_scans:
             for host in scan['hosts']:
-                if self.scans_to_reports:
+                if self.main_window:
                     QtGui.QGuiApplication.processEvents()
                     
                 for req in host['requirements']:
@@ -1770,13 +1806,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_acas_uniq_iava(self):
         """ Generates ACAS Unique IAVA Tab """
-        if 'rpt_acas_uniq_iava' in self.skip_reports:
+        if 'rpt_acas_uniq_iava' in self.scar_conf.get('skip_reports'):
             return None
         
         logging.info('Building ACAS Unique IAVA Tab')
         worksheet = self.workbook.add_worksheet('ACAS Unique IAVA')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'ACAS Unique IAVA' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'ACAS Unique IAVA' Tab")
 
         widths = [25, 25, 50, 25, 25, 25]
         ascii = string.ascii_uppercase
@@ -1789,6 +1825,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         plugin_count = {}
         plugins_rpt = []
         
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
@@ -1801,12 +1840,12 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     }
                 }
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         
         for scan in acas_scans:
             for host in scan['hosts']:
-                if self.scans_to_reports:
+                if self.main_window:
                     QtGui.QGuiApplication.processEvents()
                     
                 for req in host['requirements']:
@@ -1848,13 +1887,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_missing_patches(self):
         """ Generates Missing Patches tab """
-        if 'rpt_missing_patches' in self.skip_reports:
+        if 'rpt_missing_patches' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building Missing Patches tab')
         worksheet = self.workbook.add_worksheet('Missing Patches')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Missing Patches' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Missing Patches' Tab")
 
         widths = [35, 50, 50]
         ascii = string.ascii_uppercase
@@ -1865,6 +1904,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         patches = []
 
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
@@ -1875,11 +1917,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     requirements: requirements[]  | [?plugin_id == `66334`].{ comments: comments}
                 }
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
 
             for host in scan['hosts']:
@@ -1922,13 +1964,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_summary(self):
         """ Generates Scan Summary Tab """
-        if 'rpt_summary' in self.skip_reports:
+        if 'rpt_summary' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building Summary Tab')
         worksheet = self.workbook.add_worksheet('Summary')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Summary' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Summary' Tab")
 
         widths = [
             10,30,20,50,100,
@@ -1944,6 +1986,8 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         summary_results = []
 
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
         disa_scans = jmespath.search(
             """results[?type=='CKL' || type=='SCAP'].{
                 type: type,
@@ -1969,11 +2013,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 catiii: requirements[] | [?status != 'C' && severity == `1`].[severity, status],
                 cativ: requirements[]  | [?status != 'C' && severity == `0`].[severity, status]
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in disa_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
 
             summary_results.append({
@@ -2026,11 +2070,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     cativ:  requirements[] | [?status != 'C' && severity == `0`].{ plugin_id: plugin_id, severity: severity, status: status}
                 }
             }""",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
 
             for host in scan['hosts']:
@@ -2090,13 +2134,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_raw_data(self):
         """ Generates RAW Data Tab """
-        if 'rpt_raw_data' in self.skip_reports:
+        if 'rpt_raw_data' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building Raw Data Tab')
         worksheet = self.workbook.add_worksheet('Raw Data')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Raw Data' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Raw Data' Tab")
 
         worksheet.set_column('A:A', 15)
         worksheet.set_column('B:B', 40)
@@ -2129,14 +2173,17 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         worksheet.set_column('AB:AB', 75)
         worksheet.autofilter(0, 0, 0, 27)
 
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         raw_results = []
         acas_scans = jmespath.search(
             "results[?type=='ACAS'].{ type: type, title: title, filename: filename, scan_date: scan_date, version: version, feed: feed, hosts: hosts[] | [*].{ hostname: hostname, ip : ip, credentialed: credentialed, requirements: requirements[] | [*].{ publication_date: publication_date, modification_date : modification_date, comments: comments, grp_id: grp_id, plugin_id: plugin_id, req_title: req_title, severity: severity, status: status, finding_details: finding_details, description: description, solution: solution, fix_id: fix_id, references: references, resources: resources } } }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             for host in scan['hosts']:
                 for req in host['requirements']:
@@ -2175,11 +2222,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         disa_scans = jmespath.search(
             "results[?type=='CKL' || type=='SCAP'].{ type: type, title: title, filename: filename, scan_date: scan_date, version: version, release: release, hostname: hostname, ip : ip, credentialed: credentialed, requirements: requirements[] | [*].{ comments: comments, grp_id: grp_id, plugin_id: plugin_id, req_title: req_title, severity: severity, status: status, finding_details: finding_details, description: description, solution: solution, fix_id: fix_id, references: references, resources: resources, cci: cci, assessments: assessments, rmf_controls: rmf_controls, ia_controls: ia_controls, rule_id: rule_id, vuln_id: vuln_id } }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in disa_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             for req in scan['requirements']:
                 raw_results.append({
@@ -2233,13 +2280,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_operating_systems(self):
         """ Generates OS Tab """
-        if 'rpt_operating_systems' in self.skip_reports:
+        if 'rpt_operating_systems' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building OS Tab')
         worksheet = self.workbook.add_worksheet('Operating Systems')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Operating Systems' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Operating Systems' Tab")
 
         widths = [50, 25, 25]
         ascii = string.ascii_uppercase
@@ -2249,12 +2296,17 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
         os_list = []
+        
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
+            
         acas_scans = jmespath.search(
             "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ os: os } }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             for host in scan['hosts']:
                 if not any(host['os'] in x['os'] for x in os_list):
@@ -2285,13 +2337,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
     def rpt_local_users(self):
         """ Generates Local Users tab """
-        if 'rpt_local_users' in self.skip_reports:
+        if 'rpt_local_users' in self.scar_conf.get('skip_reports'):
             return None
             
         logging.info('Building Local Users Tab')
         worksheet = self.workbook.add_worksheet('Local Users')
-        if self.scans_to_reports:
-            self.scans_to_reports.statusBar().showMessage("Generating 'Local Users' Tab")
+        if self.main_window:
+            self.main_window.statusBar().showMessage("Generating 'Local Users' Tab")
 
         widths = [50,50,50]
         ascii = string.ascii_uppercase
@@ -2300,14 +2352,17 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         worksheet.autofilter(0, 0, 0, int(len(widths))-1)
 
+        with open(os.path.join(self.scar_conf.get('application_path'), "data", "scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
+            
         users = []
         acas_scans = jmespath.search(
             "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ hostname: hostname, os: os, requirements: requirements[?plugin_id == `10860`] | [*].comments } }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             for host in scan['hosts']:
                 for req in host['requirements']:
@@ -2321,11 +2376,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         acas_scans = jmespath.search(
             "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ hostname: hostname, os: os, requirements: requirements[?plugin_id == `126527`] | [*].comments } }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             for host in scan['hosts']:
                 for req in host['requirements']:
@@ -2339,11 +2394,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
 
         acas_scans = jmespath.search(
             "results[?type=='ACAS'].{ hosts: hosts[] | [*].{ hostname: hostname, os: os, requirements: requirements[?plugin_id == `95928`] | [*].comments } }",
-            { 'results' : self.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in acas_scans:
-            if self.scans_to_reports:
+            if self.main_window:
                 QtGui.QGuiApplication.processEvents()
             for host in scan['hosts']:
                 for req in host['requirements']:

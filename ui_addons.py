@@ -1,13 +1,17 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import os.path
 import re
+import sys
 import time
 import pprint
 import dumper
 import logging
 import psutil
 import jmespath
+import pickle
 from functools import partial
+from utils import Utils
+from scan_utils import ScanUtils
 
 class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
     def __init__ (self, value):
@@ -78,34 +82,38 @@ class UiAddons():
                         self.main_form.tbl_selected_scans.horizontalHeader().setStretchLastSection(True)
 
     def btn_parse_scan_files_on_click(self):
-        self.main_app.poam_conf = {
-            'predisposing_conditions': self.main_form.txtPredisposingCondition.toPlainText(),
-            'include_finding_details' : self.main_form.chkIncludeFindingDetails.isChecked(),
-            'skip_info' : self.main_form.chkSkipInfo.isChecked(),
-            'scd' : self.main_form.chk_prefill_scd.isChecked(),
-            'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
-            'exclude_plugins' : self.main_form.spnExcludeDays.value(),
-            'test_results' : {
+        self.main_form.btn_parse_scan_files.setEnabled(False)
+        self.main_app.main_window.statusBar().showMessage('Parsing Files... Please Wait')
+        QtGui.QGuiApplication.processEvents() 
+        
+        self.main_app.scar_data.set('command', self.main_form.txt_command.text() )
+        self.main_app.scar_data.set('name', self.main_form.txt_poc.text() )
+        self.main_app.scar_data.set('phone', self.main_form.txt_phone.text() )
+        self.main_app.scar_data.set('email', self.main_form.txt_email.text() )
+        
+        self.main_app.scar_data.set('predisposing_conditions', self.main_form.txtPredisposingCondition.toPlainText())
+        self.main_app.scar_data.set('include_finding_details', self.main_form.chkIncludeFindingDetails.isChecked())
+        self.main_app.scar_data.set('skip_info', self.main_form.chkSkipInfo.isChecked())
+        self.main_app.scar_data.set('scd', self.main_form.chk_prefill_scd.isChecked())
+        self.main_app.scar_data.set('lower_risk', self.main_form.chk_lower_risk.isChecked())
+        self.main_app.scar_data.set('exclude_plugins', self.main_form.spnExcludeDays.value())
+        self.main_app.scar_data.set('test_results',  {
                 'Add All Findings' : 'add',
                 'Mark as Closed' : 'close',
                 'Convert to CM-6.5' : 'convert'
-            }[self.main_form.cboTestResultFunc.currentText()]
-        }
+            }[self.main_form.cboTestResultFunc.currentText()] )
 
-        self.main_app.num_threads = 1
+        self.main_app.scar_conf.set('num_threads', 1)
         if self.main_form.cboProcIntensity.currentText() == 'Light Load':
-            self.main_app.num_threads = int(psutil.cpu_count() // 2) + 1
-            if self.main_app.num_threads <= 0:
-                self.main_app.num_threads = 1
+            self.main_app.scar_conf.set('num_threads', int(psutil.cpu_count() // 2) + 1)
         elif self.main_form.cboProcIntensity.currentText() == 'Normal Load':
-            self.main_app.num_threads = int(psutil.cpu_count()) - 2 + 1
-            if self.main_app.num_threads <= 0:
-                self.main_app.num_threads = 1
+            self.main_app.scar_conf.set('num_threads', int(psutil.cpu_count()) - 2 + 1)
         else:
-            self.main_app.num_threads = int(psutil.cpu_count() * 2) - 1
-            if self.main_app.num_threads <= 0:
-                self.main_app.num_threads = 1
-                    
+            self.main_app.scar_conf.set('num_threads', int(psutil.cpu_count() * 2) - 1)
+            
+        if self.main_app.scar_conf.get('num_threads') <= 0:
+            self.main_app.scar_conf.set('num_threads', 1)
+                
         logging.info('Parse Scan Files Clicked')
         self.main_form.tbl_scan_summary.setRowCount(0)
 
@@ -155,9 +163,18 @@ class UiAddons():
                 
         self.main_app.scan_files = filepaths
         self.main_app.scan_results = [{} for x in self.main_app.scan_files]
+        
         self.main_app.parse_scan_files()
+        
+        if getattr(sys, 'frozen', False):
+            application_path = sys._MEIPASS
+        else:
+            application_path = os.path.dirname(os.path.abspath(__file__))
+            
+        with open(os.path.join(application_path, "data/scan_results.pkl"), "rb") as f:
+            scan_results = pickle.load(f)
 
-        total_files = len(self.main_app.scan_results)
+        total_files = len(scan_results)
         self.main_form.tbl_scan_summary.setRowCount(1000)
         currentRow = 0
         
@@ -182,7 +199,7 @@ class UiAddons():
                     blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].{ plugin_id: plugin_id, severity: severity, status: status}
                 }
             }""",
-            { 'results' : self.main_app.scan_results}
+            { 'results' : scan_results}
         )
         
         for scan in acas_scans:
@@ -228,7 +245,7 @@ class UiAddons():
                 
                 blank_comments: requirements[]  | [?status != 'C' && ( comments == '' && finding_details == '')].[comments, severity, status]
             }""",
-            { 'results' : self.main_app.scan_results}
+            { 'results' : scan_results}
         )
 
         for scan in disa_scans:
@@ -257,6 +274,7 @@ class UiAddons():
         self.main_form.tbl_scan_summary.setRowCount(currentRow + 1)
         self.main_form.tbl_scan_summary.resizeColumnsToContents()
         self.main_form.tbl_scan_summary.horizontalHeader().setStretchLastSection(True)
+        self.main_form.btn_parse_scan_files.setEnabled(True)
 
     def merge_nessus(self, host_count):
         logging.info('Merge Nessus Clicked')
@@ -264,7 +282,7 @@ class UiAddons():
         options = QtWidgets.QFileDialog.Options(  )
         files, _ = QtWidgets.QFileDialog.getOpenFileNames(None,"Select Multiple Nessus Files to Merge", "","Nessus Files (*.nessus);;", options=options)
         if files:
-            self.main_app.merge_nessus_files(files, host_count)
+            ScanUtils.merge_nessus_files(files, host_count, self.main_app)
 
     def split_nessus(self):
         logging.info('Split Nessus Clicked')
@@ -276,7 +294,7 @@ class UiAddons():
             for file in files:
                 logging.info('Splitting {}'.format(file))
                 print('Splitting {}'.format(file))
-                self.main_app.split_nessus_file(file)
+                ScanUtils.split_nessus_file(file, self.main_app)
 
     def update_ckl(self):
         logging.info('Update CKL Clicked')
@@ -292,83 +310,84 @@ class UiAddons():
             destination = files[0]
             
         if source is not None and destination is not None:
-            self.main_app.update_ckl(source, destination)
+            ScanUtils.update_ckl(source, destination, self.main_app)
                 
                 
     def btn_execute_on_click(self):
+        self.main_form.btn_execute.setEnabled(False)
+        self.main_app.main_window.statusBar().showMessage('Generating Reports... Please Wait')
+        QtGui.QGuiApplication.processEvents() 
         logging.info('Execute Clicked')
-        self.main_app.contact_info['command'] = self.main_form.txt_command.text()
-        self.main_app.contact_info['name']    = self.main_form.txt_poc.text()
-        self.main_app.contact_info['phone']   = self.main_form.txt_phone.text()
-        self.main_app.contact_info['email']   = self.main_form.txt_email.text()
+        self.main_app.scar_data.set('command', self.main_form.txt_command.text() )
+        self.main_app.scar_data.set('name', self.main_form.txt_poc.text() )
+        self.main_app.scar_data.set('phone', self.main_form.txt_phone.text() )
+        self.main_app.scar_data.set('email', self.main_form.txt_email.text() )
 
-        self.main_app.poam_conf = {
-            'predisposing_conditions': self.main_form.txtPredisposingCondition.toPlainText(),
-            'include_finding_details' : self.main_form.chkIncludeFindingDetails.isChecked(),
-            'skip_info' : self.main_form.chkSkipInfo.isChecked(),
-            'scd' : self.main_form.chk_prefill_scd.isChecked(),
-            'lower_risk' : self.main_form.chk_lower_risk.isChecked(),
-            'exclude_plugins' : self.main_form.spnExcludeDays.value(),
-            'test_results' : {
+        self.main_app.scar_data.set('predisposing_conditions', self.main_form.txtPredisposingCondition.toPlainText())
+        self.main_app.scar_data.set('include_finding_details', self.main_form.chkIncludeFindingDetails.isChecked())
+        self.main_app.scar_data.set('skip_info', self.main_form.chkSkipInfo.isChecked())
+        self.main_app.scar_data.set('scd', self.main_form.chk_prefill_scd.isChecked())
+        self.main_app.scar_data.set('lower_risk', self.main_form.chk_lower_risk.isChecked())
+        self.main_app.scar_data.set('exclude_plugins', self.main_form.spnExcludeDays.value())
+        self.main_app.scar_data.set('test_results',  {
                 'Add All Findings' : 'add',
                 'Mark as Closed' : 'close',
                 'Convert to CM-6.5' : 'convert'
-            }[self.main_form.cboTestResultFunc.currentText()]
-        }
-
+            }[self.main_form.cboTestResultFunc.currentText()] )
+            
         if not self.main_form.chk_acas_unique_iavm.isChecked():
-            self.main_app.skip_reports.append('rpt_acas_uniq_iava')
+            self.main_app.scar_conf.append('skip_reports', 'rpt_acas_uniq_iava')
 
         if not self.main_form.chk_acas_unique_vuln.isChecked():
-            self.main_app.skip_reports.append('rpt_acas_uniq_vuln')
+            self.main_app.scar_conf.append('skip_reports','rpt_acas_uniq_vuln')
 
         if not self.main_form.chk_asset_traceability.isChecked():
-            self.main_app.skip_reports.append('rpt_asset_traceability')
+            self.main_app.scar_conf.append('skip_reports','rpt_asset_traceability')
 
         if not self.main_form.chk_cci.isChecked():
-            self.main_app.skip_reports.append('rpt_cci')
+            self.main_app.scar_conf.append('skip_reports','rpt_cci')
 
         if not self.main_form.chk_hardware.isChecked():
-            self.main_app.skip_reports.append('rpt_hardware')
+            self.main_app.scar_conf.append('skip_reports','rpt_hardware')
 
         if not self.main_form.chk_local_users.isChecked():
-            self.main_app.skip_reports.append('rpt_local_users')
+            self.main_app.scar_conf.append('skip_reports','rpt_local_users')
 
         if not self.main_form.chk_missing_patches.isChecked():
-            self.main_app.skip_reports.append('rpt_missing_patches')
+            self.main_app.scar_conf.append('skip_reports','rpt_missing_patches')
 
         if not self.main_form.chk_operating_systems.isChecked():
-            self.main_app.skip_reports.append('rpt_operating_systems')
+            self.main_app.scar_conf.append('skip_reports','rpt_operating_systems')
 
         if not self.main_form.chk_poam.isChecked():
-            self.main_app.skip_reports.append('rpt_poam')
+            self.main_app.scar_conf.append('skip_reports','rpt_poam')
 
         if not self.main_form.chk_ppsm.isChecked():
-            self.main_app.skip_reports.append('rpt_ppsm')
+            self.main_app.scar_conf.append('skip_reports','rpt_ppsm')
 
         if not self.main_form.chk_rar.isChecked():
-            self.main_app.skip_reports.append('rpt_rar')
+            self.main_app.scar_conf.append('skip_reports','rpt_rar')
 
         if not self.main_form.chk_raw_data.isChecked():
-            self.main_app.skip_reports.append('rpt_raw_data')
+            self.main_app.scar_conf.append('skip_reports','rpt_raw_data')
 
         if not self.main_form.chk_scap_ckl_issues.isChecked():
-            self.main_app.skip_reports.append('rpt_scap_ckl_issues')
+            self.main_app.scar_conf.append('skip_reports','rpt_scap_ckl_issues')
 
         if not self.main_form.chk_software_linux.isChecked():
-            self.main_app.skip_reports.append('rpt_software_linux')
+            self.main_app.scar_conf.append('skip_reports','rpt_software_linux')
 
         if not self.main_form.chk_software_windows.isChecked():
-            self.main_app.skip_reports.append('rpt_software_windows')
+            self.main_app.scar_conf.append('skip_reports','rpt_software_windows')
 
         if not self.main_form.chk_summary.isChecked():
-            self.main_app.skip_reports.append('rpt_summary')
+            self.main_app.scar_conf.append('skip_reports','rpt_summary')
 
         if not self.main_form.chk_test_plan.isChecked():
-            self.main_app.skip_reports.append('rpt_test_plan')
-
+            self.main_app.scar_conf.append('skip_reports','rpt_test_plan')
 
         self.main_app.generate_reports()
+        self.main_form.btn_execute.setEnabled(True)
 
     def show_about(self):
         logging.info('About Shown')
@@ -438,13 +457,10 @@ To utilize the tool, follow the steps below:
         self.main_form.action50_Hosts.triggered.connect( partial(self.merge_nessus, 50) )
         self.main_form.actionAll_Hosts.triggered.connect( partial(self.merge_nessus, 0) )
 
-
-
-        self.main_form.actionSplit_Nessus.triggered.connect( self.split_nessus )
+        self.main_form.actionSplit_Nessus.triggered.connect( self.split_nessus )        
         
         self.main_form.actionUpdate_CKL.triggered.connect( self.update_ckl )
         
-
         self.main_form.actionAbout.triggered.connect( self.show_about )
         self.main_form.actionHelp.triggered.connect( self.show_help )
 
