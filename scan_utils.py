@@ -179,7 +179,7 @@ class ScanUtils():
             host_tree = host_nessus.getroottree()
             host_tree.write(report_name) 
         
-        status = f"Merged Nessus File is in results folder"
+        status = f"Split Nessus File is in results folder"
         logging.info(status)
         print(status)
         if main_app.main_window:
