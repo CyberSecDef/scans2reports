@@ -1899,6 +1899,8 @@ If the CCI is linked to a control that is inherited or not in the package, chang
     <addaction name="actionSplit_Nessus"/>
     <addaction name="separator"/>
     <addaction name="actionUpdate_CKL"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_Results"/>
    </widget>
    <addaction name="mnu_file"/>
    <addaction name="menuScans"/>
@@ -1983,6 +1985,11 @@ If the CCI is linked to a control that is inherited or not in the package, chang
   <action name="actionUpdate_CKL">
    <property name="text">
     <string>Update CKL</string>
+   </property>
+  </action>
+  <action name="actionOpen_Results">
+   <property name="text">
+    <string>Open Results</string>
    </property>
   </action>
  </widget>

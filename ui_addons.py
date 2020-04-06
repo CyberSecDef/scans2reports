@@ -2,6 +2,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import os.path
 import re
 import sys
+
+import os
+import platform
+import subprocess
+
 import time
 import pprint
 import dumper
@@ -47,7 +52,7 @@ class UiAddons():
         self.main_form.tbl_selected_scans.horizontalHeader().setSortIndicatorShown(True)
         self.main_form.tbl_scan_summary.horizontalHeader().setSortIndicatorShown(True)
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
-        logging.basicConfig(filename='{self.main_app.applcation_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
+        logging.basicConfig(filename='{self.main_app.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
 
 
     def btn_select_scan_files_on_click(self):
@@ -296,6 +301,16 @@ class UiAddons():
                 print('Splitting {}'.format(file))
                 ScanUtils.split_nessus_file(file, self.main_app)
 
+    def open_results(self):
+        path = os.path.join( self.main_app.scar_conf.get('application_path') , "results")
+        if platform.system() == "Windows":
+            os.startfile(path)
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", path])
+        else:
+            subprocess.Popen(["xdg-open", path])
+    
+    
     def update_ckl(self):
         logging.info('Update CKL Clicked')
 
@@ -460,6 +475,10 @@ To utilize the tool, follow the steps below:
         self.main_form.actionSplit_Nessus.triggered.connect( self.split_nessus )        
         
         self.main_form.actionUpdate_CKL.triggered.connect( self.update_ckl )
+        
+        self.main_form.actionOpen_Results.triggered.connect( self.open_results )
+        
+        
         
         self.main_form.actionAbout.triggered.connect( self.show_about )
         self.main_form.actionHelp.triggered.connect( self.show_help )

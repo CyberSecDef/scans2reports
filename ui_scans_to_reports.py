@@ -700,6 +700,8 @@ class UiScansToReports(object):
         self.action15_Hosts.setObjectName("action15_Hosts")
         self.actionUpdate_CKL = QtWidgets.QAction(ScansToReports)
         self.actionUpdate_CKL.setObjectName("actionUpdate_CKL")
+        self.actionOpen_Results = QtWidgets.QAction(ScansToReports)
+        self.actionOpen_Results.setObjectName("actionOpen_Results")
         self.mnu_file.addAction(self.actionSelect)
         self.mnu_file.addAction(self.actionParse_Scans)
         self.mnu_file.addAction(self.actionExecute)
@@ -718,6 +720,8 @@ class UiScansToReports(object):
         self.menuScans.addAction(self.actionSplit_Nessus)
         self.menuScans.addSeparator()
         self.menuScans.addAction(self.actionUpdate_CKL)
+        self.menuScans.addSeparator()
+        self.menuScans.addAction(self.actionOpen_Results)
         self.mnu_main.addAction(self.mnu_file.menuAction())
         self.mnu_main.addAction(self.menuScans.menuAction())
         self.mnu_main.addAction(self.mnu_help.menuAction())
@@ -826,7 +830,7 @@ class UiScansToReports(object):
         self.lblExlcudePlugins.setToolTip(_translate("ScansToReports", "Some commands do not require new ACAS plugins to be included in part of a package, normally plugins that have been released within the last 30 days.  Insert the number of days to \'skip\' here, or enter 0 to include all plugins."))
         self.lblExlcudePlugins.setText(_translate("ScansToReports", "Exclude ACAS Plugins Published Less Than X Days Ago: (enter 0 to disable)"))
         self.lblTestResultsProcessing.setToolTip(_translate("ScansToReports", "Add All Findings \n"
-"Process as Norm and add all findings to the POAM/RAR\n"
+"Process as Normal and add all findings to the POAM/RAR\n"
 "\n"
 "Marked as Closed\n"
 "If the CCI is linked to a control that is inherited or not in the package, mark as  completed\n"
@@ -860,6 +864,7 @@ class UiScansToReports(object):
         self.actionAll_Hosts.setText(_translate("ScansToReports", "All Hosts"))
         self.action15_Hosts.setText(_translate("ScansToReports", "15 Hosts"))
         self.actionUpdate_CKL.setText(_translate("ScansToReports", "Update CKL"))
+        self.actionOpen_Results.setText(_translate("ScansToReports", "Open Results"))
 
 
 if __name__ == "__main__":
