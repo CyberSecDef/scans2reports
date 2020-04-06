@@ -826,7 +826,7 @@ class UiScansToReports(object):
         self.lblExlcudePlugins.setToolTip(_translate("ScansToReports", "Some commands do not require new ACAS plugins to be included in part of a package, normally plugins that have been released within the last 30 days.  Insert the number of days to \'skip\' here, or enter 0 to include all plugins."))
         self.lblExlcudePlugins.setText(_translate("ScansToReports", "Exclude ACAS Plugins Published Less Than X Days Ago: (enter 0 to disable)"))
         self.lblTestResultsProcessing.setToolTip(_translate("ScansToReports", "Add All Findings \n"
-"Process as Norma and add all findings to the POAM/RARl\n"
+"Process as Norm and add all findings to the POAM/RAR\n"
 "\n"
 "Marked as Closed\n"
 "If the CCI is linked to a control that is inherited or not in the package, mark as  completed\n"

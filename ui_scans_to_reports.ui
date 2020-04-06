@@ -1481,7 +1481,7 @@ QCheckBox{
          </property>
          <property name="toolTip">
           <string>Add All Findings 
-Process as Norma and add all findings to the POAM/RARl
+Process as Normal and add all findings to the POAM/RAR
 
 Marked as Closed
 If the CCI is linked to a control that is inherited or not in the package, mark as  completed
