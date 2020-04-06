@@ -1989,7 +1989,7 @@ If the CCI is linked to a control that is inherited or not in the package, chang
   </action>
   <action name="actionOpen_Results">
    <property name="text">
-    <string>Open Results</string>
+    <string>Open Results Folder</string>
    </property>
   </action>
  </widget>

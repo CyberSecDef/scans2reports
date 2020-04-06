@@ -864,7 +864,7 @@ class UiScansToReports(object):
         self.actionAll_Hosts.setText(_translate("ScansToReports", "All Hosts"))
         self.action15_Hosts.setText(_translate("ScansToReports", "15 Hosts"))
         self.actionUpdate_CKL.setText(_translate("ScansToReports", "Update CKL"))
-        self.actionOpen_Results.setText(_translate("ScansToReports", "Open Results"))
+        self.actionOpen_Results.setText(_translate("ScansToReports", "Open Results Folder"))
 
 
 if __name__ == "__main__":
