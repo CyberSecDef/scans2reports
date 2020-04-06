@@ -932,7 +932,7 @@ border-radius: 15px;
             <string>Enter the Name of the Base or Command the package belongs to.</string>
            </property>
            <property name="placeholderText">
-            <string>Command (NSWC DD)</string>
+            <string>Organization Name</string>
            </property>
           </widget>
          </item>
@@ -1008,7 +1008,7 @@ border-radius: 15px;
             <string>Enter the Name of the main Point of Contact for the package</string>
            </property>
            <property name="placeholderText">
-            <string>John Doe</string>
+            <string>POC Name</string>
            </property>
           </widget>
          </item>
@@ -1052,7 +1052,7 @@ border-radius: 15px;
             <string>Enter the Phone Number for the main Point of Contact for the package</string>
            </property>
            <property name="placeholderText">
-            <string>800-555-1212</string>
+            <string>POC Phone #</string>
            </property>
           </widget>
          </item>
@@ -1096,7 +1096,7 @@ border-radius: 15px;
             <string>Enter the Email for the main Point of Contact for the package</string>
            </property>
            <property name="placeholderText">
-            <string>john.doe@navy.mil</string>
+            <string>POC Email</string>
            </property>
           </widget>
          </item>
