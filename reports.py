@@ -524,12 +524,24 @@ class Reports:
                 predisposing_conditions = self.scar_conf.get('predisposing_conditions')
                 
                 mitigation_statement = ''
-                if str(req['plugin_id']) in selected_mitigations.keys():
-                    mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
-                if str(req['vuln_id']) in selected_mitigations.keys():
-                    mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
-                if str(req['rule_id']) in selected_mitigations.keys():
-                    mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
+                if self.scar_conf.get('mitigation_statements') == 'poam':
+                    if str(req['plugin_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
+                    if str(req['vuln_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
+                    if str(req['rule_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
+                elif self.scar_conf.get('mitigation_statements') == 'ckl' and 'ckl' in req['results'][0]['type'].lower():
+                    mitigation_statement = comments
+                elif self.scar_conf.get('mitigation_statements') == 'both':
+                    if str(req['plugin_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
+                    if str(req['vuln_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
+                    if str(req['rule_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
+                    if mitigation_statement.strip() == '' and 'ckl' in req['results'][0]['type'].lower():
+                        mitigation_statement = comments
                 
                 if self.scar_conf.get('test_results') is not None:
                     #test results parsed
@@ -884,13 +896,35 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 objectives = list(set(objectives))
                 objectives = ", ".join( objectives )
 
+                # mitigation_statement = ''
+                # if str(req['plugin_id']) in selected_mitigations.keys():
+                    # mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
+                # if str(req['vuln_id']) in selected_mitigations.keys():
+                    # mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
+                # if str(req['rule_id']) in selected_mitigations.keys():
+                    # mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
+
+
                 mitigation_statement = ''
-                if str(req['plugin_id']) in selected_mitigations.keys():
-                    mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
-                if str(req['vuln_id']) in selected_mitigations.keys():
-                    mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
-                if str(req['rule_id']) in selected_mitigations.keys():
-                    mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
+                if self.scar_conf.get('mitigation_statements') == 'poam':
+                    if str(req['plugin_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
+                    if str(req['vuln_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
+                    if str(req['rule_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
+                elif self.scar_conf.get('mitigation_statements') == 'ckl' and 'ckl' in req['results'][0]['type'].lower():
+                    mitigation_statement = comments
+                elif self.scar_conf.get('mitigation_statements') == 'both':
+                    if str(req['plugin_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
+                    if str(req['vuln_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
+                    if str(req['rule_id']) in selected_mitigations.keys():
+                        mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
+                    if mitigation_statement.strip() == '' and 'ckl' in req['results'][0]['type'].lower():
+                        mitigation_statement = comments
+
 
 
                 if self.scar_conf.get('test_results') is not None:

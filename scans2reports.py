@@ -23,7 +23,7 @@ import re
 import pickle
 
 from scar_pickles import SCARPickles
-from scar_enums import TestResultOptions
+from scar_enums import TestResultOptions, MitigationStatementOptions
 
 from enum import Enum
 from lxml import etree
@@ -108,6 +108,12 @@ class Scans2Reports:
         else:
             self.scar_conf.set('test_results', args.test_results)
 
+        if args.mitigation_statements is None:
+            if self.scar_conf.get('mitigation_statements') is None:
+                self.scar_conf.set('mitigation_statements', 'blank')
+        else:
+            self.scar_conf.set('mitigation_statements', args.mitigation_statements)
+
         if args.threads == 0:
             if self.scar_conf.get('num_threads') is None:
                 self.scar_conf.set('num_threads', int(psutil.cpu_count()) - 2 + 1)
@@ -182,9 +188,10 @@ class Scans2Reports:
 
         #start parse threads
         for i in range( self.scar_conf.get('num_threads') ):
-            worker = Thread(target=self.start_parse_thread, args=(self.q, self.scan_results))
-            worker.setDaemon(True)
-            worker.start()
+            if i <= num_files:
+                worker = Thread(target=self.start_parse_thread, args=(self.q, self.scan_results))
+                worker.setDaemon(True)
+                worker.start()
 
         #make sure the main gui doesn't get blocked while waiting for queue to finish
         if main_app.main_window:
@@ -214,8 +221,14 @@ class Scans2Reports:
 
         #gather test results from parsed files
         self.scar_data.set('test_result_data', next(iter([ i for i in self.scan_results if type(i) == dict and 'type' in i and i['type'] == 'Test Results' ]),'') )
-        self.scar_data.set('mitigations', next(iter([ i for i in self.scan_results if type(i) == dict and 'type' in i and i['type'] == 'Mitigations' ]),'') )
-
+        
+        mitigations = []
+        for mitigation_bundle in iter([ i for i in self.scan_results if type(i) == dict and 'type' in i and i['type'] == 'Mitigations' ]):
+            for mitigation_row in mitigation_bundle['mitigations']:
+                mitigations.append(mitigation_row)
+        
+        self.scar_data.set('mitigations', {'mitigations':mitigations,'type':'Mitigations'})
+        
         #gather scan results from parsed files
         self.scan_results = [ i for i in self.scan_results if type(i) == ScanFile ]
 
@@ -263,6 +276,8 @@ class Scans2Reports:
                         data = scan_parser.parseNessus(file)
                     elif extension == '.xlsx':
                         data = scan_parser.parseXlsx(file)
+                    elif extension == '.csv':
+                        data = scan_parser.parseCsv(file)
                     else:
                         data = None
                         logging.warning(f'Skipping scan file: {str(file)}');
@@ -340,6 +355,7 @@ optional.add_argument('-i', '--skip-info', help='Skip Informational Findings', a
 optional.add_argument('-fd', '--finding-details', help='Whether or not to include the finding details in the POAM/RAR Comments', action='store_true')
 optional.add_argument('-g', '--gui', help='Use the GUI instead of the console', action='store_true')
 optional.add_argument('-l', '--lower-risk', help='Automatically Lower Risk on POAM', action='store_true')
+optional.add_argument('--mitigation-statements', help='Import Mitigation Methods (blank, poam, ckl, both)',  type=MitigationStatementOptions, choices=list(MitigationStatementOptions))
 optional.add_argument('--predisposing-conditions', help='Enter default Predisposing Conditions')
 optional.add_argument('-s', '--scd', help='Prefill Estimated SCD to POAM', action='store_true')
 optional.add_argument('--test-results', help='Add, Close or Convert CCI Mismatches',  type=TestResultOptions, choices=list(TestResultOptions))

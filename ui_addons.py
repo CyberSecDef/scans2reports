@@ -70,6 +70,15 @@ class UiAddons():
         elif self.main_app.scar_conf.get('test_results') == 'convert':
             self.main_form.cboTestResultFunc.setCurrentIndex(2)
         
+        if self.main_app.scar_conf.get('mitigation_statements') == 'blank':
+            self.main_form.cboMitigationStatements.setCurrentIndex(0)
+        elif self.main_app.scar_conf.get('mitigation_statements') == 'poam':
+            self.main_form.cboMitigationStatements.setCurrentIndex(1)
+        elif self.main_app.scar_conf.get('mitigation_statements') == 'ckl':
+            self.main_form.cboMitigationStatements.setCurrentIndex(2)
+        elif self.main_app.scar_conf.get('mitigation_statements') == 'both':
+            self.main_form.cboMitigationStatements.setCurrentIndex(3)
+        
         if self.main_app.scar_conf.get('threads') == 1:
             self.main_form.cboProcIntensity.setCurrentIndex(1)
         elif self.main_app.scar_conf.get('threads') == 2:
@@ -96,7 +105,7 @@ class UiAddons():
                 extension = os.path.splitext(filepath)[1].lower()
 
                 if filepath not in filepaths:
-                    if extension in ['.ckl', '.xml', '.nessus']:
+                    if extension in ['.ckl', '.xml', '.nessus', '.csv', '.xlsx']:
                         logging.info('Adding file to queue: %s', filepath)
                         self.main_form.tbl_selected_scans.insertRow(0)
 
@@ -132,7 +141,14 @@ class UiAddons():
                 'Mark as Closed' : 'close',
                 'Convert to CM-6.5' : 'convert'
             }[self.main_form.cboTestResultFunc.currentText()] )
-
+            
+        self.main_app.scar_conf.set('mitigation_statements',  {
+                'Leave Blank' : 'blank',
+                'Existing POAM or Answerfile CSV' : 'poam',
+                'CKL Comments' : 'ckl',
+                'POAM/CSV, then CKL (Prefer Existing POAM/CSV)' : 'both'
+            }[self.main_form.cboMitigationStatements.currentText()] )
+            
         self.main_app.scar_conf.set('num_threads', 1)
         self.main_app.scar_conf.set('threads', 1)
         if self.main_form.cboProcIntensity.currentText() == 'Light Load':
@@ -380,6 +396,13 @@ class UiAddons():
                 'Convert to CM-6.5' : 'convert'
             }[self.main_form.cboTestResultFunc.currentText()] )
             
+        self.main_app.scar_conf.set('mitigation_statements',  {
+                'Leave Blank' : 'blank',
+                'Existing POAM or Answerfile CSV' : 'poam',
+                'CKL Comments' : 'ckl',
+                'POAM/CSV, then CKL (Prefer Existing POAM/CSV)' : 'both'
+            }[self.main_form.cboMitigationStatements.currentText()] )
+            
         if not self.main_form.chk_acas_unique_iavm.isChecked():
             self.main_app.scar_conf.append('skip_reports','rpt_acas_uniq_iava')
 
@@ -606,7 +629,7 @@ class FileDrop(QtWidgets.QLabel):
         current_row = 0
         for filepath in filepaths:
             extension = os.path.splitext(filepath)[1].lower()
-            if extension in ['.ckl', '.xml', '.nessus', '.xlsx']:
+            if extension in ['.ckl', '.xml', '.nessus', '.xlsx', '.csv']:
                 btn = QtWidgets.QPushButton(self.main_form.tbl_selected_scans)
                 btn.setText('Del')
                 btn.clicked.connect(self.remove_row)

@@ -1560,7 +1560,7 @@ If the CCI is linked to a control that is inherited or not in the package, chang
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>170</y>
+           <y>190</y>
            <width>121</width>
            <height>21</height>
           </rect>
@@ -1576,13 +1576,62 @@ If the CCI is linked to a control that is inherited or not in the package, chang
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>190</y>
+           <y>210</y>
            <width>381</width>
-           <height>91</height>
+           <height>71</height>
           </rect>
          </property>
          <property name="placeholderText">
           <string>Enter Default Predisposing Conditions</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="cboMitigationStatements">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>170</y>
+           <width>261</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <item>
+          <property name="text">
+           <string>Leave Blank</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Existing POAM or Answerfile CSV</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>CKL Comments</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>POAM/CSV, then CKL (Prefer Existing POAM/CSV)</string>
+          </property>
+         </item>
+        </widget>
+        <widget class="QLabel" name="lblMitigationStatements">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>170</y>
+           <width>121</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: none;</string>
+         </property>
+         <property name="text">
+          <string>Mitigation Statements</string>
          </property>
         </widget>
        </widget>

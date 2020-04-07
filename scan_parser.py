@@ -34,9 +34,49 @@ class ScanParser:
 
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
         logging.basicConfig(filename=f"{self.scar_conf.get('application_path')}/scans2reports.log", level=logging.INFO, format=FORMAT)
+
+    def parseCsv(self, filename):
+        df = pd.read_csv(filename)
+        if 'Mitigation' in df.keys() and 'Finding ID' in df.keys():
+            mitigation_results = {}
+            mitigation_results['type'] = 'Mitigations'
+            mitigation_results['mitigations'] = []
+            
+            for index, row in df.iterrows():
+                source = row['Finding ID'].strip()
+                
+                plugin_id = re.search('^([0-9]{3,6})$', source, re.IGNORECASE)
+                plugin_id = plugin_id.group(1).strip() if plugin_id is not None else ''
+            
+                rule_id = re.search('^(SV-[0-9.]+r[0-9]+_rule)$', source, re.IGNORECASE)
+                rule_id = rule_id.group(1).strip() if rule_id is not None else ''
+            
+                vuln_id = re.search("\W(V-[0-9]+)", source.upper())
+                vuln_id = vuln_id.group(1).strip() if vuln_id is not None else ''
+                
+                if vuln_id == '':
+                    vuln_id = re.search("^(V-[0-9]+)", source.upper())
+                    vuln_id = vuln_id.group(1).strip() if vuln_id is not None else ''
+                    
+                    
+            
+                mitigation = row['Mitigation']
+                
+                mitigation_results['mitigations'].append({
+                    'plugin_id': plugin_id,
+                    'rule_id': rule_id,
+                    'vuln_id': vuln_id,
+                    'control': '',
+                    'mitigation': mitigation,
+                    'source': source
+                })
+            
+            return mitigation_results
+            
     
     def parseXlsx(self, filename):
 
+        #df is the data format read.  used to determine the type of excel file being read prior to looping the rows.
         df = pd.read_excel(filename, None);
 
         if 'POAM' in df.keys():
@@ -48,7 +88,7 @@ class ScanParser:
             
             for poam in poam_rows.index:
             
-                source = poam_rows['Security Checks'][poam]
+                source = str(poam_rows['Security Checks'][poam]).strip()
                 
                 plugin_id = re.search('^([0-9]{3,6})$', source.strip())
                 plugin_id = plugin_id.group(1).strip() if plugin_id is not None else ''
@@ -56,9 +96,13 @@ class ScanParser:
                 rule_id = re.search('(SV-[0-9.]+r[0-9]+_rule)', source.strip())
                 rule_id = rule_id.group(1).strip() if rule_id is not None else ''
             
-                vuln_id = re.search('([^S]V-[0-9]+)', source.strip())
+                vuln_id = re.search("\W(V-[0-9]+)", source.upper())
                 vuln_id = vuln_id.group(1).strip() if vuln_id is not None else ''
-            
+                
+                if vuln_id == '':
+                    vuln_id = re.search("^(V-[0-9]+)", source.upper())
+                    vuln_id = vuln_id.group(1).strip() if vuln_id is not None else ''
+                
                 control = poam_rows['Security Control Number (NC/NA controls only)'][poam]
                 
                 mitigation = poam_rows['Mitigations'][poam]
@@ -68,7 +112,8 @@ class ScanParser:
                     'rule_id': rule_id,
                     'vuln_id': vuln_id,
                     'control': control,
-                    'mitigation': mitigation
+                    'mitigation': mitigation,
+                    'source': source
                 })
             
             return poam_results

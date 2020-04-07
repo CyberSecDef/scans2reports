@@ -7,3 +7,13 @@ class TestResultOptions(Enum):
     
     def __str__(self):
         return self.value
+        
+        
+class MitigationStatementOptions(Enum):
+    blank = 'blank'
+    poam  = 'poam'
+    ckl   = 'ckl'
+    both  = 'both'
+    
+    def __str__(self):
+        return self.value
