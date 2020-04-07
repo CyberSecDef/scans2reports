@@ -3,7 +3,7 @@
 
 # NOTES:
 # Python Path: C:\Users\admin\AppData\Local\Programs\Python\Python37
-# Convert UI to PU: .\Scripts\pyuic5.exe -x S:\Misc\Development\scans2reports\src\ui_scans_to_reports.ui -o S:\Misc\Development\scans2reports\src\ui_scans_to_reports.py
+# Convert UI to PY: .\Scripts\pyuic5.exe -x S:\Misc\Development\scans2reports\src\ui_scans_to_reports.ui -o S:\Misc\Development\scans2reports\src\ui_scans_to_reports.py
 # Execute Applet: clear; .\python.exe S:\Misc\Development\scans2reports\src\scans2reports.py
 # from ui_addons import FileDrop
 
