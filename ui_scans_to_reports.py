@@ -837,7 +837,7 @@ class UiScansToReports(object):
 "\n"
 "Convert to CM-6.5\n"
 "If the CCI is linked to a control that is inherited or not in the package, change control to CM-6"))
-        self.lblTestResultsProcessing.setText(_translate("ScansToReports", "Test Result Function"))
+        self.lblTestResultsProcessing.setText(_translate("ScansToReports", "Test Result Action"))
         self.cboTestResultFunc.setItemText(0, _translate("ScansToReports", "Add All Findings"))
         self.cboTestResultFunc.setItemText(1, _translate("ScansToReports", "Mark as Closed"))
         self.cboTestResultFunc.setItemText(2, _translate("ScansToReports", "Convert to CM-6.5"))

@@ -1493,7 +1493,7 @@ If the CCI is linked to a control that is inherited or not in the package, chang
           <string notr="true">background: none;</string>
          </property>
          <property name="text">
-          <string>Test Result Function</string>
+          <string>Test Result Action</string>
          </property>
         </widget>
         <widget class="QComboBox" name="cboTestResultFunc">

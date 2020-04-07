@@ -11,6 +11,7 @@ import jmespath
 import pickle
 
 from scar_pickles import SCARPickles
+from collections.abc import Iterable
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from functools import reduce
@@ -512,15 +513,15 @@ class Reports:
 
                 # pylint: disable=C0330
                 scd = ""
-                if self.scar_data.get('scd'):
-                    if self.scar_data.get('lower_risk'):
+                if self.scar_conf.get('scd'):
+                    if self.scar_conf.get('lower_risk'):
                         scd = datetime.date.today() + datetime.timedelta( ([1095, 365, 90, 30])[Utils.clamp( (int(Utils.risk_val(req['severity'], 'NUM')) - 1), 1, 3 )] )
                     else:
                         scd = datetime.date.today() + datetime.timedelta( ([1095, 365, 90, 30])[Utils.clamp( (int(Utils.risk_val(req['severity'], 'NUM'))), 1, 3 )] )
                 else:
                     scd = ''
 
-                predisposing_conditions = self.scar_data.get('predisposing_conditions')
+                predisposing_conditions = self.scar_conf.get('predisposing_conditions')
                 
                 mitigation_statement = ''
                 if str(req['plugin_id']) in selected_mitigations.keys():
@@ -530,23 +531,33 @@ class Reports:
                 if str(req['rule_id']) in selected_mitigations.keys():
                     mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
                 
-                if self.scar_data.get('test_results') is not None:
+                if self.scar_conf.get('test_results') is not None:
                     #test results parsed
                     
                     if req['cci'].strip() != '':
                         #cci is present
                         
-                        if self.scar_data.get('test_results') == 'add':
+                        if(
+                            self.scar_conf.get('test_results') == 'add' or
+                            (
+                                isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                not isinstance(self.scar_data.get('test_result_data'), str)
+                            )
+                        ):
                             #add option selected, proceed as normal
                             rmf_controls = rmf_controls
                             comments = f"{ req['cci']}\n\n{comments}"
                             status = f"{ Utils.status(req['status'], 'HUMAN') }"
                             
-                        elif self.scar_data.get('test_results') == 'close':
+                        elif self.scar_conf.get('test_results') == 'close':
                             #close option selected, inheritted or CCI's not in package will be closed.
                             #non-inheritted controls that are present will proceed as normal
                             
-                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys():
+                            if(
+                                isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                not isinstance(self.scar_data.get('test_result_data'), str) and 
+                                req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys()
+                            ):
                                 #the current cci is not in the implementation plan, map to close
                                 comments = f"{ req['cci']}\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being marked as 'Completed' by default. \n\n{comments}"
                                 rmf_controls = rmf_controls
@@ -555,8 +566,12 @@ class Reports:
                                 #the current cci is part of the implementation plan
                             
                                 if(
-                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
-                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                    not isinstance(self.scar_data.get('test_result_data'), str) and 
+                                    (
+                                        self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                        self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    )
                                 ):
                                     #the current cci is marked as inheritted.  Close the requirement
                                     comments = f"{ req['cci']}\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being marked as completed by default. \n\n{comments}"
@@ -567,10 +582,14 @@ class Reports:
                                     rmf_controls = rmf_controls
                                     comments = f"{ req['cci']}\n\n{comments}"
                                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
-                        elif self.scar_data.get('test_results') == 'convert':
+                        elif self.scar_conf.get('test_results') == 'convert':
                             #convert option selected, inheritted or CCI's not in package will be converted to CM-6.5
                             #non-inheritted controls that are present will proceed as normal
-                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys():
+                            if(
+                                isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                not isinstance(self.scar_data.get('test_result_data'), str) and 
+                                req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys()
+                            ):
                                 #the current cci is not in the implementation plan, map to CM-6.5
                                 comments = f"CCI-000366\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being mapped to CCI-000366 CM-6.5.\n\n{comments}"
                                 req['cci'] = 'CCI-000366'
@@ -578,10 +597,13 @@ class Reports:
                                 status = f"{ Utils.status(req['status'], 'HUMAN') }"
                             else:
                                 #the current cci is part of the implementation plan
-                            
                                 if(
-                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
-                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                    not isinstance(self.scar_data.get('test_result_data'), str) and 
+                                    (
+                                        self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                        self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    )
                                 ):
                                     #the current cci is marked as inheritted.  Close the requirement
                                     comments = f"CCI-000366\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being mapped to CCI-000366 CM-6.5. \n\n{comments}"
@@ -612,7 +634,7 @@ class Reports:
                     comments = f"{ req['cci']}\n\n{comments}"
                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
                     
-                if self.scar_data.get('include_finding_details'):
+                if self.scar_conf.get('include_finding_details'):
                     comments = f"{comments}\n\nFinding Details:\n{finding_details}"
                 
                 req_data = {
@@ -626,7 +648,7 @@ class Reports:
                     'Milestone with Completion Dates'                   : "{m} {s[0]} updates {s[1]}/{s[2]}/{s[0]}".format(
 s=str(scd).split('-'),
 m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
-) if self.scar_data.get('scd') else '',
+) if self.scar_conf.get('scd') else '',
                     'Milestone Changes'                                 : '',
                     'Source Identifying Control Vulnerability'          : f"{prefix} {req['scan_title']}",
                     'Status'                                            : status,
@@ -643,7 +665,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Impact Description'                                : '',
                     'Residual Risk Level'                               : Utils.risk_val(req['severity'], 'POAM'),
                     'Recommendations'                                   : req['solution'],
-                    'Resulting Residual Risk after Proposed Mitigations': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.scar_data.get('lower_risk') else Utils.risk_val(req['severity'], 'POAM'),
+                    'Resulting Residual Risk after Proposed Mitigations': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.scar_conf.get('lower_risk') else Utils.risk_val(req['severity'], 'POAM'),
                 }
 
 
@@ -653,7 +675,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     report.append(req_data)
                 elif( str(req['publication_date']).strip() == '' ):
                     report.append(req_data)
-                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.scar_data.get('exclude_plugins') ) ):
+                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.scar_conf.get('exclude_plugins') ) ):
                     report.append(req_data)
 
                             
@@ -871,23 +893,33 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
 
 
-                if self.scar_data.get('test_results') is not None:
+                if self.scar_conf.get('test_results') is not None:
                     #test results parsed
                     
                     if req['cci'].strip() != '':
                         #cci is present
                         
-                        if self.scar_data.get('test_results') == 'add':
+                        if(
+                            self.scar_conf.get('test_results') == 'add' or
+                            (
+                                isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                not isinstance(self.scar_data.get('test_result_data'), str)
+                            )
+                        ):
                             #add option selected, proceed as normal
                             rmf_controls = rmf_controls
                             comments = f"{ req['cci']}\n\n{comments}"
                             status = f"{ Utils.status(req['status'], 'HUMAN') }"
                             
-                        elif self.scar_data.get('test_results') == 'close':
+                        elif self.scar_conf.get('test_results') == 'close':
                             #close option selected, inheritted or CCI's not in package will be closed.
                             #non-inheritted controls that are present will proceed as normal
                             
-                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys():
+                            if(
+                                isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                not isinstance(self.scar_data.get('test_result_data'), str) and 
+                                req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys()
+                            ):
                                 #the current cci is not in the implementation plan, map to close
                                 comments = f"{ req['cci']}\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being marked as 'Completed' by default. \n\n{comments}"
                                 rmf_controls = rmf_controls
@@ -896,8 +928,12 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                 #the current cci is part of the implementation plan
                             
                                 if(
-                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
-                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                    not isinstance(self.scar_data.get('test_result_data'), str) and 
+                                    (
+                                        self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                        self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    )
                                 ):
                                     #the current cci is marked as inheritted.  Close the requirement
                                     comments = f"{ req['cci']}\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being marked as completed by default. \n\n{comments}"
@@ -908,10 +944,18 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                     rmf_controls = rmf_controls
                                     comments = f"{ req['cci']}\n\n{comments}"
                                     status = f"{ Utils.status(req['status'], 'HUMAN') }"
-                        elif self.scar_data.get('test_results') == 'convert':
+                        elif(
+                            isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                            not isinstance(self.scar_data.get('test_result_data'), str) and 
+                            self.scar_conf.get('test_results') == 'convert'
+                        ):
                             #convert option selected, inheritted or CCI's not in package will be converted to CM-6.5
                             #non-inheritted controls that are present will proceed as normal
-                            if  req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys():
+                            if(
+                                isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                not isinstance(self.scar_data.get('test_result_data'), str) and  
+                                req['cci'].strip().replace('CCI-','').zfill(6) not in self.scar_data.get('test_result_data').keys()
+                            ):
                                 #the current cci is not in the implementation plan, map to CM-6.5
                                 comments = f"CCI-000366\n\nThis vulnerability is mapped to { req['cci']} {rmf_controls}, however this CCI/AP is not part of the package baseline.  Therefore this requirement is being mapped to CCI-000366 CM-6.5.\n\n{comments}"
                                 req['cci'] = 'CCI-000366'
@@ -919,10 +963,13 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                                 status = f"{ Utils.status(req['status'], 'HUMAN') }"
                             else:
                                 #the current cci is part of the implementation plan
-                            
                                 if(
-                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
-                                    self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    isinstance(self.scar_data.get('test_result_data'), Iterable) and 
+                                    not isinstance(self.scar_data.get('test_result_data'), str) and 
+                                    (
+                                        self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['implementation'] == 'Inherited' or 
+                                        self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited'] != 'Local'
+                                    )
                                 ):
                                     #the current cci is marked as inheritted.  Close the requirement
                                     comments = f"CCI-000366\n\nThis vulnerability was originally mapped to { req['cci']} {rmf_controls}, however this CCI/AP is inheritted from {self.scar_data.get('test_result_data')[ req['cci'].strip().replace('CCI-','').zfill(6) ]['inherited']}.  Therefore it is being mapped to CCI-000366 CM-6.5. \n\n{comments}"
@@ -964,7 +1011,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Devices Affected (16b.1)': hosts,
                     'Security Objectives (C-I-A) (16c)': objectives,
                     'Raw Test Result (16d)': Utils.risk_val(req['severity'], 'CAT'),
-                    'Predisposing Condition(s) (16d.1)': str( self.scar_data.get('predisposing_conditions') ),
+                    'Predisposing Condition(s) (16d.1)': str( self.scar_conf.get('predisposing_conditions') ),
                     'Technical Mitigation(s) (16d.2)': '',
                     'Severity or Pervasiveness (VL-VH) (16d.3)': Utils.risk_val(req['severity'], 'VL-VH'),
                     'Relevance of Threat (VL-VH) (16e)': 'High',
@@ -974,7 +1021,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     'Impact Description (16h)': '',
                     'Risk (Cells 16f & 16g) (VL-VH) (16i)': Utils.risk_val(req['severity'], 'VL-VH'),
                     'Proposed Mitigations (From POA&M) (16j)': mitigation_statement,
-                    'Residual Risk (After Proposed Mitigations) (16k)': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.scar_data.get('lower_risk') else Utils.risk_val(req['severity'], 'VL-VH'),
+                    'Residual Risk (After Proposed Mitigations) (16k)': Utils.risk_val(str(Utils.clamp((int(Utils.risk_val(req['severity'], 'NUM')) - 1), 0, 3)), 'POAM') if self.scar_conf.get('lower_risk') else Utils.risk_val(req['severity'], 'VL-VH'),
                     'Recommendations (16l)': req['solution'],
                     'Comments': f"Status: { status }\n\nGroup ID: {req['grp_id']}\nVuln ID: {req['vuln_id']}\nRule ID: {req['rule_id']}\nPlugin ID: {req['plugin_id']}\n\n{comments}\n\n{finding_details}"
                 }
@@ -985,7 +1032,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     report.append(req_data)
                 elif( str(req['publication_date']).strip() == '' ):
                     report.append(req_data)
-                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.scar_data.get('exclude_plugins') ) ):
+                elif( datetime.datetime.strptime(req['publication_date'],'%Y/%m/%d')  < datetime.datetime.today() - datetime.timedelta(days=self.scar_conf.get('exclude_plugins') ) ):
                     report.append(req_data)
 
         row = 0

@@ -215,7 +215,7 @@ class ScanParser:
                     severity = int(next(iter(req.xpath("./@severity")),''))
                     plugin_id = int(next(iter(req.xpath("./@pluginID")),''))
                     
-                    if not self.scar_data.get('skip_info') or ( severity != 0 or plugin_id in self.scar_data.get('data_mapping')['acas_required_info'] ):
+                    if not self.scar_conf.get('skip_info') or ( severity != 0 or plugin_id in self.scar_data.get('data_mapping')['acas_required_info'] ):
                         req = {
                             'cci'              : '',
                             'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),

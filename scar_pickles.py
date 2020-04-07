@@ -1,3 +1,4 @@
+import pprint
 import sys
 import os
 import pickle
@@ -23,6 +24,14 @@ class SCARPickles(dict):
             self['application_path'] = os.path.dirname(os.path.abspath(__file__))
         
         self['pickle_name'] = pickle_name
+        
+        #see if the pickle already exists
+        existing_path = os.path.join( self['application_path'], 'data', self['pickle_name'] + '.pkl' )
+        existing_pickle = SCARPickles.loader( existing_path )
+        
+        if existing_pickle and isinstance(existing_pickle, Iterable):
+            for key in existing_pickle.keys():
+                self[key] = existing_pickle[key]
         
         if data and isinstance(data, Iterable):
             for key in data.keys():

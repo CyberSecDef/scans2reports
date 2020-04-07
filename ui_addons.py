@@ -17,6 +17,7 @@ import pickle
 from functools import partial
 from utils import Utils
 from scan_utils import ScanUtils
+from scar_enums import TestResultOptions
 
 class QNumericTableWidgetItem (QtWidgets.QTableWidgetItem):
     def __init__ (self, value):
@@ -53,6 +54,30 @@ class UiAddons():
         self.main_form.tbl_scan_summary.horizontalHeader().setSortIndicatorShown(True)
         FORMAT = "[%(asctime)s ] %(levelname)s - %(filename)s; %(lineno)s: %(name)s.%(module)s.%(funcName)s(): %(message)s"
         logging.basicConfig(filename='{self.main_app.application_path}/scans2reports.log', level=logging.INFO, format=FORMAT)
+
+    def update_form_values(self):
+        self.main_form.spnExcludeDays.setValue( self.main_app.scar_conf.get('exclude_plugins') )
+        
+        self.main_form.chkSkipInfo.setChecked( self.main_app.scar_conf.get('skip_info') )
+        self.main_form.chk_lower_risk.setChecked( self.main_app.scar_conf.get('lower_risk') )
+        self.main_form.chk_prefill_scd.setChecked( self.main_app.scar_conf.get('scd') )
+        self.main_form.chkIncludeFindingDetails.setChecked( self.main_app.scar_conf.get('include_finding_details') )
+            
+        if self.main_app.scar_conf.get('test_results') == 'add':
+            self.main_form.cboTestResultFunc.setCurrentIndex(0)
+        elif self.main_app.scar_conf.get('test_results') == 'close':
+            self.main_form.cboTestResultFunc.setCurrentIndex(1)
+        elif self.main_app.scar_conf.get('test_results') == 'convert':
+            self.main_form.cboTestResultFunc.setCurrentIndex(2)
+        
+        if self.main_app.scar_conf.get('threads') == 1:
+            self.main_form.cboProcIntensity.setCurrentIndex(1)
+        elif self.main_app.scar_conf.get('threads') == 2:
+            self.main_form.cboProcIntensity.setCurrentIndex(0)
+        else:
+            self.main_form.cboProcIntensity.setCurrentIndex(2)
+        
+        self.main_form.txtPredisposingCondition.setPlainText( self.main_app.scar_conf.get('predisposing_conditions') )
 
 
     def btn_select_scan_files_on_click(self):
@@ -96,28 +121,33 @@ class UiAddons():
         self.main_app.scar_data.set('phone', self.main_form.txt_phone.text() )
         self.main_app.scar_data.set('email', self.main_form.txt_email.text() )
         
-        self.main_app.scar_data.set('predisposing_conditions', self.main_form.txtPredisposingCondition.toPlainText())
-        self.main_app.scar_data.set('include_finding_details', self.main_form.chkIncludeFindingDetails.isChecked())
-        self.main_app.scar_data.set('skip_info', self.main_form.chkSkipInfo.isChecked())
-        self.main_app.scar_data.set('scd', self.main_form.chk_prefill_scd.isChecked())
-        self.main_app.scar_data.set('lower_risk', self.main_form.chk_lower_risk.isChecked())
-        self.main_app.scar_data.set('exclude_plugins', self.main_form.spnExcludeDays.value())
-        self.main_app.scar_data.set('test_results',  {
+        self.main_app.scar_conf.set('predisposing_conditions', self.main_form.txtPredisposingCondition.toPlainText())
+        self.main_app.scar_conf.set('include_finding_details', self.main_form.chkIncludeFindingDetails.isChecked())
+        self.main_app.scar_conf.set('skip_info', self.main_form.chkSkipInfo.isChecked())
+        self.main_app.scar_conf.set('scd', self.main_form.chk_prefill_scd.isChecked())
+        self.main_app.scar_conf.set('lower_risk', self.main_form.chk_lower_risk.isChecked())
+        self.main_app.scar_conf.set('exclude_plugins', self.main_form.spnExcludeDays.value())
+        self.main_app.scar_conf.set('test_results',  {
                 'Add All Findings' : 'add',
                 'Mark as Closed' : 'close',
                 'Convert to CM-6.5' : 'convert'
             }[self.main_form.cboTestResultFunc.currentText()] )
 
         self.main_app.scar_conf.set('num_threads', 1)
+        self.main_app.scar_conf.set('threads', 1)
         if self.main_form.cboProcIntensity.currentText() == 'Light Load':
             self.main_app.scar_conf.set('num_threads', int(psutil.cpu_count() // 2) + 1)
+            self.main_app.scar_conf.set('threads', 1)
         elif self.main_form.cboProcIntensity.currentText() == 'Normal Load':
             self.main_app.scar_conf.set('num_threads', int(psutil.cpu_count()) - 2 + 1)
+            self.main_app.scar_conf.set('threads', 2)
         else:
             self.main_app.scar_conf.set('num_threads', int(psutil.cpu_count() * 2) - 1)
+            self.main_app.scar_conf.set('threads', 3)
             
         if self.main_app.scar_conf.get('num_threads') <= 0:
             self.main_app.scar_conf.set('num_threads', 1)
+            self.main_app.scar_conf.set('threads', 1)
                 
         logging.info('Parse Scan Files Clicked')
         self.main_form.tbl_scan_summary.setRowCount(0)
@@ -338,20 +368,20 @@ class UiAddons():
         self.main_app.scar_data.set('phone', self.main_form.txt_phone.text() )
         self.main_app.scar_data.set('email', self.main_form.txt_email.text() )
 
-        self.main_app.scar_data.set('predisposing_conditions', self.main_form.txtPredisposingCondition.toPlainText())
-        self.main_app.scar_data.set('include_finding_details', self.main_form.chkIncludeFindingDetails.isChecked())
-        self.main_app.scar_data.set('skip_info', self.main_form.chkSkipInfo.isChecked())
-        self.main_app.scar_data.set('scd', self.main_form.chk_prefill_scd.isChecked())
-        self.main_app.scar_data.set('lower_risk', self.main_form.chk_lower_risk.isChecked())
-        self.main_app.scar_data.set('exclude_plugins', self.main_form.spnExcludeDays.value())
-        self.main_app.scar_data.set('test_results',  {
+        self.main_app.scar_conf.set('predisposing_conditions', self.main_form.txtPredisposingCondition.toPlainText())
+        self.main_app.scar_conf.set('include_finding_details', self.main_form.chkIncludeFindingDetails.isChecked())
+        self.main_app.scar_conf.set('skip_info', self.main_form.chkSkipInfo.isChecked())
+        self.main_app.scar_conf.set('scd', self.main_form.chk_prefill_scd.isChecked())
+        self.main_app.scar_conf.set('lower_risk', self.main_form.chk_lower_risk.isChecked())
+        self.main_app.scar_conf.set('exclude_plugins', self.main_form.spnExcludeDays.value())
+        self.main_app.scar_conf.set('test_results',  {
                 'Add All Findings' : 'add',
                 'Mark as Closed' : 'close',
                 'Convert to CM-6.5' : 'convert'
             }[self.main_form.cboTestResultFunc.currentText()] )
             
         if not self.main_form.chk_acas_unique_iavm.isChecked():
-            self.main_app.scar_conf.append('skip_reports', 'rpt_acas_uniq_iava')
+            self.main_app.scar_conf.append('skip_reports','rpt_acas_uniq_iava')
 
         if not self.main_form.chk_acas_unique_vuln.isChecked():
             self.main_app.scar_conf.append('skip_reports','rpt_acas_uniq_vuln')
