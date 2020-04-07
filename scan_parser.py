@@ -152,7 +152,7 @@ class ScanParser:
                         k,v = line.split(':', 1)
                         port_range = str(v).strip()
                         
-                    if 'Scan Duration' in line:
+                    if 'scan duration' in line.lower():
                         k,v = line.split(':', 1)
                         duration = str(v).strip()
                 
@@ -494,7 +494,7 @@ class ScanParser:
 
                 'filename'     : str(filename),
                 'scan_date'    : time.strftime( '%Y-%m-%dT%H:%M:%S', time.gmtime( os.path.getmtime( filename ))),
-                'duration'     : 0,
+                'duration'     : '',
 
                 'scanner_edition' : '',
                 'title'        : next(iter(tree.xpath("/CHECKLIST/STIGS/iSTIG/STIG_INFO/SI_DATA[./SID_NAME='title']/SID_DATA/text()")), ''),

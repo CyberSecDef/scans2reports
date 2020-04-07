@@ -2067,6 +2067,10 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
             if self.main_window:
                 QtGui.QGuiApplication.processEvents()
 
+            duration = ''
+            if str(scan['duration']).strip() != '':
+                duration = str(reduce(lambda x, y: x*60+y, [int(i) for i in (str(scan['duration'])).split(':')])) + ' sec'
+            
             summary_results.append({
                 'Type': scan['type'],
                 
@@ -2076,7 +2080,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 
                 'Scan File Name': os.path.basename(scan['filename']),
                 'Scan Date': scan['scan_date'],
-                'Scan Duration': str(reduce(lambda x, y: x*60+y, [int(i) for i in (str(scan['duration'])).split(':')])) + ' sec',
+                'Scan Duration': duration,
                 'Scan To Feed Difference': '',
                 'Version': scan['version'],
                 'Release': scan['release'],
