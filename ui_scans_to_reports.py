@@ -324,9 +324,9 @@ class UiScansToReports(object):
 "border: 1px dashed #3490dc;\n"
 "font-size:12px;\n"
 "background: #d2e0fb;\n"
+"font-family:Courier New;\n"
 "border-radius:15px;\n"
 "}")
-        self.lbl_file_drop.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_file_drop.setWordWrap(True)
         self.lbl_file_drop.setObjectName("lbl_file_drop")
         self.gridLayout.addWidget(self.lbl_file_drop, 0, 0, 1, 1)
@@ -772,7 +772,16 @@ class UiScansToReports(object):
 "R\n"
 "T"))
         self.lbl_file_drop.setToolTip(_translate("ScansToReports", "Drop Scan Files onto the section to automatically parse them"))
-        self.lbl_file_drop.setText(_translate("ScansToReports", " Select multiple files with the file dialog or by dragging and dropping scan files into this region "))
+        self.lbl_file_drop.setText(_translate("ScansToReports", "Select multiple files with the file dialog or by dragging and dropping scan files into this region:\n"
+"\n"
+"    .ckl    - STIG/Checklist Files\n"
+"    .nessus - ACAS Scan Results\n"
+"    .xml    - SCAP/XCCDF Files\n"
+"\n"
+"    .csv    - Mitigation Statement Answer File\n"
+"    .xlsx   - Old POAMs for Mitigation Statements\n"
+"    .xlsx   - eMASS Test Result Exports for Control Mapping\n"
+"               "))
         self.grp_data_points.setTitle(_translate("ScansToReports", "Report Options"))
         self.chk_rar.setToolTip(_translate("ScansToReports", "This is a Risk Assessment Report for uploading as an artifact to eMASS"))
         self.chk_rar.setText(_translate("ScansToReports", "RAR"))

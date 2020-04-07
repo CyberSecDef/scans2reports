@@ -791,14 +791,21 @@ T</string>
 border: 1px dashed #3490dc;
 font-size:12px;
 background: #d2e0fb;
+font-family:Courier New;
 border-radius:15px;
 }</string>
               </property>
               <property name="text">
-               <string> Select multiple files with the file dialog or by dragging and dropping scan files into this region </string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
+               <string>Select multiple files with the file dialog or by dragging and dropping scan files into this region:
+
+    .ckl    - STIG/Checklist Files
+    .nessus - ACAS Scan Results
+    .xml    - SCAP/XCCDF Files
+
+    .csv    - Mitigation Statement Answer File
+    .xlsx   - Old POAMs for Mitigation Statements
+    .xlsx   - eMASS Test Result Exports for Control Mapping
+               </string>
               </property>
               <property name="wordWrap">
                <bool>true</bool>
