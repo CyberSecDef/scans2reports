@@ -1303,7 +1303,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
             25, 25, 25, 25, 25,
             25, 25, 25, 25, 25,
             25, 25, 25, 25, 25,
-            25, 25, 25, 25
+            25, 25, 25
             ]
         ascii = string.ascii_uppercase
         for index, w in enumerate(widths):
@@ -1731,7 +1731,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         if self.main_window:
             self.main_window.statusBar().showMessage("Generating 'CCI Data' Tab")
 
-        widths = [25,25,25,25,25, 25,25,125,125]
+        widths = [25, 25, 25, 25, 25, 25, 125, 125]
         ascii = string.ascii_uppercase
         for index, w in enumerate(widths):
             worksheet.set_column("{}:{}".format( ascii[index], ascii[index]), w)
