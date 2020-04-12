@@ -645,12 +645,15 @@ class FileDrop(QtWidgets.QLabel):
             if urls and urls[0].scheme() == 'file':
                 for url in urls:
                     filepath = str(url.path())[1:]
-                    if filepath not in filepaths:
+                    extension = os.path.splitext(filepath)[1].lower()
+                    if extension in ['.ckl', '.xml', '.nessus', '.xlsx', '.csv', '.xlsm'] and filepath not in filepaths:
                         filepaths.append(filepath)
 
         # preset row count in table
         self.main_form.tbl_selected_scans.setRowCount(0)
         total_files = len(filepaths)
+        if total_files < 1:
+            total_files = 1
         self.main_form.tbl_selected_scans.setRowCount(total_files)
 
         current_row = 0
