@@ -105,7 +105,7 @@ class UiAddons():
                 extension = os.path.splitext(filepath)[1].lower()
 
                 if filepath not in filepaths:
-                    if extension in ['.ckl', '.xml', '.nessus', '.csv', '.xlsx']:
+                    if extension in ['.ckl', '.xml', '.nessus', '.csv', '.xlsx', '.xlsm']:
                         logging.info('Adding file to queue: %s', filepath)
                         self.main_form.tbl_selected_scans.insertRow(0)
 
@@ -656,7 +656,7 @@ class FileDrop(QtWidgets.QLabel):
         current_row = 0
         for filepath in filepaths:
             extension = os.path.splitext(filepath)[1].lower()
-            if extension in ['.ckl', '.xml', '.nessus', '.xlsx', '.csv']:
+            if extension in ['.ckl', '.xml', '.nessus', '.xlsx', '.csv', '.xlsm']:
                 btn = QtWidgets.QPushButton(self.main_form.tbl_selected_scans)
                 btn.setText('Del')
                 btn.clicked.connect(self.remove_row)
