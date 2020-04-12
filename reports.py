@@ -356,7 +356,7 @@ class Reports:
             return None
         
         logging.info('Building POAM')
-        worksheet = self.workbook.add_worksheet('POAM')
+        worksheet = self.workbook.add_worksheet('POA&M')
         if self.main_window:
             self.main_window.statusBar().showMessage("Generating 'POAM' Tab")
             QtGui.QGuiApplication.processEvents()
@@ -1934,7 +1934,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 for req in host['requirements']:
                     if not list(filter(lambda x: x['plugin_id'] == req['plugin_id'], plugins)):
                         plugins.append(req)
-                        print(req['iavm'])
                     if int(req['plugin_id']) not in plugin_count:
                         plugin_count[int(req['plugin_id'])] = 1
                     else:
