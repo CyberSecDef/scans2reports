@@ -33,6 +33,19 @@ class UiScansToReports(object):
         self.gridLayout_7.setObjectName("gridLayout_7")
         self.grid_selected_scans = QtWidgets.QGridLayout()
         self.grid_selected_scans.setObjectName("grid_selected_scans")
+        self.btn_parse_scan_files = QtWidgets.QPushButton(self.grp_selected_scans)
+        self.btn_parse_scan_files.setMinimumSize(QtCore.QSize(50, 150))
+        self.btn_parse_scan_files.setMaximumSize(QtCore.QSize(50, 150))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(14)
+        self.btn_parse_scan_files.setFont(font)
+        self.btn_parse_scan_files.setStyleSheet("background-color: rgb(30, 126, 52);\n"
+"color: #ffffff;\n"
+"border-radius: 15px;\n"
+"font-size:14pt;")
+        self.btn_parse_scan_files.setObjectName("btn_parse_scan_files")
+        self.grid_selected_scans.addWidget(self.btn_parse_scan_files, 0, 2, 1, 1)
         self.tbl_selected_scans = QtWidgets.QTableWidget(self.grp_selected_scans)
         self.tbl_selected_scans.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.tbl_selected_scans.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
@@ -40,7 +53,7 @@ class UiScansToReports(object):
 "background:#ffffff;\n"
 "border-radius:0px;\n"
 "border: 1px solid black;\n"
-"margin-left:10px;\n"
+"margin-left:0px;\n"
 "margin-bottom:10px;\n"
 "font-size: 8pt;\n"
 "}\n"
@@ -63,20 +76,17 @@ class UiScansToReports(object):
         self.tbl_selected_scans.setObjectName("tbl_selected_scans")
         self.tbl_selected_scans.setColumnCount(0)
         self.tbl_selected_scans.setRowCount(0)
-        self.grid_selected_scans.addWidget(self.tbl_selected_scans, 0, 0, 1, 1)
-        self.btn_parse_scan_files = QtWidgets.QPushButton(self.grp_selected_scans)
-        self.btn_parse_scan_files.setMinimumSize(QtCore.QSize(50, 150))
-        self.btn_parse_scan_files.setMaximumSize(QtCore.QSize(50, 150))
-        font = QtGui.QFont()
-        font.setFamily("Arial")
-        font.setPointSize(14)
-        self.btn_parse_scan_files.setFont(font)
-        self.btn_parse_scan_files.setStyleSheet("background-color: rgb(30, 126, 52);\n"
-"color: #ffffff;\n"
-"border-radius: 15px;\n"
-"font-size:14pt;")
-        self.btn_parse_scan_files.setObjectName("btn_parse_scan_files")
-        self.grid_selected_scans.addWidget(self.btn_parse_scan_files, 0, 1, 1, 1)
+        self.grid_selected_scans.addWidget(self.tbl_selected_scans, 0, 1, 1, 1)
+        self.btnClearSelectedScans = QtWidgets.QPushButton(self.grp_selected_scans)
+        self.btnClearSelectedScans.setMinimumSize(QtCore.QSize(25, 150))
+        self.btnClearSelectedScans.setMaximumSize(QtCore.QSize(25, 150))
+        self.btnClearSelectedScans.setStyleSheet("background-color: #c1dbc7;\n"
+"color: rgb(133, 100, 4);\n"
+"font-size:10pt;\n"
+"")
+        self.btnClearSelectedScans.setFlat(True)
+        self.btnClearSelectedScans.setObjectName("btnClearSelectedScans")
+        self.grid_selected_scans.addWidget(self.btnClearSelectedScans, 0, 0, 1, 1)
         self.gridLayout_7.addLayout(self.grid_selected_scans, 0, 0, 1, 1)
         self.gridLayout_2.addWidget(self.grp_selected_scans, 1, 0, 1, 2)
         self.grp_scan_summary = QtWidgets.QGroupBox(self.main_content)
@@ -91,12 +101,27 @@ class UiScansToReports(object):
         self.gridLayout_9.setObjectName("gridLayout_9")
         self.grid_scan_summary = QtWidgets.QGridLayout()
         self.grid_scan_summary.setObjectName("grid_scan_summary")
+        self.btn_execute = QtWidgets.QPushButton(self.grp_scan_summary)
+        self.btn_execute.setMinimumSize(QtCore.QSize(50, 150))
+        self.btn_execute.setMaximumSize(QtCore.QSize(50, 150))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(14)
+        font.setBold(False)
+        font.setWeight(50)
+        self.btn_execute.setFont(font)
+        self.btn_execute.setStyleSheet("background-color: rgb(200, 35, 51);\n"
+"color: #ffffff;\n"
+"border-radius: 15px;\n"
+"font-size:14pt;")
+        self.btn_execute.setObjectName("btn_execute")
+        self.grid_scan_summary.addWidget(self.btn_execute, 0, 2, 1, 1)
         self.tbl_scan_summary = QtWidgets.QTableWidget(self.grp_scan_summary)
         self.tbl_scan_summary.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.tbl_scan_summary.setStyleSheet("QTableWidget{\n"
 "background: #ffffff;\n"
 "border-radius: 0px;\n"
-"margin-left:10px;\n"
+"margin-left:00px;\n"
 "margin-bottom:10px;\n"
 "border: 1px solid black;\n"
 "font-size:8pt;\n"
@@ -120,22 +145,17 @@ class UiScansToReports(object):
         self.tbl_scan_summary.setObjectName("tbl_scan_summary")
         self.tbl_scan_summary.setColumnCount(0)
         self.tbl_scan_summary.setRowCount(0)
-        self.grid_scan_summary.addWidget(self.tbl_scan_summary, 0, 0, 1, 1)
-        self.btn_execute = QtWidgets.QPushButton(self.grp_scan_summary)
-        self.btn_execute.setMinimumSize(QtCore.QSize(50, 150))
-        self.btn_execute.setMaximumSize(QtCore.QSize(50, 150))
-        font = QtGui.QFont()
-        font.setFamily("Arial")
-        font.setPointSize(14)
-        font.setBold(False)
-        font.setWeight(50)
-        self.btn_execute.setFont(font)
-        self.btn_execute.setStyleSheet("background-color: rgb(200, 35, 51);\n"
-"color: #ffffff;\n"
-"border-radius: 15px;\n"
-"font-size:14pt;")
-        self.btn_execute.setObjectName("btn_execute")
-        self.grid_scan_summary.addWidget(self.btn_execute, 0, 1, 1, 1)
+        self.grid_scan_summary.addWidget(self.tbl_scan_summary, 0, 1, 1, 1)
+        self.btnClearScanSummary = QtWidgets.QPushButton(self.grp_scan_summary)
+        self.btnClearScanSummary.setMinimumSize(QtCore.QSize(25, 150))
+        self.btnClearScanSummary.setMaximumSize(QtCore.QSize(25, 150))
+        self.btnClearScanSummary.setStyleSheet("background-color: #f5d7d9;\n"
+"color: rgb(133, 100, 4);\n"
+"font-size:10pt;\n"
+"")
+        self.btnClearScanSummary.setFlat(True)
+        self.btnClearScanSummary.setObjectName("btnClearScanSummary")
+        self.grid_scan_summary.addWidget(self.btnClearScanSummary, 0, 0, 1, 1)
         self.gridLayout_9.addLayout(self.grid_scan_summary, 0, 0, 1, 1)
         self.gridLayout_2.addWidget(self.grp_scan_summary, 2, 0, 1, 2)
         self.grp_file_drop = QtWidgets.QGroupBox(self.main_content)
@@ -759,15 +779,20 @@ class UiScansToReports(object):
         _translate = QtCore.QCoreApplication.translate
         ScansToReports.setWindowTitle(_translate("ScansToReports", "Scans To Reports"))
         self.grp_selected_scans.setTitle(_translate("ScansToReports", "Selected Scan Files"))
-        self.tbl_selected_scans.setToolTip(_translate("ScansToReports", "This table is a summary of all the selected scan files"))
         self.btn_parse_scan_files.setToolTip(_translate("ScansToReports", "Click this button to parse the selected scan files"))
         self.btn_parse_scan_files.setText(_translate("ScansToReports", "P\n"
 "A\n"
 "R\n"
 "S\n"
 "E"))
+        self.tbl_selected_scans.setToolTip(_translate("ScansToReports", "This table is a summary of all the selected scan files"))
+        self.btnClearSelectedScans.setToolTip(_translate("ScansToReports", "Clear the Selected Scans and Scan Summary Tables"))
+        self.btnClearSelectedScans.setText(_translate("ScansToReports", "C\n"
+"L\n"
+"E\n"
+"A\n"
+"R"))
         self.grp_scan_summary.setTitle(_translate("ScansToReports", "Scan Summary"))
-        self.tbl_scan_summary.setToolTip(_translate("ScansToReports", "This is a summary of all the parsed scan data"))
         self.btn_execute.setToolTip(_translate("ScansToReports", "Click this button to generate the reports for the selected scan files."))
         self.btn_execute.setText(_translate("ScansToReports", "R\n"
 "E\n"
@@ -775,6 +800,13 @@ class UiScansToReports(object):
 "O\n"
 "R\n"
 "T"))
+        self.tbl_scan_summary.setToolTip(_translate("ScansToReports", "This is a summary of all the parsed scan data"))
+        self.btnClearScanSummary.setToolTip(_translate("ScansToReports", "Clear the Scan Summary Table"))
+        self.btnClearScanSummary.setText(_translate("ScansToReports", "C\n"
+"L\n"
+"E\n"
+"A\n"
+"R"))
         self.grp_file_drop.setTitle(_translate("ScansToReports", "Scan Drop"))
         self.btn_select_scan_files.setToolTip(_translate("ScansToReports", "Click on this button to select scan files to import"))
         self.btn_select_scan_files.setText(_translate("ScansToReports", "I\n"
@@ -786,13 +818,13 @@ class UiScansToReports(object):
         self.lbl_file_drop.setToolTip(_translate("ScansToReports", "Drop Scan Files onto the section to automatically parse them"))
         self.lbl_file_drop.setText(_translate("ScansToReports", "Select multiple files with the file dialog or by dragging and dropping scan files into this region:\n"
 "\n"
-"    .ckl    - STIG/Checklist Files\n"
-"    .nessus - ACAS Scan Results\n"
-"    .xml    - SCAP/XCCDF Files\n"
+"    .ckl        - STIG/Checklist Files\n"
+"    .nessus     - ACAS Scan Results\n"
+"    .xml        - SCAP/XCCDF Files\n"
 "\n"
-"    .csv    - Mitigation Statement Answer File\n"
-"    .xlsx   - Old POAMs for Mitigation Statements\n"
-"    .xlsx   - eMASS Test Result Exports for Control Mapping\n"
+"    .csv        - Mitigation Statement Answer File\n"
+"    .xlsx/.xlsm - Old POAMs for Mitigation Statements\n"
+"    .xlsx/.xlsm - eMASS Test Result Exports for Control Mapping\n"
 "               "))
         self.grp_data_points.setTitle(_translate("ScansToReports", "Report Options"))
         self.chk_rar.setToolTip(_translate("ScansToReports", "This is a Risk Assessment Report for uploading as an artifact to eMASS"))

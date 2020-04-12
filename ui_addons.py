@@ -507,12 +507,39 @@ To utilize the tool, follow the steps below:
 
         self.main_form.tbl_scan_summary.sortByColumn(self.tbl_scan_summary_sort_col, self.tbl_scan_summary_sort_order)
 
-
+    def btn_clear_selected_scans_on_click(self):
+        self.main_form.tbl_selected_scans.setRowCount(0)
+        self.main_form.tbl_selected_scans.setRowCount(1)
+        
+        self.main_form.tbl_scan_summary.setRowCount(0)
+        self.main_form.tbl_scan_summary.setRowCount(1)
+        
+        self.main_app.scan_files = []
+        self.main_app.scan_results = []
+        
+        self.main_app.parse_scan_files()
+        
+        
+    def btn_clear_scan_summary_on_click(self):
+        
+        self.main_form.tbl_scan_summary.setRowCount(0)
+        self.main_form.tbl_scan_summary.setRowCount(1)
+        
+        self.main_app.scan_files = []
+        self.main_app.scan_results = []
+        
+        self.main_app.parse_scan_files()
+    
     def connect_events(self):
         logging.info('Connecting Events')
         self.main_form.btn_parse_scan_files.clicked.connect(self.btn_parse_scan_files_on_click)
+        self.main_form.btnClearSelectedScans.clicked.connect(self.btn_clear_selected_scans_on_click)
+        
         self.main_form.btn_execute.clicked.connect(self.btn_execute_on_click)
         self.main_form.btn_select_scan_files.clicked.connect(self.btn_select_scan_files_on_click)
+
+        self.main_form.btnClearScanSummary.clicked.connect(self.btn_clear_scan_summary_on_click)
+
 
         self.main_form.tbl_selected_scans.horizontalHeader().sectionClicked.connect(self.sort_tbl_selected_scans)
         self.main_form.tbl_scan_summary.horizontalHeader().sectionClicked.connect(self.sort_tbl_scan_summary)

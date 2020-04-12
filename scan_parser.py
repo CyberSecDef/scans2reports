@@ -275,9 +275,6 @@ class ScanParser:
                             if str(iavt.text).strip() != '':
                                 iavms.append(iavt.text)
                         
-                        if len(iavms) > 0:
-                            print(severity, iavms)
-                        
                         stig_severity = next(iter(req.xpath("./stig_severity/text()")),'')
                         
                         #if there is a stig verity, the DoD Risk follows it
@@ -288,11 +285,6 @@ class ScanParser:
                                     'NUM'
                                 )
                             )
-                            # print(str(severity), str(stig_severity), Utils.risk_val(
-                                    # str(stig_severity),
-                                    # 'NUM'
-                                # ) 
-                            # )
                             
                         req = {
                             'cci'               : '',

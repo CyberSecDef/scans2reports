@@ -50,48 +50,7 @@ border:1px solid #000000;
        </property>
        <item row="0" column="0">
         <layout class="QGridLayout" name="grid_selected_scans">
-         <item row="0" column="0">
-          <widget class="QTableWidget" name="tbl_selected_scans">
-           <property name="focusPolicy">
-            <enum>Qt::ClickFocus</enum>
-           </property>
-           <property name="contextMenuPolicy">
-            <enum>Qt::ActionsContextMenu</enum>
-           </property>
-           <property name="toolTip">
-            <string>This table is a summary of all the selected scan files</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QTableWidget{
-background:#ffffff;
-border-radius:0px;
-border: 1px solid black;
-margin-left:10px;
-margin-bottom:10px;
-font-size: 8pt;
-}
-QHeaderView::section{
-            border-top:0px solid #D8D8D8;
-            border-left:0px solid #D8D8D8;
-            border-right:1px solid #D8D8D8;
-            border-bottom: 1px solid #D8D8D8;
-            background-color:white;
-            padding:4px;
-        }
-QTableCornerButton::section{
-            border-top:0px solid #D8D8D8;
-            border-left:0px solid #D8D8D8;
-            border-right:1px solid #D8D8D8;
-            border-bottom: 1px solid #D8D8D8;
-            background-color:white;
-        }</string>
-           </property>
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
+         <item row="0" column="2">
           <widget class="QPushButton" name="btn_parse_scan_files">
            <property name="minimumSize">
             <size>
@@ -129,6 +88,82 @@ E</string>
            </property>
           </widget>
          </item>
+         <item row="0" column="1">
+          <widget class="QTableWidget" name="tbl_selected_scans">
+           <property name="focusPolicy">
+            <enum>Qt::ClickFocus</enum>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::ActionsContextMenu</enum>
+           </property>
+           <property name="toolTip">
+            <string>This table is a summary of all the selected scan files</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QTableWidget{
+background:#ffffff;
+border-radius:0px;
+border: 1px solid black;
+margin-left:0px;
+margin-bottom:10px;
+font-size: 8pt;
+}
+QHeaderView::section{
+            border-top:0px solid #D8D8D8;
+            border-left:0px solid #D8D8D8;
+            border-right:1px solid #D8D8D8;
+            border-bottom: 1px solid #D8D8D8;
+            background-color:white;
+            padding:4px;
+        }
+QTableCornerButton::section{
+            border-top:0px solid #D8D8D8;
+            border-left:0px solid #D8D8D8;
+            border-right:1px solid #D8D8D8;
+            border-bottom: 1px solid #D8D8D8;
+            background-color:white;
+        }</string>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="btnClearSelectedScans">
+           <property name="minimumSize">
+            <size>
+             <width>25</width>
+             <height>150</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>25</width>
+             <height>150</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Clear the Selected Scans and Scan Summary Tables</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: #c1dbc7;
+color: rgb(133, 100, 4);
+font-size:10pt;
+</string>
+           </property>
+           <property name="text">
+            <string>C
+L
+E
+A
+R</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>
@@ -161,45 +196,7 @@ border:1px solid #000000;
        </property>
        <item row="0" column="0">
         <layout class="QGridLayout" name="grid_scan_summary">
-         <item row="0" column="0">
-          <widget class="QTableWidget" name="tbl_scan_summary">
-           <property name="focusPolicy">
-            <enum>Qt::ClickFocus</enum>
-           </property>
-           <property name="toolTip">
-            <string>This is a summary of all the parsed scan data</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QTableWidget{
-background: #ffffff;
-border-radius: 0px;
-margin-left:10px;
-margin-bottom:10px;
-border: 1px solid black;
-font-size:8pt;
-}
-QHeaderView::section{
-            border-top:0px solid #D8D8D8;
-            border-left:0px solid #D8D8D8;
-            border-right:1px solid #D8D8D8;
-            border-bottom: 1px solid #D8D8D8;
-            background-color:white;
-            padding:4px;
-        }
-QTableCornerButton::section{
-            border-top:0px solid #D8D8D8;
-            border-left:0px solid #D8D8D8;
-            border-right:1px solid #D8D8D8;
-            border-bottom: 1px solid #D8D8D8;
-            background-color:white;
-        }</string>
-           </property>
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
+         <item row="0" column="2">
           <widget class="QPushButton" name="btn_execute">
            <property name="minimumSize">
             <size>
@@ -237,6 +234,79 @@ P
 O
 R
 T</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QTableWidget" name="tbl_scan_summary">
+           <property name="focusPolicy">
+            <enum>Qt::ClickFocus</enum>
+           </property>
+           <property name="toolTip">
+            <string>This is a summary of all the parsed scan data</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QTableWidget{
+background: #ffffff;
+border-radius: 0px;
+margin-left:0px;
+margin-bottom:10px;
+border: 1px solid black;
+font-size:8pt;
+}
+QHeaderView::section{
+            border-top:0px solid #D8D8D8;
+            border-left:0px solid #D8D8D8;
+            border-right:1px solid #D8D8D8;
+            border-bottom: 1px solid #D8D8D8;
+            background-color:white;
+            padding:4px;
+        }
+QTableCornerButton::section{
+            border-top:0px solid #D8D8D8;
+            border-left:0px solid #D8D8D8;
+            border-right:1px solid #D8D8D8;
+            border-bottom: 1px solid #D8D8D8;
+            background-color:white;
+        }</string>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="btnClearScanSummary">
+           <property name="minimumSize">
+            <size>
+             <width>25</width>
+             <height>150</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>25</width>
+             <height>150</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Clear the Scan Summary Table</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: #f5d7d9;
+color: rgb(133, 100, 4);
+font-size:10pt;
+</string>
+           </property>
+           <property name="text">
+            <string>C
+L
+E
+A
+R</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -798,13 +868,13 @@ border-radius:15px;
               <property name="text">
                <string>Select multiple files with the file dialog or by dragging and dropping scan files into this region:
 
-    .ckl    - STIG/Checklist Files
-    .nessus - ACAS Scan Results
-    .xml    - SCAP/XCCDF Files
+    .ckl        - STIG/Checklist Files
+    .nessus     - ACAS Scan Results
+    .xml        - SCAP/XCCDF Files
 
-    .csv    - Mitigation Statement Answer File
-    .xlsx   - Old POAMs for Mitigation Statements
-    .xlsx   - eMASS Test Result Exports for Control Mapping
+    .csv        - Mitigation Statement Answer File
+    .xlsx/.xlsm - Old POAMs for Mitigation Statements
+    .xlsx/.xlsm - eMASS Test Result Exports for Control Mapping
                </string>
               </property>
               <property name="wordWrap">
