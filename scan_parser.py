@@ -261,28 +261,61 @@ class ScanParser:
                     plugin_id = int(next(iter(req.xpath("./@pluginID")),''))
                     
                     if not self.scar_conf.get('skip_info') or ( severity != 0 or plugin_id in self.scar_data.get('data_mapping')['acas_required_info'] ):
+                    
+                        iavms = []
+                        for iava in req.xpath("./iava"):
+                            if str(iava.text).strip() != '':
+                                iavms.append(iava.text)
+                            
+                        for iavb in req.xpath("./iavb"):
+                            if str(iavb.text).strip() != '':
+                                iavms.append(iavb.text)
+                        
+                        for iavt in req.xpath("./iavt"):
+                            if str(iavt.text).strip() != '':
+                                iavms.append(iavt.text)
+                        
+                        if len(iavms) > 0:
+                            print(severity, iavms)
+                        
+                        stig_severity = next(iter(req.xpath("./stig_severity/text()")),'')
+                        
+                        #if there is a stig verity, the DoD Risk follows it
+                        if stig_severity.strip() != '':
+                            severity = int(
+                                Utils.risk_val(
+                                    str(stig_severity),
+                                    'NUM'
+                                )
+                            )
+                            # print(str(severity), str(stig_severity), Utils.risk_val(
+                                    # str(stig_severity),
+                                    # 'NUM'
+                                # ) 
+                            # )
+                            
                         req = {
-                            'cci'              : '',
-                            'comments'         : next(iter(req.xpath("./plugin_output/text()")),''),
-                            'description'      : next(iter(req.xpath("./synopsis/text()")),'') + "\n\n" + next(iter(req.xpath("./description/text()")),''),
+                            'cci'               : '',
+                            'comments'          : next(iter(req.xpath("./plugin_output/text()")),''),
+                            'description'       : next(iter(req.xpath("./synopsis/text()")),'') + "\n\n" + next(iter(req.xpath("./description/text()")),''),
                             'finding_details'   : '',
                             'fix_id'            : '',
-                            'mitigation'       : '',
-                            'port'             : int(next(iter(req.xpath("./@port")),'')),
-                            'protocol'         : next(iter(req.xpath("./@protocol")),''),
-                            'service'          : next(iter(req.xpath("./@svc_name")),''),
+                            'mitigation'        : '',
+                            'port'              : int(next(iter(req.xpath("./@port")),'')),
+                            'protocol'          : next(iter(req.xpath("./@protocol")),''),
+                            'service'           : next(iter(req.xpath("./@svc_name")),''),
                             'grp_id'            : next(iter(req.xpath("./@pluginFamily")),''),
-                            'iava'             : next(iter(req.xpath("./iava/text()")),''),
+                            'iavm'              : ', '.join(iavms).strip(),
                             'plugin_id'         : plugin_id,
-                            'resources'        : '',
+                            'resources'         : '',
                             'rule_id'           : '',
-                            'solution'         : next(iter(req.xpath("./solution/text()")),''),
-                            'references'       : '',
-                            'severity'         : severity,
+                            'solution'          : next(iter(req.xpath("./solution/text()")),''),
+                            'references'        : '',
+                            'severity'          : severity,
                             'req_title'         : next(iter(req.xpath("./@pluginName")),''),
                             'vuln_id'           : '',
                             'ia_controls'       : [],
-                            'status'           : 'O',
+                            'status'            : 'O',
                             'publication_date'  : next(iter(req.xpath("./plugin_publication_date/text()")),''),
                             'modification_date' : next(iter(req.xpath("./plugin_modification_date/text()")),''),
                         }

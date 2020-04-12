@@ -404,7 +404,7 @@ class UiAddons():
             }[self.main_form.cboMitigationStatements.currentText()] )
             
         if not self.main_form.chk_acas_unique_iavm.isChecked():
-            self.main_app.scar_conf.append('skip_reports','rpt_acas_uniq_iava')
+            self.main_app.scar_conf.append('skip_reports','rpt_acas_uniq_iavm')
 
         if not self.main_form.chk_acas_unique_vuln.isChecked():
             self.main_app.scar_conf.append('skip_reports','rpt_acas_uniq_vuln')

@@ -395,6 +395,7 @@ class Reports:
                                     'rule_id'         : req['rule_id'],
                                     'plugin_id'       : req['plugin_id'],
                                     'cci'             : req['cci'],
+                                    'iavm'            : '',
                                     'req_title'       : req['req_title'],
                                     'description'     : req['description'],
                                     'resources'       : req['resources'],
@@ -418,7 +419,7 @@ class Reports:
 
                 elif type == 'acas':
                     acas_scans = jmespath.search(
-                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scanner_edition: '', scan_description: '', type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [?status=='" + status + "'].{ cci: cci, req_title: req_title, description: description, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, publication_date: publication_date, modification_date: modification_date } } }",
+                        "results[?type=='ACAS'].{ scan_title: title, policy: policy, scanner_edition: '', scan_description: '', type: type, version: version, release: feed, filename: filename, hosts: hosts[] | [*].{ hostname: hostname, requirements: requirements[] | [?status=='" + status + "'].{ cci: cci, req_title: req_title, description: description, grp_id: grp_id, vuln_id: vuln_id, rule_id: rule_id, plugin_id: plugin_id, iavm: iavm, status: status, finding_details: finding_details, resources: resources, severity: severity, solution: solution, comments: comments, publication_date: publication_date, modification_date: modification_date } } }",
                         { 'results' : scan_results}
                     )
 
@@ -433,6 +434,7 @@ class Reports:
                                         'rule_id'         : req['rule_id'],
                                         'plugin_id'       : req['plugin_id'],
                                         'cci'             : req['cci'],
+                                        'iavm'            : req['iavm'],
                                         'req_title'       : req['req_title'],
                                         'description'     : req['description'],
                                         'resources'       : req['resources'],
@@ -651,7 +653,7 @@ class Reports:
                 
                 req_data = {
                     'A'                                                 : '',
-                    'Control Vulnerability Description'                 : f"Title: {req['req_title']}\n\nFamily: {req['grp_id']}\n\nDescription:\n{req['description']}",
+                    'Control Vulnerability Description'                 : f"Title: {req['req_title']}\n{req['iavm']}\nFamily: {req['grp_id']}\n\nDescription:\n{req['description']}",
                     'Security Control Number (NC/NA controls only)'     : rmf_controls,
                     'Office/Org'                                        : f"{self.scar_data.get('command')}\n{self.scar_data.get('name')}\n{self.scar_data.get('phone')}\n{self.scar_data.get('email')}\n".strip(),
                     'Security Checks'                                   : f"{req['plugin_id']}{req['rule_id']}\n{req['vuln_id']}",
@@ -1885,15 +1887,15 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                     col += 1
                 row += 1
 
-    def rpt_acas_uniq_iava(self):
-        """ Generates ACAS Unique IAVA Tab """
-        if 'rpt_acas_uniq_iava' in self.scar_conf.get('skip_reports'):
+    def rpt_acas_uniq_iavm(self):
+        """ Generates ACAS Unique IAVM Tab """
+        if 'rpt_acas_uniq_iavm' in self.scar_conf.get('skip_reports'):
             return None
         
-        logging.info('Building ACAS Unique IAVA Tab')
-        worksheet = self.workbook.add_worksheet('ACAS Unique IAVA')
+        logging.info('Building ACAS Unique IAVM Tab')
+        worksheet = self.workbook.add_worksheet('ACAS Unique IAVM')
         if self.main_window:
-            self.main_window.statusBar().showMessage("Generating 'ACAS Unique IAVA' Tab")
+            self.main_window.statusBar().showMessage("Generating 'ACAS Unique IAVM' Tab")
 
         widths = [25, 25, 50, 25, 25, 25]
         ascii = string.ascii_uppercase
@@ -1912,9 +1914,9 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         acas_scans = jmespath.search(
             """results[?type=='ACAS'].{
                 hosts: hosts[] | [*].{
-                    requirements: requirements[]  | [?iava != '' && severity != `0`].{ 
+                    requirements: requirements[]  | [?iavm != '' && severity != `0`].{ 
                         plugin_id: plugin_id,
-                        iava: iava,
+                        iavm: iavm,
                         title: req_title,
                         grp_id: grp_id,
                         severity: severity
@@ -1932,6 +1934,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 for req in host['requirements']:
                     if not list(filter(lambda x: x['plugin_id'] == req['plugin_id'], plugins)):
                         plugins.append(req)
+                        print(req['iavm'])
                     if int(req['plugin_id']) not in plugin_count:
                         plugin_count[int(req['plugin_id'])] = 1
                     else:
@@ -1941,7 +1944,7 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
         for plugin in plugins:
             plugins_rpt.append({
                 'Plugin'     : plugin['plugin_id'],
-                'IAVM'       : plugin['iava'],
+                'IAVM'       : plugin['iavm'],
                 'Plugin Name': plugin['title'],
                 'Family'     : plugin['grp_id'],
                 'Severity'   : Utils.risk_val(plugin['severity'], 'CAT'),
