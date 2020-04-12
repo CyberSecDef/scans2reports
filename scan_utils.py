@@ -196,7 +196,6 @@ class ScanUtils():
         else:
             application_path = os.path.dirname(os.path.abspath(__file__))
 
-        validFilenameChars = "-_.() %s%s" % (string.ascii_letters, string.digits)                
         policies = {}
         
         status = "Merging selected Nessus Files"

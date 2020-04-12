@@ -275,7 +275,7 @@ class Scans2Reports:
                     elif extension == '.nessus':
                         data = scan_parser.parseNessus(file)
                     elif extension == '.xlsx' or extension == '.xlsm':
-                        data = scan_parser.parseXlsx(file)
+                        data = scan_parser.parseExcel(file)
                     elif extension == '.csv':
                         data = scan_parser.parseCsv(file)
                     else:

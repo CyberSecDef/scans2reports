@@ -5,6 +5,7 @@ import time
 import uuid
 import pprint
 import logging
+import string
 import numpy as np
 import pandas as pd
 import xlrd
@@ -74,49 +75,54 @@ class ScanParser:
             return mitigation_results
             
     
-    def parseXlsx(self, filename):
+    def parseExcel(self, filename):
 
         #df is the data format read.  used to determine the type of excel file being read prior to looping the rows.
         df = pd.read_excel(filename, None);
-
-        if 'POAM' in df.keys():
-            poam_rows = pd.read_excel(filename, 'POAM', header=0, index_col=None, na_values=['NA'], mangle_dupe_cols=True)
+        safe_keys = ( [ ( "".join([ch for ch in i.upper() if ch in (string.ascii_letters + string.digits)]) )   for i in df.keys()  ] )
+        
+        if 'POAM' in safe_keys:
+            poam_rows = None
+            for key in df.keys():
+                if ( "".join([ch for ch in key.upper() if ch in (string.ascii_letters + string.digits)]) ) == 'POAM':
+                    poam_rows = pd.read_excel(filename, key, header=0, index_col=None, na_values=['NA'], mangle_dupe_cols=True)
             
-            poam_results = {}
-            poam_results['type'] = 'Mitigations'
-            poam_results['mitigations'] = []
-            
-            for poam in poam_rows.index:
-            
-                source = str(poam_rows['Security Checks'][poam]).strip()
+            if poam_rows is not None and not poam_rows.empty:
+                poam_results = {}
+                poam_results['type'] = 'Mitigations'
+                poam_results['mitigations'] = []
                 
-                plugin_id = re.search('^([0-9]{3,6})$', source.strip())
-                plugin_id = plugin_id.group(1).strip() if plugin_id is not None else ''
-            
-                rule_id = re.search('(SV-[0-9.]+r[0-9]+_rule)', source.strip())
-                rule_id = rule_id.group(1).strip() if rule_id is not None else ''
-            
-                vuln_id = re.search("\W(V-[0-9]+)", source.upper())
-                vuln_id = vuln_id.group(1).strip() if vuln_id is not None else ''
+                for poam in poam_rows.index:
                 
-                if vuln_id == '':
-                    vuln_id = re.search("^(V-[0-9]+)", source.upper())
+                    source = str(poam_rows['Security Checks'][poam]).strip()
+                    
+                    plugin_id = re.search('^([0-9]{3,6})$', source.strip())
+                    plugin_id = plugin_id.group(1).strip() if plugin_id is not None else ''
+                
+                    rule_id = re.search('(SV-[0-9.]+r[0-9]+_rule)', source.strip())
+                    rule_id = rule_id.group(1).strip() if rule_id is not None else ''
+                
+                    vuln_id = re.search("\W(V-[0-9]+)", source.upper())
                     vuln_id = vuln_id.group(1).strip() if vuln_id is not None else ''
+                    
+                    if vuln_id == '':
+                        vuln_id = re.search("^(V-[0-9]+)", source.upper())
+                        vuln_id = vuln_id.group(1).strip() if vuln_id is not None else ''
+                    
+                    control = poam_rows['Security Control Number (NC/NA controls only)'][poam]
+                    
+                    mitigation = poam_rows['Mitigations'][poam]
+                    
+                    poam_results['mitigations'].append({
+                        'plugin_id': plugin_id,
+                        'rule_id': rule_id,
+                        'vuln_id': vuln_id,
+                        'control': control,
+                        'mitigation': mitigation,
+                        'source': source
+                    })
                 
-                control = poam_rows['Security Control Number (NC/NA controls only)'][poam]
-                
-                mitigation = poam_rows['Mitigations'][poam]
-                
-                poam_results['mitigations'].append({
-                    'plugin_id': plugin_id,
-                    'rule_id': rule_id,
-                    'vuln_id': vuln_id,
-                    'control': control,
-                    'mitigation': mitigation,
-                    'source': source
-                })
-            
-            return poam_results
+                return poam_results
             
         if 'Test Result Import' in df.keys():
             tr_rows = pd.read_excel(filename, 'Test Result Import', header=5, index_col=None, na_values=['NA'], mangle_dupe_cols=True)
