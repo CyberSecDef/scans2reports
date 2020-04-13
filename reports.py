@@ -874,7 +874,11 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 comments = []
                 finding_details = []
                 for host in req['results']:
-                    hosts.append(f"{host['hostname']} [{host['type']} - Ver: {host['version']}, Rel/Feed: {host['release']} ]")
+                    if self.scar_conf.get('host_details'):
+                        hosts.append(f"{host['hostname']} [{host['type']} - Ver: {host['version']}, Rel/Feed: {host['release']} ]")
+                    else:
+                        hosts.append(f"{host['hostname']}")
+                        
                     types.append(f"{host['type']}")
                     comments.append(f"{host['comments']}")
                     finding_details.append(f"{host['finding_details']}")
@@ -902,15 +906,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                 objectives = list(set(objectives))
                 objectives = ", ".join( objectives )
 
-                # mitigation_statement = ''
-                # if str(req['plugin_id']) in selected_mitigations.keys():
-                    # mitigation_statement = selected_mitigations[ str(req['plugin_id']) ]
-                # if str(req['vuln_id']) in selected_mitigations.keys():
-                    # mitigation_statement = selected_mitigations[ str(req['vuln_id']) ]
-                # if str(req['rule_id']) in selected_mitigations.keys():
-                    # mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
-
-
                 mitigation_statement = ''
                 if self.scar_conf.get('mitigation_statements') == 'poam':
                     if str(req['plugin_id']) in selected_mitigations.keys():
@@ -930,8 +925,6 @@ m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
                         mitigation_statement = selected_mitigations[ str(req['rule_id']) ]
                     if mitigation_statement.strip() == '' and 'ckl' in req['results'][0]['type'].lower():
                         mitigation_statement = comments
-
-
 
                 if self.scar_conf.get('test_results') is not None:
                     #test results parsed
