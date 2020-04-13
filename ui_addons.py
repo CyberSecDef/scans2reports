@@ -59,6 +59,9 @@ class UiAddons():
         self.main_form.spnExcludeDays.setValue( self.main_app.scar_conf.get('exclude_plugins') )
         
         self.main_form.chkSkipInfo.setChecked( self.main_app.scar_conf.get('skip_info') )
+        
+        self.main_form.chk_show_host_details.setChecked( self.main_app.scar_conf.get('host_details') )
+        
         self.main_form.chk_lower_risk.setChecked( self.main_app.scar_conf.get('lower_risk') )
         self.main_form.chk_prefill_scd.setChecked( self.main_app.scar_conf.get('scd') )
         self.main_form.chkIncludeFindingDetails.setChecked( self.main_app.scar_conf.get('include_finding_details') )
@@ -133,6 +136,7 @@ class UiAddons():
         self.main_app.scar_conf.set('predisposing_conditions', self.main_form.txtPredisposingCondition.toPlainText())
         self.main_app.scar_conf.set('include_finding_details', self.main_form.chkIncludeFindingDetails.isChecked())
         self.main_app.scar_conf.set('skip_info', self.main_form.chkSkipInfo.isChecked())
+        self.main_app.scar_conf.set('host_details', self.main_form.chk_show_host_details.isChecked())
         self.main_app.scar_conf.set('scd', self.main_form.chk_prefill_scd.isChecked())
         self.main_app.scar_conf.set('lower_risk', self.main_form.chk_lower_risk.isChecked())
         self.main_app.scar_conf.set('exclude_plugins', self.main_form.spnExcludeDays.value())
@@ -387,6 +391,7 @@ class UiAddons():
         self.main_app.scar_conf.set('predisposing_conditions', self.main_form.txtPredisposingCondition.toPlainText())
         self.main_app.scar_conf.set('include_finding_details', self.main_form.chkIncludeFindingDetails.isChecked())
         self.main_app.scar_conf.set('skip_info', self.main_form.chkSkipInfo.isChecked())
+        self.main_app.scar_conf.set('host_details', self.main_form.chk_show_host_details.isChecked())
         self.main_app.scar_conf.set('scd', self.main_form.chk_prefill_scd.isChecked())
         self.main_app.scar_conf.set('lower_risk', self.main_form.chk_lower_risk.isChecked())
         self.main_app.scar_conf.set('exclude_plugins', self.main_form.spnExcludeDays.value())

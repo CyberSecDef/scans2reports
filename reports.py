@@ -502,7 +502,11 @@ class Reports:
                 comments = []
                 finding_details = []
                 for host in req['results']:
-                    hosts.append(f"{host['hostname']} [{host['type']} - Ver: {host['version']}, Rel/Feed: {host['release']} ]")
+                    if self.scar_conf.get('host_details'):
+                        hosts.append(f"{host['hostname']} [{host['type']} - Ver: {host['version']}, Rel/Feed: {host['release']} ]")
+                    else:
+                        hosts.append(f"{host['hostname']}")
+                    
                     types.append(f"{host['type']}")
                     comments.append(f"{host['comments']}")
                     finding_details.append(f"{host['finding_details']}")

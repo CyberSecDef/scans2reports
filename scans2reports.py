@@ -77,7 +77,12 @@ class Scans2Reports:
         else:
             self.scar_conf.set('exclude_plugins', args.exclude_plugins)
         
-        
+        if args.host_details:
+            self.scar_conf.set('host_details', args.host_details)
+        else:
+            if self.scar_conf.get('host_details') is None:
+                self.scar_conf.set( 'host_details', False )
+                
         if args.skip_info:
             self.scar_conf.set('skip_info', args.skip_info)
         else:
@@ -345,7 +350,9 @@ class Scans2Reports:
 
 # pylint: disable=C0103
 # Disable default help
-arg_parser = ArgumentParser(add_help=False)
+from argparse import RawTextHelpFormatter
+arg_parser = ArgumentParser(add_help=False, formatter_class=RawTextHelpFormatter)
+
 required = arg_parser.add_argument_group('required arguments')
 required.add_argument('input_folder', nargs='?', help='The folder to collect scans from.')
 
@@ -354,6 +361,7 @@ optional = arg_parser.add_argument_group('optional arguments')
 optional.add_argument('-i', '--skip-info', help='Skip Informational Findings', action='store_true')
 optional.add_argument('-fd', '--finding-details', help='Whether or not to include the finding details in the POAM/RAR Comments', action='store_true')
 optional.add_argument('-g', '--gui', help='Use the GUI instead of the console', action='store_true')
+optional.add_argument('-hd', '--host-details', help='Show affected devices as \n    hostname [SCAN_TYPE - Ver: #, Rel/Feed: # ]\non the POAM/RAR tabs\n\n', action='store_true')
 optional.add_argument('-l', '--lower-risk', help='Automatically Lower Risk on POAM', action='store_true')
 optional.add_argument('--mitigation-statements', help='Import Mitigation Methods (blank, poam, ckl, both)',  type=MitigationStatementOptions, choices=list(MitigationStatementOptions))
 optional.add_argument('--predisposing-conditions', help='Enter default Predisposing Conditions')
