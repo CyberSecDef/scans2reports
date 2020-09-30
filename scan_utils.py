@@ -1,3 +1,6 @@
+"""
+This package contains stateless methods that support teh report generator
+"""
 import logging
 import sys
 import os.path
@@ -15,9 +18,19 @@ from lxml import etree
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class ScanUtils():
-
+    """
+    Class that contains static methods that support the report generator
+    """
     @staticmethod
     def update_ckl(source, destination, main_app):
+        """
+        Copies the status, comments and finding details from one CKL to another
+
+        Arguments:
+            source {string} - The filepath for the original CKL file
+            destination {string} -- The filepath for the destingation CKL file
+            main_app {Object} -- A link to the main application
+        """
         if getattr(sys, 'frozen', False):
             application_path = sys._MEIPASS
         else:

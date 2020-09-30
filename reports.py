@@ -665,7 +665,7 @@ class Reports:
                     'Scheduled Completion Date'                         : scd,
                     'Milestone with Completion Dates'                   : "{m} {s[0]} updates {s[1]}/{s[2]}/{s[0]}".format(
 s=str(scd).split('-'),
-m=(['Winter', 'Spring', 'Summer', 'Autumn'][(int(str(scd).split('-')[1])//3)]),
+m=(['Winter', 'Spring', 'Summer', 'Autumn'][((int(str(scd).split('-')[1]) -1 )//3)]),
 ) if self.scar_conf.get('scd') else '',
                     'Milestone Changes'                                 : '',
                     'Source Identifying Control Vulnerability'          : f"{prefix} {req['scan_title']}",
